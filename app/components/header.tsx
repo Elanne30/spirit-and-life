@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useState } from "react";
 import { ThemeToggle } from "@/app/components/theme-toggle";
 import { navigation } from "@/app/content/navigation";
@@ -11,9 +12,8 @@ export function Header() {
   return (
     <header className="site-header">
       <div className="page-container header-inner">
-        <Link className="wordmark" href="/" onClick={() => setMenuOpen(false)}>
-          <span>Spirit</span>
-          <span>&amp; Life</span>
+        <Link className="brand-link" href="/" onClick={() => setMenuOpen(false)}>
+          <Image className="brand-logo" src="/spiri_life_logo.jpg" alt="Spirit & Life" width={1280} height={853} />
         </Link>
         <button
           className="menu-toggle"
