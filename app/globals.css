@@ -113,13 +113,28 @@ a:focus-visible {
 
 .brand-link {
   display: inline-flex;
+  width: 4.75rem;
+  height: 4.75rem;
   align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--foreground) 20%, transparent);
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--surface) 72%, transparent);
+  box-shadow: 0 0.4rem 1.2rem var(--shadow);
 }
 
 .brand-logo {
-  width: 4.25rem;
-  height: 2.85rem;
+  width: 100%;
+  height: 100%;
+  opacity: 0.88;
   object-fit: cover;
+  mix-blend-mode: multiply;
+}
+
+html[data-theme="dark"] .brand-logo {
+  mix-blend-mode: screen;
+  opacity: 0.82;
 }
 
 .main-navigation {
@@ -185,30 +200,32 @@ a:focus-visible {
   position: relative;
   isolation: isolate;
   display: grid;
+  width: 100%;
+  max-width: none;
   min-height: min(43rem, calc(100vh - 5.5rem));
   align-items: center;
-  padding-block: 6rem;
-  background: linear-gradient(90deg, rgba(8, 16, 30, 0.96) 0%, rgba(8, 16, 30, 0.88) 48%, rgba(8, 16, 30, 0.15) 100%), url("/spiri_life_hero.jpg") center / cover;
+  padding: 6rem max(1.5rem, calc((100% - 76rem) / 2));
+  background: linear-gradient(90deg, rgba(8, 16, 30, 0.84), rgba(8, 16, 30, 0.54)), url("/spiri_life_hero.jpg") center / cover;
   color: #fffaf2;
 }
 
-.hero::before {
-  position: absolute;
-  z-index: -1;
-  inset: 0;
-  content: "";
-  background: rgba(8, 16, 30, 0.1);
+html[data-theme="light"] .hero {
+  background: linear-gradient(90deg, rgba(241, 237, 229, 0.86), rgba(241, 237, 229, 0.58)), url("/spiri_life_hero.jpg") center / cover;
+  color: var(--foreground);
 }
 
 .hero-copy {
-  max-width: 42rem;
+  width: min(100%, 52rem);
+  margin-inline: auto;
+  text-align: center;
 }
 
 .hero-logo {
-  width: 4.5rem;
-  height: 3rem;
+  width: 5.5rem;
+  height: 3.65rem;
   margin-bottom: 2.25rem;
   object-fit: cover;
+  opacity: 0.94;
 }
 
 .eyebrow,
@@ -238,23 +255,33 @@ h3 {
 }
 
 h1 {
-  max-width: 12ch;
+  max-width: none;
   margin-bottom: 1.6rem;
   font-size: clamp(4rem, 8vw, 7.5rem);
   letter-spacing: -0.045em;
   line-height: 0.86;
+  text-wrap: balance;
 }
 
 .hero h1 {
   color: #fffaf2;
 }
 
+html[data-theme="light"] .hero h1 {
+  color: var(--foreground);
+}
+
 .hero-introduction {
-  max-width: 34rem;
+  max-width: 38rem;
+  margin-inline: auto;
   margin-bottom: 2.2rem;
-  color: var(--muted);
+  color: color-mix(in srgb, #fffaf2 86%, transparent);
   font-size: clamp(1.05rem, 1.8vw, 1.25rem);
   line-height: 1.55;
+}
+
+html[data-theme="light"] .hero-introduction {
+  color: color-mix(in srgb, var(--foreground) 86%, transparent);
 }
 
 .hero .eyebrow {
@@ -264,6 +291,7 @@ h1 {
 .hero-actions {
   display: flex;
   align-items: center;
+  justify-content: center;
   flex-wrap: wrap;
   gap: 1.25rem;
 }
@@ -351,27 +379,30 @@ h1 {
 }
 
 .section-heading {
-  display: grid;
-  max-width: 47rem;
-  grid-template-columns: minmax(12rem, 0.55fr) 1.45fr;
-  column-gap: 2rem;
+  display: block;
+  max-width: 56rem;
+  margin-inline: auto;
   margin-bottom: 3rem;
+  text-align: center;
 }
 
 .section-heading .eyebrow {
-  grid-row: span 2;
+  margin-bottom: 1.25rem;
 }
 
-.section-heading h2,
-.invitation-section h2 {
+.section-heading h2 {
+  max-width: 24ch;
+  margin-inline: auto;
   margin-bottom: 1rem;
   font-size: clamp(2.5rem, 5vw, 4.5rem);
   letter-spacing: -0.04em;
   line-height: 0.95;
+  text-wrap: balance;
 }
 
 .section-heading p:last-child {
-  max-width: 38rem;
+  max-width: 43rem;
+  margin-inline: auto;
   margin-bottom: 0;
   color: var(--muted);
 }
@@ -384,8 +415,9 @@ h1 {
 
 .content-card {
   min-height: 15rem;
-  padding: 1.5rem 1.5rem 1.5rem 0;
+  padding: 1.75rem 1.5rem 1.75rem 0;
   border-right: 1px solid var(--line);
+  transition: border-color 160ms ease, transform 160ms ease;
 }
 
 .content-card:not(:first-child) {
@@ -394,6 +426,10 @@ h1 {
 
 .content-card:last-child {
   border-right: 0;
+}
+
+.content-card:hover {
+  transform: translateY(-0.2rem);
 }
 
 .content-card h3 {
@@ -423,12 +459,13 @@ h1 {
 
 .walk-section h2,
 .newsletter-section h2 {
-  max-width: 15ch;
+  max-width: 24ch;
   margin-inline: auto;
   margin-bottom: 1rem;
   font-size: clamp(2.5rem, 5vw, 4.5rem);
   letter-spacing: -0.04em;
   line-height: 0.95;
+  text-wrap: balance;
 }
 
 .walk-section p:last-child {
