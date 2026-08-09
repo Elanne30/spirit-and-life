@@ -47,6 +47,21 @@ export default async function BookPage({
             <p className="book-detail-meta">Expected publication: {book.expectedPublication}</p>
           ) : null}
           {book.author ? <p className="book-detail-meta">Author: {book.author}</p> : null}
+          {book.publisher ? <p className="book-detail-meta">Publisher/site label: {book.publisher}</p> : null}
+          {book.length ? <p className="book-detail-meta">Length: {book.length}</p> : null}
+          {book.description ? (
+            <div className="book-detail-description">
+              {book.description.split("\n\n").map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
+            </div>
+          ) : null}
+          {book.tableOfContents ? (
+            <div className="book-detail-contents">
+              <h2>Table of Contents</h2>
+              <ul>
+                {book.tableOfContents.map((item) => <li key={item}>{item}</li>)}
+              </ul>
+            </div>
+          ) : null}
           <p className="book-detail-notice">
             This book is currently in preparation and is not yet available to read.
           </p>

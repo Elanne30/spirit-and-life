@@ -25,6 +25,10 @@ export default async function JournalPage({
         <header className="journal-detail-header page-container">
           <p className="eyebrow">Journal</p>
           <h1>{journal.title}</h1>
+          <div className="journal-meta">
+            <span>{journal.date}</span>
+            <span>{journal.label}</span>
+          </div>
         </header>
         <div className="journal-feature-image page-container">
           <Image
@@ -37,10 +41,13 @@ export default async function JournalPage({
           />
         </div>
         <div className="journal-reading-column">
-          <p className="journal-content-status">
-            The full text of this journal entry is not yet available in the
-            project content files.
-          </p>
+          <p className="journal-introduction">{journal.introduction}</p>
+          {journal.sections.map((section) => (
+            <section className="reading-section" key={section.heading}>
+              <h2>{section.heading}</h2>
+              {section.paragraphs.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
+            </section>
+          ))}
           <Link className="button button-text" href="/journals">
             Back to Journals
           </Link>

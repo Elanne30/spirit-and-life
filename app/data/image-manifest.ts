@@ -10,7 +10,7 @@ export const imageManifest = {
   "The grace that transforms_reflection on romans 8.jpg": {
     type: "reflection",
     contentSlug: "the-grace-that-transforms-a-reflection-on-romans-8",
-    title: "The Grace That Transforms: A Reflection on Romans 8",
+    title: "The Grace That Transforms: Reflections on Romans 8",
   },
   "Reading_scripture_in_context_why_it_matters.jpg": {
     type: "reflection",
@@ -36,10 +36,5 @@ export const imageManifest = {
     type: "book",
     contentSlug: "from-perfection-to-corruption",
     title: "From Perfection to Corruption",
-  },
-  "thy-word-is-truth-john-17.svg": {
-    type: "book",
-    contentSlug: "thy-word-is-truth-a-journey-through-john-17",
-    title: "Thy Word Is Truth: A Journey Through John 17",
   },
 } satisfies Record<string, ImageManifestEntry>;

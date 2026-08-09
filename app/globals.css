@@ -663,6 +663,23 @@ html[data-theme="light"] .hero-introduction {
   text-transform: uppercase;
 }
 
+.reflection-meta,
+.journal-meta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem 1rem;
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.reflection-meta span:not(:last-child)::after,
+.journal-meta span:not(:last-child)::after {
+  margin-left: 1rem;
+  content: "/";
+  color: var(--line);
+}
+
 .reflection-feature-image {
   max-width: 76rem;
 }
@@ -676,6 +693,32 @@ html[data-theme="light"] .hero-introduction {
   max-width: 44rem;
   margin-inline: auto;
   padding-top: 4rem;
+}
+
+.reflection-introduction,
+.journal-introduction {
+  margin-bottom: 3rem;
+  color: var(--foreground);
+  font-family: var(--font-display), serif;
+  font-size: 1.6rem;
+  line-height: 1.45;
+}
+
+.reading-section {
+  margin-bottom: 3rem;
+}
+
+.reading-section h2 {
+  margin-bottom: 1rem;
+  color: var(--accent-strong);
+  font-size: 1.65rem;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+.reading-section p {
+  margin-bottom: 1.25rem;
+  color: var(--foreground);
 }
 
 .reflection-content-status {
@@ -1031,6 +1074,35 @@ html[data-theme="light"] .hero-introduction {
   font-family: var(--font-display), serif;
   font-size: 1.4rem;
   line-height: 1.4;
+}
+
+.book-detail-description {
+  margin-top: 2rem;
+  color: var(--foreground);
+}
+
+.book-detail-description p {
+  margin-bottom: 1.25rem;
+}
+
+.book-detail-contents {
+  margin-top: 2rem;
+  color: var(--foreground);
+}
+
+.book-detail-contents h2 {
+  margin-bottom: 1rem;
+  color: var(--accent-strong);
+  font-size: 1.65rem;
+}
+
+.book-detail-contents ul {
+  margin: 0 0 1.5rem;
+  padding-left: 1.25rem;
+}
+
+.book-detail-contents li {
+  margin-bottom: 0.45rem;
 }
 
 .site-footer {
