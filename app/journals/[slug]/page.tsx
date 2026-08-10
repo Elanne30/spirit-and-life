@@ -22,7 +22,7 @@ export default async function JournalPage({
   return (
     <main className="journal-detail-page">
       <article className="journal-detail">
-        <header className="journal-detail-header page-container">
+        <header className="journal-detail-header page-container detail-header">
           <p className="eyebrow">Journal</p>
           <h1>{journal.title}</h1>
           <div className="journal-meta">

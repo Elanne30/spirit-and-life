@@ -17,8 +17,8 @@ export function ThemeToggle() {
       onClick={toggleTheme}
       aria-label="Toggle color theme"
     >
-      <span aria-hidden="true">◐</span>
-      <span>Theme</span>
+      <span aria-hidden="true" className="theme-icon">◐</span>
+      <span className="sr-only">Toggle theme</span>
     </button>
   );
 }

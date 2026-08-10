@@ -14,6 +14,10 @@ export function Header() {
       <div className="page-container header-inner">
         <Link className="brand-link" href="/" onClick={() => setMenuOpen(false)}>
           <Image className="brand-logo" src="/spiri_life_logo.jpg" alt="Spirit & Life" width={1280} height={853} />
+          <span className="brand-copy">
+            <strong>Spirit &amp; Life</strong>
+            <small>A library of reflective truths</small>
+          </span>
         </Link>
         <button
           className="menu-toggle"
@@ -36,6 +40,9 @@ export function Header() {
               {item.label}
             </Link>
           ))}
+          <button className="search-button" type="button" aria-label="Search">
+            <span aria-hidden="true" />
+          </button>
           <ThemeToggle />
         </nav>
       </div>

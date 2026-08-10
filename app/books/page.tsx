@@ -5,20 +5,13 @@ import { books } from "@/app/data/books";
 export default function BooksPage() {
   return (
     <main className="books-page">
-      <section className="books-introduction page-container">
-        <p className="eyebrow">Books</p>
-        <h1>A digital library for thoughtful reading</h1>
-        <p>
-          Books are being prepared as part of the connected Spirit &amp; Life
-          reading experience.
-        </p>
+      <section className="books-introduction page-container page-intro">
+        <p className="eyebrow">The Library</p>
+        <h1>Books</h1>
+        <p>Published and future writing projects exploring important biblical themes and questions.</p>
       </section>
 
-      <section className="book-library page-container" aria-labelledby="book-library-title">
-        <div className="book-library-heading">
-          <p className="eyebrow">The library</p>
-          <h2 id="book-library-title">Books in preparation.</h2>
-        </div>
+      <section className="book-library page-container library-section" aria-labelledby="book-library-title">
         <div className="book-grid">
           {books.map((book) => (
             <article className="book-card" key={book.contentSlug}>
@@ -38,14 +31,13 @@ export default function BooksPage() {
                 )}
               </Link>
               <div className="book-card-body">
-                <p className="content-card-label">Book</p>
+                <p className="content-card-label">Biblical Studies</p>
                 <h2>
                   <Link href={`/books/${book.contentSlug}`}>{book.title}</Link>
                 </h2>
                 {book.subtitle ? <p className="book-subtitle">{book.subtitle}</p> : null}
-                <p className="book-status">{book.status}</p>
                 <Link className="content-card-link" href={`/books/${book.contentSlug}`}>
-                  View Book
+                  Learn More →
                 </Link>
               </div>
             </article>

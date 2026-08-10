@@ -22,7 +22,7 @@ export default async function ReflectionPage({
   return (
     <main className="reflection-detail-page">
       <article className="reflection-detail">
-        <header className="reflection-detail-header page-container">
+        <header className="reflection-detail-header page-container detail-header">
           <p className="eyebrow">Reflection</p>
           <h1>{reflection.title}</h1>
           <div className="reflection-meta">

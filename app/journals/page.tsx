@@ -5,20 +5,13 @@ import { journals } from "@/app/data/journals";
 export default function JournalsPage() {
   return (
     <main className="journals-page">
-      <section className="journals-introduction page-container">
-        <p className="eyebrow">Journals</p>
-        <h1>Short entries from the life of faith</h1>
-        <p>
-          Shorter entries capturing observations, thoughts, prayers, questions,
-          and moments of reflection.
-        </p>
+      <section className="journals-introduction page-container page-intro">
+        <p className="eyebrow">The Library</p>
+        <h1>Journals</h1>
+        <p>Personal observations, lessons learned, and reflections gathered through study and life.</p>
       </section>
 
-      <section className="journal-library page-container" aria-labelledby="journal-library-title">
-        <div className="journal-library-heading">
-          <p className="eyebrow">The journal</p>
-          <h2 id="journal-library-title">Notes to return to.</h2>
-        </div>
+      <section className="journal-library page-container library-section" aria-labelledby="journal-library-title">
         <div className="journal-grid">
           {journals.map((journal) => (
             <article className="journal-card" key={journal.contentSlug}>
@@ -32,14 +25,15 @@ export default function JournalsPage() {
                 />
               </Link>
               <div className="journal-card-body">
-                <p className="content-card-label">Journal</p>
+                <p className="content-card-label">{journal.date}</p>
                 <h2>
                   <Link href={`/journals/${journal.contentSlug}`}>
                     {journal.title}
                   </Link>
                 </h2>
+                <p>{journal.introduction}</p>
                 <Link className="content-card-link" href={`/journals/${journal.contentSlug}`}>
-                  Read Journal
+                  Read Entry →
                 </Link>
               </div>
             </article>

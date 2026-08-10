@@ -2962,3 +2962,1182 @@ html[data-theme="dark"] .study-brand img {
     margin-top: 0.75rem;
   }
 }
+
+/* Public editorial system */
+:root {
+  --background: #080d17;
+  --surface: #101725;
+  --surface-muted: #151d2b;
+  --foreground: #f0ece4;
+  --muted: #929bac;
+  --line: #263142;
+  --accent: #d2a45d;
+  --accent-strong: #e8bd78;
+  --on-accent: #12100c;
+  --shadow: rgba(0, 0, 0, 0.35);
+}
+
+html[data-theme="light"] {
+  --background: #f2eee6;
+  --surface: #faf8f3;
+  --surface-muted: #e7e0d4;
+  --foreground: #1d2731;
+  --muted: #617080;
+  --line: #cbd0d2;
+  --accent: #96682f;
+  --accent-strong: #70491e;
+  --on-accent: #fffaf0;
+  --shadow: rgba(31, 38, 43, 0.12);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+}
+
+.site-header {
+  position: relative;
+  z-index: 10;
+  border-bottom: 1px solid var(--line);
+  background: color-mix(in srgb, var(--background) 94%, transparent);
+}
+
+.header-inner {
+  min-height: 5.75rem;
+  gap: 1.5rem;
+}
+
+.brand-link {
+  width: auto;
+  height: auto;
+  gap: 0.8rem;
+  overflow: visible;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.brand-logo {
+  width: 3.15rem;
+  height: 3.15rem;
+  object-fit: cover;
+  border: 1px solid color-mix(in srgb, var(--accent) 24%, var(--line));
+  border-radius: 0;
+}
+
+.brand-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.brand-copy strong {
+  font-family: var(--font-display), serif;
+  font-size: 1.35rem;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.brand-copy small {
+  color: var(--muted);
+  font-size: 0.58rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.main-navigation {
+  display: flex;
+  align-items: center;
+  gap: clamp(0.85rem, 2vw, 2rem);
+}
+
+.main-navigation a {
+  position: relative;
+  padding-block: 0.45rem;
+  color: var(--muted);
+  font-size: 0.78rem;
+  letter-spacing: 0.02em;
+  transition: color 160ms ease;
+}
+
+.main-navigation a:hover,
+.main-navigation a:focus-visible {
+  color: var(--foreground);
+}
+
+.main-navigation a:hover::after,
+.main-navigation a:focus-visible::after {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 1px;
+  background: var(--accent);
+  content: "";
+}
+
+.theme-toggle,
+.search-button {
+  display: inline-flex;
+  width: 2.15rem;
+  height: 2.15rem;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.theme-toggle:hover,
+.search-button:hover {
+  color: var(--accent-strong);
+}
+
+.theme-icon {
+  font-size: 1.1rem;
+}
+
+.search-button {
+  margin-left: 0.35rem;
+  border-left: 1px solid var(--line);
+  border-radius: 0;
+}
+
+.search-button span {
+  width: 0.9rem;
+  height: 0.9rem;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+}
+
+.search-button span::after {
+  display: block;
+  width: 0.4rem;
+  height: 1px;
+  margin: 0.72rem 0 0 0.68rem;
+  background: currentColor;
+  content: "";
+  transform: rotate(45deg);
+  transform-origin: left center;
+}
+
+.eyebrow {
+  color: var(--accent);
+  font-size: 0.67rem;
+  font-weight: 600;
+  letter-spacing: 0.28em;
+  line-height: 1.4;
+  text-transform: uppercase;
+}
+
+.section-heading {
+  max-width: 46rem;
+  margin-inline: auto;
+  text-align: center;
+}
+
+.section-heading h2,
+.section-heading h1 {
+  margin: 0.8rem 0 1.35rem;
+  font-size: clamp(2.2rem, 4.2vw, 3.75rem);
+  font-weight: 500;
+  letter-spacing: 0;
+  line-height: 0.98;
+}
+
+.section-heading h2::after,
+.section-heading h1::after,
+.page-intro h1::after {
+  display: block;
+  width: 3.9rem;
+  height: 1px;
+  margin: 1.2rem auto 0;
+  background: var(--accent);
+  content: "";
+}
+
+.section-heading > p:last-child,
+.page-intro > p:last-child {
+  max-width: 44rem;
+  margin-inline: auto;
+  color: var(--muted);
+  font-size: 1.05rem;
+}
+
+.button {
+  display: inline-flex;
+  min-height: 2.9rem;
+  align-items: center;
+  justify-content: center;
+  padding: 0.7rem 1.35rem;
+  border: 1px solid var(--accent);
+  border-radius: 3px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  transition: background 160ms ease, color 160ms ease, border-color 160ms ease, transform 160ms ease;
+}
+
+.button:hover {
+  transform: translateY(-2px);
+}
+
+.button-primary {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+.button-primary:hover {
+  background: var(--accent-strong);
+  border-color: var(--accent-strong);
+}
+
+.button-secondary {
+  background: transparent;
+  color: var(--foreground);
+}
+
+.button-secondary:hover {
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  color: var(--accent-strong);
+}
+
+.button-text,
+.content-card-link,
+.quiet-link {
+  border: 0;
+  color: var(--accent-strong);
+}
+
+.button-text:hover,
+.content-card-link:hover,
+.quiet-link:hover {
+  color: var(--foreground);
+}
+
+.hero {
+  position: relative;
+  display: grid;
+  min-height: min(47rem, calc(100vh - 5.75rem));
+  place-items: center;
+  overflow: hidden;
+  padding: 6rem 1.5rem 7rem;
+  text-align: center;
+}
+
+.hero-backdrop {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(8, 13, 23, 0.6), rgba(8, 13, 23, 0.88)), url("/spiri_life_hero.jpg") center / cover;
+  opacity: 0.95;
+}
+
+.hero-copy {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 49rem);
+}
+
+.hero-logo {
+  width: 5rem;
+  height: 5rem;
+  margin-bottom: 2.4rem;
+  object-fit: cover;
+  border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent);
+  border-radius: 0;
+}
+
+.hero h1 {
+  margin: 1.25rem 0 1.2rem;
+  font-size: clamp(3.7rem, 9vw, 7.1rem);
+  font-weight: 500;
+  line-height: 0.82;
+}
+
+.hero-introduction {
+  max-width: 42rem;
+  margin: 0 auto 1.2rem;
+  color: var(--foreground);
+  font-size: clamp(1.08rem, 2vw, 1.35rem);
+}
+
+.hero-supporting {
+  max-width: 39rem;
+  margin: 0.85rem auto;
+  color: #c2c6cc;
+  font-size: 0.95rem;
+}
+
+.hero-actions {
+  display: flex;
+  justify-content: center;
+  gap: 0.9rem;
+  margin-top: 2rem;
+}
+
+.foundation-section,
+.home-feature,
+.newsletter-section {
+  padding-block: 7rem;
+}
+
+.foundation-section {
+  border-bottom: 1px solid var(--line);
+}
+
+.content-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1.1rem;
+  margin-top: 3.7rem;
+}
+
+.content-card {
+  display: flex;
+  min-height: 17rem;
+  flex-direction: column;
+  padding: 1.8rem;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  background: var(--surface);
+}
+
+.content-card-label {
+  display: grid;
+  width: 2.6rem;
+  height: 2.6rem;
+  place-items: center;
+  margin: 0 0 2.4rem;
+  border: 1px solid color-mix(in srgb, var(--accent) 32%, var(--line));
+  border-radius: 50%;
+  color: var(--accent);
+  font-size: 0.7rem;
+}
+
+.content-card h3 {
+  margin: 0 0 0.75rem;
+  font-family: var(--font-display), serif;
+  font-size: 1.75rem;
+  font-weight: 500;
+  line-height: 1;
+}
+
+.content-card p:not(.content-card-label) {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.84rem;
+}
+
+.content-card-link {
+  margin-top: auto;
+  padding-top: 1.5rem;
+  font-size: 0.78rem;
+}
+
+.home-feature {
+  border-bottom: 1px solid var(--line);
+  text-align: center;
+}
+
+.feature-split {
+  display: grid;
+  grid-template-columns: minmax(0, 1.08fr) minmax(0, 0.92fr);
+  gap: clamp(2.5rem, 7vw, 6rem);
+  align-items: center;
+  margin-top: 3.9rem;
+  text-align: left;
+}
+
+.feature-split > img {
+  width: 100%;
+  height: 23rem;
+  object-fit: cover;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+}
+
+.feature-copy h2 {
+  margin: 0.8rem 0 1.15rem;
+  font-family: var(--font-display), serif;
+  font-size: clamp(2.2rem, 4vw, 3.3rem);
+  font-weight: 500;
+  line-height: 0.97;
+}
+
+.feature-copy > p:not(.eyebrow):not(.scripture-reference) {
+  color: var(--muted);
+  font-size: 0.96rem;
+}
+
+.scripture-reference {
+  color: var(--accent-strong);
+  font-family: var(--font-display), serif;
+  font-style: italic;
+}
+
+.feature-action {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  margin-top: 1.8rem;
+}
+
+.feature-action > span {
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.quiet-link {
+  display: inline-block;
+  margin-top: 2.7rem;
+  font-size: 0.8rem;
+}
+
+.feature-split-book {
+  grid-template-columns: minmax(0, 0.75fr) minmax(0, 1.25fr);
+  max-width: 62rem;
+  margin-inline: auto;
+}
+
+.book-cover-wrap {
+  display: flex;
+  justify-content: center;
+}
+
+.book-cover-wrap img,
+.book-cover-placeholder {
+  width: min(100%, 16rem);
+  aspect-ratio: 0.72;
+  object-fit: cover;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+}
+
+.book-cover-placeholder {
+  display: grid;
+  place-items: center;
+  padding: 2rem;
+  background: linear-gradient(135deg, #18283d, #0b101b);
+  color: var(--accent-strong);
+  font-family: var(--font-display), serif;
+  font-size: 1.6rem;
+  text-align: center;
+}
+
+.newsletter-section {
+  display: grid;
+  justify-items: center;
+  border-bottom: 1px solid var(--line);
+  text-align: center;
+}
+
+.newsletter-section h2 {
+  margin: 0.8rem 0 1.35rem;
+  font-size: clamp(2.5rem, 5vw, 4rem);
+  font-weight: 500;
+  line-height: 0.95;
+}
+
+.newsletter-section > div > p:last-child {
+  max-width: 38rem;
+  color: var(--muted);
+}
+
+.newsletter-form {
+  width: min(100%, 31rem);
+  margin-top: 2rem;
+}
+
+.newsletter-form label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+}
+
+.newsletter-field {
+  display: flex;
+  gap: 0.65rem;
+}
+
+.newsletter-field input,
+.contact-form input,
+.contact-form textarea,
+.journal-composer textarea,
+.study-workspace textarea {
+  min-width: 0;
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  background: color-mix(in srgb, var(--background) 82%, transparent);
+  color: var(--foreground);
+  font: inherit;
+}
+
+.newsletter-field input {
+  padding: 0.75rem 1rem;
+}
+
+.newsletter-field input::placeholder,
+.contact-form input::placeholder,
+.contact-form textarea::placeholder {
+  color: var(--muted);
+}
+
+.site-footer {
+  border-top: 0;
+  background: #070c15;
+}
+
+.footer-inner {
+  display: grid;
+  grid-template-columns: 1.2fr 0.9fr 0.7fr;
+  gap: 4rem;
+  padding-block: 4.5rem 3.5rem;
+}
+
+.footer-inner .brand-link {
+  display: inline-flex;
+}
+
+.footer-note {
+  max-width: 19rem;
+  margin: 1.5rem 0 1.4rem;
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+.footer-socials {
+  display: flex;
+  gap: 0.55rem;
+}
+
+.footer-socials a {
+  display: grid;
+  width: 2.25rem;
+  height: 2.25rem;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  color: var(--muted);
+  font-size: 0.6rem;
+  text-transform: uppercase;
+}
+
+.footer-socials a:hover {
+  border-color: var(--accent);
+  color: var(--accent-strong);
+}
+
+.footer-heading {
+  margin: 0 0 1.35rem;
+  color: var(--accent);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+}
+
+.footer-links {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.footer-links a {
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+.footer-links a:hover {
+  color: var(--foreground);
+}
+
+.footer-bottom {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-block: 1.35rem;
+  border-top: 1px solid color-mix(in srgb, var(--accent) 35%, var(--line));
+  color: var(--muted);
+  font-size: 0.7rem;
+  letter-spacing: 0.04em;
+}
+
+.footer-bottom p {
+  margin: 0;
+}
+
+.page-intro {
+  padding: 8.5rem 1.5rem 5.5rem;
+  text-align: center;
+}
+
+.page-intro h1 {
+  margin: 1rem 0 1.4rem;
+  font-size: clamp(3.2rem, 7vw, 5.8rem);
+  font-weight: 500;
+  line-height: 0.88;
+}
+
+.library-section {
+  padding-bottom: 8rem;
+}
+
+.filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.55rem;
+  margin: 0 auto 3.2rem;
+}
+
+.filter-pill {
+  padding: 0.7rem 1.25rem;
+  border: 1px solid var(--line);
+  border-radius: 2rem;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: 0.8rem;
+}
+
+.filter-pill.is-active,
+.filter-pill:hover {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+.reflection-grid,
+.journal-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1.4rem;
+}
+
+.journal-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.reflection-card,
+.journal-card,
+.book-card {
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  background: var(--surface);
+}
+
+.reflection-card-image,
+.journal-card-image,
+.book-card-cover {
+  display: block;
+  overflow: hidden;
+}
+
+.reflection-card-image img,
+.journal-card-image img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1.55;
+  object-fit: cover;
+  transition: transform 300ms ease;
+}
+
+.reflection-card:hover img,
+.journal-card:hover img,
+.book-card:hover img {
+  transform: scale(1.03);
+}
+
+.reflection-card-body,
+.journal-card-body,
+.book-card-body {
+  padding: 1.7rem 1.8rem 1.8rem;
+}
+
+.reflection-card h2,
+.journal-card h2,
+.book-card h2 {
+  margin: 0.8rem 0 0.9rem;
+  font-family: var(--font-display), serif;
+  font-size: clamp(1.65rem, 2.5vw, 2.1rem);
+  font-weight: 500;
+  line-height: 1.05;
+}
+
+.reflection-card p:not(.content-card-label),
+.journal-card p:not(.content-card-label),
+.book-card p {
+  color: var(--muted);
+  font-size: 0.86rem;
+}
+
+.reflection-card .content-card-link,
+.journal-card .content-card-link {
+  display: inline-block;
+  margin-top: 0.8rem;
+}
+
+.book-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1.4rem;
+}
+
+.book-card-cover img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 0.78;
+  object-fit: cover;
+  transition: transform 300ms ease;
+}
+
+.book-card-cover-missing,
+.book-detail-cover-missing {
+  display: grid;
+  min-height: 20rem;
+  place-items: center;
+  padding: 2rem;
+  background: #111b2c;
+  color: var(--accent-strong);
+  font-family: var(--font-display), serif;
+  font-size: 1.6rem;
+  text-align: center;
+}
+
+.book-detail,
+.reflection-detail,
+.journal-detail {
+  padding-bottom: 7rem;
+}
+
+.detail-header {
+  max-width: 58rem;
+  margin-inline: auto;
+  padding: 7rem 1.5rem 3rem;
+  text-align: center;
+}
+
+.detail-header h1 {
+  margin: 1rem 0 1.5rem;
+  font-size: clamp(3rem, 6vw, 5.7rem);
+  font-weight: 500;
+  line-height: 0.9;
+}
+
+.reflection-meta,
+.journal-meta,
+.book-detail-meta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.7rem 1.2rem;
+  color: var(--muted);
+  font-size: 0.76rem;
+}
+
+.reflection-feature-image,
+.journal-feature-image {
+  max-width: 76rem;
+  margin: 0 auto;
+}
+
+.reflection-feature-image img,
+.journal-feature-image img {
+  display: block;
+  width: 100%;
+  max-height: 36rem;
+  object-fit: cover;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+}
+
+.reading-column,
+.reflection-reading-column,
+.journal-reading-column {
+  max-width: 42rem;
+  margin: 4rem auto 0;
+  padding-inline: 1.5rem;
+}
+
+.reflection-introduction,
+.journal-introduction {
+  color: var(--foreground);
+  font-family: var(--font-display), serif;
+  font-size: 1.65rem;
+  line-height: 1.25;
+}
+
+.reading-section h2 {
+  margin-top: 3rem;
+  font-family: var(--font-display), serif;
+  font-size: 2.2rem;
+  font-weight: 500;
+}
+
+.reading-section p,
+.journal-reading-column p {
+  color: var(--muted);
+  font-size: 1rem;
+  line-height: 1.85;
+}
+
+.book-detail {
+  display: grid;
+  grid-template-columns: minmax(15rem, 24rem) minmax(0, 1fr);
+  gap: clamp(2.5rem, 8vw, 7rem);
+  max-width: 76rem;
+  margin: 0 auto;
+  padding: 8rem 1.5rem;
+}
+
+.book-detail-cover img {
+  display: block;
+  width: 100%;
+  border: 1px solid var(--line);
+}
+
+.book-detail-content h1 {
+  margin: 0.8rem 0 1rem;
+  font-size: clamp(3rem, 6vw, 5rem);
+  font-weight: 500;
+  line-height: 0.9;
+}
+
+.book-detail-description {
+  color: var(--muted);
+  white-space: pre-line;
+}
+
+.about-main,
+.contact-main {
+  padding-bottom: 7rem;
+}
+
+.about-introduction,
+.contact-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: clamp(2rem, 6vw, 6rem);
+  align-items: start;
+  max-width: 76rem;
+  margin: 2rem auto 0;
+  padding: 5rem 1.5rem 8rem;
+  border-top: 1px solid var(--line);
+}
+
+.about-introduction img {
+  width: 100%;
+  aspect-ratio: 0.78;
+  object-fit: cover;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+}
+
+.about-introduction h2,
+.contact-card h2,
+.contact-form h2 {
+  margin: 0 0 1.4rem;
+  font-family: var(--font-display), serif;
+  font-size: 2.6rem;
+  font-weight: 500;
+  line-height: 1;
+}
+
+.about-copy p,
+.mission-copy p,
+.contact-card p {
+  color: var(--muted);
+}
+
+.about-copy p + p {
+  margin-top: 1.3rem;
+}
+
+.mission-copy,
+.closing-invitation {
+  max-width: 62rem;
+  margin: 0 auto;
+  padding: 6rem 1.5rem;
+  border-top: 1px solid var(--line);
+  text-align: center;
+}
+
+.mission-copy blockquote {
+  margin: 1.3rem 0 2rem;
+  font-family: var(--font-display), serif;
+  font-size: clamp(2.2rem, 4.5vw, 4.3rem);
+  line-height: 1;
+}
+
+.closing-invitation {
+  border-bottom: 1px solid var(--line);
+}
+
+.closing-invitation h2 {
+  font-family: var(--font-display), serif;
+  font-size: 3rem;
+  font-weight: 500;
+}
+
+.closing-invitation p {
+  color: var(--muted);
+}
+
+.closing-actions {
+  display: flex;
+  justify-content: center;
+  gap: 0.8rem;
+  margin-top: 2rem;
+}
+
+.contact-layout {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+}
+
+.contact-form,
+.contact-card {
+  padding: 2.2rem;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  background: var(--surface);
+}
+
+.contact-form {
+  display: grid;
+  gap: 1.1rem;
+}
+
+.contact-form label {
+  color: var(--muted);
+  font-size: 0.72rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.contact-form input,
+.contact-form textarea {
+  margin-top: 0.45rem;
+  padding: 0.85rem 1rem;
+}
+
+.contact-form textarea {
+  min-height: 10rem;
+  resize: vertical;
+}
+
+.contact-form .button {
+  width: 100%;
+  margin-top: 0.5rem;
+}
+
+.contact-stack {
+  display: grid;
+  gap: 1.2rem;
+}
+
+.contact-card h2 {
+  font-size: 2.1rem;
+}
+
+.contact-card + .contact-card {
+  margin-top: 0;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (max-width: 900px) {
+  .main-navigation {
+    gap: 0.9rem;
+  }
+
+  .content-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .reflection-grid,
+  .book-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .footer-inner {
+    gap: 2rem;
+  }
+}
+
+@media (max-width: 700px) {
+  .page-container {
+    width: min(100% - 2rem, 76rem);
+  }
+
+  .header-inner {
+    min-height: 4.8rem;
+  }
+
+  .brand-copy small {
+    display: none;
+  }
+
+  .menu-toggle {
+    display: inline-flex;
+  }
+
+  .main-navigation {
+    position: absolute;
+    top: calc(100% + 1px);
+    right: 0;
+    left: 0;
+    display: none;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    padding: 0.75rem 1rem 1rem;
+    border-bottom: 1px solid var(--line);
+    background: var(--background);
+  }
+
+  .main-navigation.is-open {
+    display: flex;
+  }
+
+  .main-navigation a,
+  .theme-toggle {
+    width: 100%;
+    padding: 0.8rem 0;
+    text-align: left;
+  }
+
+  .search-button {
+    display: none;
+  }
+
+  .hero {
+    min-height: auto;
+    padding-block: 5rem 5.5rem;
+  }
+
+  .hero-logo {
+    margin-bottom: 1.6rem;
+  }
+
+  .hero-actions,
+  .closing-actions,
+  .newsletter-field {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .foundation-section,
+  .home-feature,
+  .newsletter-section {
+    padding-block: 5rem;
+  }
+
+  .feature-split,
+  .feature-split-book,
+  .about-introduction,
+  .contact-layout,
+  .book-detail {
+    display: block;
+  }
+
+  .feature-split > img {
+    height: 16rem;
+    margin-bottom: 2rem;
+  }
+
+  .feature-split-book .book-cover-wrap {
+    margin-bottom: 2.5rem;
+  }
+
+  .feature-copy h2 {
+    font-size: 2.5rem;
+  }
+
+  .reflection-grid,
+  .journal-grid,
+  .book-grid,
+  .content-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .page-intro {
+    padding-block: 5.5rem 4rem;
+  }
+
+  .library-section,
+  .about-main,
+  .contact-main {
+    padding-bottom: 5rem;
+  }
+
+  .filter-row {
+    justify-content: flex-start;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    padding-bottom: 0.5rem;
+  }
+
+  .filter-pill {
+    flex: 0 0 auto;
+  }
+
+  .detail-header {
+    padding-top: 5rem;
+  }
+
+  .book-detail {
+    padding-block: 5rem;
+  }
+
+  .book-detail-cover {
+    width: min(75%, 18rem);
+    margin: 0 auto 2.5rem;
+  }
+
+  .about-introduction,
+  .contact-layout {
+    padding-block: 3.5rem 5rem;
+  }
+
+  .about-introduction img {
+    margin-bottom: 2.5rem;
+  }
+
+  .contact-form,
+  .contact-card {
+    padding: 1.4rem;
+  }
+
+  .contact-stack {
+    margin-top: 1.25rem;
+  }
+
+  .footer-inner,
+  .footer-bottom {
+    display: block;
+  }
+
+  .footer-column {
+    margin-top: 2rem;
+  }
+
+  .footer-bottom p + p {
+    margin-top: 0.6rem;
+  }
+}
