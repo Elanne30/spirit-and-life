@@ -1,35 +1,51 @@
 import Link from "next/link";
 import Image from "next/image";
+import { siFacebook, siInstagram, siX, siYoutube } from "simple-icons";
 import { navigation } from "@/app/content/navigation";
+import { socialLinks } from "@/app/content/social";
+import { siteConfig } from "@/app/content/site-config";
+
+const additionalLinks = [
+  { label: "Newsletter", href: "/#newsletter" },
+  { label: "Privacy Policy", href: "/privacy-policy" },
+  { label: "Terms of Use", href: "/terms-of-use" },
+];
+
+const socialIcons = { YouTube: siYoutube, Facebook: siFacebook, Instagram: siInstagram, X: siX };
 
 export function Footer() {
   return (
     <footer className="site-footer">
       <div className="page-container footer-inner">
         <div>
-          <Link className="brand-link" href="/">
-            <Image className="brand-logo" src="/spiri_life_logo.jpg" alt="Spirit & Life" width={1280} height={853} />
+          <Link className="brand-link footer-brand-link" href="/">
+            <Image className="brand-logo" src={siteConfig.brand.logo} alt="Spirit & Life" width={616} height={496} />
+            <span className="footer-brand-copy">
+              <strong>Spirit &amp; Life</strong>
+              <small>A library of reflective truths</small>
+            </span>
           </Link>
           <p className="footer-note">Exploring God, life, and the world with clarity, depth, and faith.</p>
-          <div className="footer-socials" aria-label="Social links">
-            <a href="#" aria-label="YouTube">YT</a>
-            <a href="#" aria-label="Facebook">f</a>
-            <a href="#" aria-label="Instagram">ig</a>
-            <a href="#" aria-label="Twitter">tw</a>
+          <p className="footer-heading sr-only">Social Media</p>
+          <div className="footer-socials" aria-label="Social media">
+            {socialLinks.map(({ label, href }) => {
+              const icon = socialIcons[label];
+              const iconMarkup = <svg aria-hidden="true" className="footer-social-icon" viewBox="0 0 24 24" focusable="false"><path d={icon.path} /></svg>;
+
+              return href ? <a className="footer-social-link" key={label} href={href} aria-label={label}>{iconMarkup}</a> : <span className="footer-social-link footer-placeholder" key={label} aria-label={`${label} link unavailable`}>{iconMarkup}</span>;
+            })}
           </div>
         </div>
         <div className="footer-column">
           <p className="footer-heading">Navigation</p>
-          <div className="footer-links" aria-label="Footer navigation">
-            {navigation.slice(1).map((item) => <Link key={item.href} href={item.href}>{item.label}</Link>)}
+          <div className="footer-links footer-navigation-links" aria-label="Footer navigation">
+            {navigation.map((item) => <Link key={item.href} href={item.href}>{item.label}</Link>)}
           </div>
         </div>
         <div className="footer-column">
           <p className="footer-heading">Resources</p>
-          <div className="footer-links">
-            <Link href="/reflections">The library</Link>
-            <Link href="/study-center">Study plans</Link>
-            <Link href="/contact">Get in touch</Link>
+          <div className="footer-links" aria-label="Resources">
+            {additionalLinks.map((item) => <Link key={item.href} href={item.href}>{item.label}</Link>)}
           </div>
         </div>
       </div>

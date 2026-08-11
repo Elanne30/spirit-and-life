@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import type { Metadata } from "next";
 import {
   getStudyByDate,
   getStudiesByWeek,
@@ -8,8 +9,10 @@ import {
   movements,
   weeks,
 } from "@/app/data/study-plan";
-import { ThemeToggle } from "@/app/components/theme-toggle";
 import { WeekProgress } from "@/app/study-center/week-progress";
+import { pageMetadata } from "@/app/content/seo";
+
+export const metadata: Metadata = pageMetadata("Study Center", "Explore Bible study plans, reading practices, and learning resources from Spirit & Life.", "/study-center");
 
 export default function StudyCenterPage() {
   const today = new Date().toISOString().split("T")[0];
@@ -24,24 +27,25 @@ export default function StudyCenterPage() {
   return (
     <main className="study-center-page">
       <div className="study-shell">
-        <header className="study-center-header">
-          <Link className="study-brand" href="/">
-            <Image
-              src="/spiri_life_logo.jpg"
-              alt="Spirit & Life"
-              width={1280}
-              height={853}
-            />
-          </Link>
-          <div className="study-center-label">
-            <span>Spirit &amp; Life</span>
-            <strong>Study Center</strong>
+        <p className="study-verse-cap">
+          &ldquo;Your word is a lamp to my feet and a light to my path.&rdquo; &mdash; <cite>Psalm 119:105</cite>
+        </p>
+
+        <section className="study-entry" aria-labelledby="study-entry-title">
+          <div>
+            <p className="eyebrow">A connected learning space</p>
+            <h1 id="study-entry-title">Study Center</h1>
+            <p>Explore Bible study plans, reading practices, and learning resources designed for careful attention to Scripture.</p>
+            <p>The native Spirit &amp; Life Study Center keeps this journey inside the site, with each day’s study, reflection, checklist, and journal entry preserved locally.</p>
+            <p className="study-entry-note">Continue with the current study from the card below.</p>
           </div>
-          <div className="study-header-actions">
-            <Link href="/" className="study-back-link">Back to site</Link>
-            <ThemeToggle />
+          <div className="study-entry-links" aria-label="Study Center areas">
+            <span>Bible Study Plans</span>
+            <span>Reading Plans</span>
+            <span>Learning Resources</span>
+            <span className="study-entry-future">Future AI Bible Study Assistant</span>
           </div>
-        </header>
+        </section>
 
         <section className="study-hero">
           <Image

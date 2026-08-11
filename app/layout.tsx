@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Cormorant_Garamond, DM_Sans } from "next/font/google";
 import { Footer } from "@/app/components/footer";
 import { Header } from "@/app/components/header";
+import { siteConfig } from "@/app/content/site-config";
 import "./globals.css";
 
 const displayFont = Cormorant_Garamond({
@@ -17,8 +18,20 @@ const bodyFont = DM_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Spirit & Life",
-  description: "Thoughtful Christian reading, reflection, and study.",
+  metadataBase: new URL(siteConfig.url),
+  title: {
+    default: siteConfig.name,
+    template: `%s | ${siteConfig.name}`,
+  },
+  description: siteConfig.description,
+  alternates: { canonical: "/" },
+  openGraph: {
+    title: siteConfig.name,
+    description: siteConfig.description,
+    type: "website",
+    siteName: siteConfig.name,
+  },
+  twitter: { card: "summary" },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
@@ -33,7 +46,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <script
           dangerouslySetInnerHTML={{
             __html:
-              '(function(){try{var t=localStorage.getItem("spirit-life-theme");if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t)}catch(e){}})()',
+              '(function(){try{var stored=localStorage.getItem("spirit-life-theme");var preferred=stored==="light"||stored==="dark"?stored:(window.matchMedia&&window.matchMedia("(prefers-color-scheme: light)").matches?"light":"dark");document.documentElement.setAttribute("data-theme",preferred);document.documentElement.style.colorScheme=preferred}catch(e){}})()',
           }}
         />
       </head>

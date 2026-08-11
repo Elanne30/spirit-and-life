@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
-import { getNextStudy, getPreviousStudy, getStudyByDate, studies } from "@/app/data/study-plan";
+import { getNextStudy, getPreviousStudy, getStudiesByWeek, getStudyByDate, studies } from "@/app/data/study-plan";
 import { StudyWorkspace } from "@/app/study-center/study-workspace";
+import { WeekProgress } from "@/app/study-center/week-progress";
 
 export function generateStaticParams() {
   return studies.map((study) => ({ date: study.date }));
@@ -18,15 +19,42 @@ export default async function StudyDatePage({
     notFound();
   }
 
+  const weekStudies = getStudiesByWeek(study.week ?? 1);
+
   return (
     <main className="study-center-page study-detail-page">
       <div className="study-shell">
-        <StudyWorkspace
-          key={study.date}
-          study={study}
-          previous={getPreviousStudy(study.date)}
-          next={getNextStudy(study.date)}
-        />
+        <div className="study-workspace-layout">
+          <aside className="study-workspace-sidebar">
+            <div className="study-workspace-sidebar-card">
+              <p className="eyebrow">Current study</p>
+              <h2>{study.weekTitle}</h2>
+              <p>{study.focus}</p>
+              <dl>
+                <div>
+                  <dt>Passage</dt>
+                  <dd>{study.passage}</dd>
+                </div>
+                <div>
+                  <dt>Movement</dt>
+                  <dd>{study.movement}</dd>
+                </div>
+              </dl>
+            </div>
+            <div className="study-workspace-sidebar-card">
+              <p className="eyebrow">This week</p>
+              <WeekProgress studies={weekStudies} currentDate={study.date} showNavigation={false} />
+            </div>
+          </aside>
+          <div className="study-workspace-main">
+            <StudyWorkspace
+              key={study.date}
+              study={study}
+              previous={getPreviousStudy(study.date)}
+              next={getNextStudy(study.date)}
+            />
+          </div>
+        </div>
       </div>
     </main>
   );

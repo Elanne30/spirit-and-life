@@ -1,10 +1,13 @@
 import { imageManifest, type ImageManifestEntry } from "@/app/data/image-manifest";
 import type { ContentSection } from "@/app/data/reflections";
+import type { ContentCategory, ContentRelations } from "@/app/content/types";
 
-export type Journal = ImageManifestEntry & {
+export type Journal = ImageManifestEntry & ContentRelations & {
   image: string;
   date: string;
   label: string;
+  category?: ContentCategory;
+  featured?: boolean;
   introduction: string;
   sections: ContentSection[];
 };

@@ -1,6 +1,10 @@
 import Image from "next/image";
 import Link from "next/link";
+import type { Metadata } from "next";
 import { books } from "@/app/data/books";
+import { pageMetadata } from "@/app/content/seo";
+
+export const metadata: Metadata = pageMetadata("Books", "Explore the Spirit & Life digital library and future writing projects.", "/books");
 
 export default function BooksPage() {
   return (
@@ -11,7 +15,7 @@ export default function BooksPage() {
         <p>Published and future writing projects exploring important biblical themes and questions.</p>
       </section>
 
-      <section className="book-library page-container library-section" aria-labelledby="book-library-title">
+      <section className="book-library page-container library-section" aria-label="Book library">
         <div className="book-grid">
           {books.map((book) => (
             <article className="book-card" key={book.contentSlug}>
@@ -31,7 +35,7 @@ export default function BooksPage() {
                 )}
               </Link>
               <div className="book-card-body">
-                <p className="content-card-label">Biblical Studies</p>
+                <p className="content-card-label">{book.category ?? "Book"}</p>
                 <h2>
                   <Link href={`/books/${book.contentSlug}`}>{book.title}</Link>
                 </h2>

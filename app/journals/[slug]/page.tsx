@@ -1,10 +1,19 @@
 import Image from "next/image";
 import Link from "next/link";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { RelatedContent } from "@/app/components/related-content";
 import { getJournal, journals } from "@/app/data/journals";
+import { articleMetadata } from "@/app/content/seo";
 
 export function generateStaticParams() {
   return journals.map((journal) => ({ slug: journal.contentSlug }));
+}
+
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params;
+  const journal = getJournal(slug);
+  return journal ? articleMetadata(journal.title, journal.introduction, `/journals/${journal.contentSlug}`) : articleMetadata("Journals", "Personal observations and reflections from Spirit & Life.", "/journals");
 }
 
 export default async function JournalPage({
@@ -33,7 +42,7 @@ export default async function JournalPage({
         <div className="journal-feature-image page-container">
           <Image
             src={journal.image}
-            alt=""
+            alt={journal.title}
             width={1280}
             height={853}
             priority
@@ -51,6 +60,7 @@ export default async function JournalPage({
           <Link className="button button-text" href="/journals">
             Back to Journals
           </Link>
+          <RelatedContent relations={journal} />
         </div>
       </article>
     </main>

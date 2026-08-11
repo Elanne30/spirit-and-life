@@ -1,8 +1,17 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
+import { useState } from "react";
 import { reflections } from "@/app/data/reflections";
 
 export default function ReflectionsPage() {
+  const categories = ["All", ...new Set(reflections.map((reflection) => reflection.category))];
+  const [selectedCategory, setSelectedCategory] = useState("All");
+  const visibleReflections = selectedCategory === "All"
+    ? reflections
+    : reflections.filter((reflection) => reflection.category === selectedCategory);
+
   return (
     <main className="reflections-page">
       <section className="reflections-introduction page-container page-intro">
@@ -11,23 +20,27 @@ export default function ReflectionsPage() {
         <p>Thoughtful writings exploring Scripture, theology, philosophy, apologetics, and Christian living.</p>
       </section>
 
-      <section className="reflection-library page-container library-section" aria-labelledby="reflection-library-title">
+      <section className="reflection-library page-container library-section" aria-label="Reflection library">
         <div className="filter-row" aria-label="Reflection categories">
-          <button className="filter-pill is-active" type="button">All</button>
-          <button className="filter-pill" type="button">Biblical Studies</button>
-          <button className="filter-pill" type="button">Theology</button>
-          <button className="filter-pill" type="button">Christian Living</button>
-          <button className="filter-pill" type="button">Faith &amp; Life</button>
-          <button className="filter-pill" type="button">Philosophy</button>
-          <button className="filter-pill" type="button">Apologetics</button>
+          {categories.map((category) => (
+            <button
+              className={`filter-pill${selectedCategory === category ? " is-active" : ""}`}
+              key={category}
+              type="button"
+              aria-pressed={selectedCategory === category}
+              onClick={() => setSelectedCategory(category)}
+            >
+              {category}
+            </button>
+          ))}
         </div>
         <div className="reflection-grid">
-          {reflections.map((reflection) => (
+          {visibleReflections.map((reflection) => (
             <article className="reflection-card" key={reflection.contentSlug}>
               <Link className="reflection-card-image" href={`/reflections/${reflection.contentSlug}`}>
                 <Image
                   src={reflection.image}
-                  alt=""
+                  alt={reflection.title}
                   width={1280}
                   height={853}
                   sizes="(max-width: 720px) 100vw, (max-width: 1024px) 50vw, 33vw"

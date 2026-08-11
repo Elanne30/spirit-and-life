@@ -1,6 +1,10 @@
 import Image from "next/image";
 import Link from "next/link";
+import type { Metadata } from "next";
 import { journals } from "@/app/data/journals";
+import { pageMetadata } from "@/app/content/seo";
+
+export const metadata: Metadata = pageMetadata("Journals", "Read personal observations and reflections gathered through study and life.", "/journals");
 
 export default function JournalsPage() {
   return (
@@ -11,14 +15,14 @@ export default function JournalsPage() {
         <p>Personal observations, lessons learned, and reflections gathered through study and life.</p>
       </section>
 
-      <section className="journal-library page-container library-section" aria-labelledby="journal-library-title">
+      <section className="journal-library page-container library-section" aria-label="Journal library">
         <div className="journal-grid">
           {journals.map((journal) => (
             <article className="journal-card" key={journal.contentSlug}>
               <Link className="journal-card-image" href={`/journals/${journal.contentSlug}`}>
                 <Image
                   src={journal.image}
-                  alt=""
+                  alt={journal.title}
                   width={1280}
                   height={853}
                   sizes="(max-width: 720px) 100vw, 50vw"

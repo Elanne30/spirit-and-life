@@ -1,10 +1,19 @@
 import Image from "next/image";
 import Link from "next/link";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { RelatedContent } from "@/app/components/related-content";
 import { books, getBook } from "@/app/data/books";
+import { pageMetadata } from "@/app/content/seo";
 
 export function generateStaticParams() {
   return books.map((book) => ({ slug: book.contentSlug }));
+}
+
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params;
+  const book = getBook(slug);
+  return book ? pageMetadata(book.title, book.description ?? `${book.title} in the Spirit & Life digital library.`, `/books/${book.contentSlug}`) : pageMetadata("Books", "Explore the Spirit & Life digital library.", "/books");
 }
 
 export default async function BookPage({
@@ -68,6 +77,7 @@ export default async function BookPage({
           <Link className="button button-text" href="/books">
             Back to Books
           </Link>
+          <RelatedContent relations={book} />
         </div>
       </article>
     </main>

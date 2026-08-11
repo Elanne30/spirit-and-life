@@ -2,18 +2,21 @@
 
 import Link from "next/link";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { ThemeToggle } from "@/app/components/theme-toggle";
 import { navigation } from "@/app/content/navigation";
+import { siteConfig } from "@/app/content/site-config";
 
 export function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const pathname = usePathname();
 
   return (
     <header className="site-header">
       <div className="page-container header-inner">
         <Link className="brand-link" href="/" onClick={() => setMenuOpen(false)}>
-          <Image className="brand-logo" src="/spiri_life_logo.jpg" alt="Spirit & Life" width={1280} height={853} />
+          <Image className="brand-logo" src={siteConfig.brand.logo} alt="Spirit & Life" width={616} height={496} />
           <span className="brand-copy">
             <strong>Spirit &amp; Life</strong>
             <small>A library of reflective truths</small>
@@ -36,13 +39,13 @@ export function Header() {
           aria-label="Main navigation"
         >
           {navigation.map((item) => (
-            <Link key={item.href} href={item.href} onClick={() => setMenuOpen(false)}>
+            <Link className={pathname === item.href || (item.href !== "/" && pathname.startsWith(`${item.href}/`)) ? "is-active" : undefined} key={item.href} href={item.href} onClick={() => setMenuOpen(false)} aria-current={pathname === item.href || (item.href !== "/" && pathname.startsWith(`${item.href}/`)) ? "page" : undefined}>
               {item.label}
             </Link>
           ))}
-          <button className="search-button" type="button" aria-label="Search">
+          <Link className="search-button" href="/search" aria-label="Search">
             <span aria-hidden="true" />
-          </button>
+          </Link>
           <ThemeToggle />
         </nav>
       </div>

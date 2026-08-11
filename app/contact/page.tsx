@@ -2,13 +2,25 @@
 
 import { FormEvent, useState } from "react";
 import { Button } from "@/app/components/button";
+import { siteConfig } from "@/app/content/site-config";
+import { socialLinks } from "@/app/content/social";
 
 export default function ContactPage() {
-  const [sent, setSent] = useState(false);
+  const [status, setStatus] = useState<"idle" | "ready" | "error">("idle");
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setSent(true);
+    const formData = new FormData(event.currentTarget);
+    const name = String(formData.get("name") ?? "").trim();
+    const email = String(formData.get("email") ?? "").trim();
+    const message = String(formData.get("message") ?? "").trim();
+
+    if (!name || !email || !message) {
+      setStatus("error");
+      return;
+    }
+
+    setStatus("ready");
   }
 
   return (
@@ -29,7 +41,8 @@ export default function ContactPage() {
           <label htmlFor="contact-message">Message</label>
           <textarea id="contact-message" name="message" placeholder="Your message..." required />
           <Button type="submit">Send Message</Button>
-          {sent ? <p role="status">Thank you. Your message is ready to be sent, and I&apos;ll respond as soon as I can.</p> : null}
+          {status === "ready" ? <p role="status">Thank you. Your message is ready to be sent, and I&apos;ll respond as soon as I can.</p> : null}
+          {status === "error" ? <p className="form-error" role="alert">Please complete all fields before preparing your message.</p> : null}
         </form>
 
         <div className="contact-stack">
@@ -42,6 +55,18 @@ export default function ContactPage() {
             <p className="eyebrow">A considered reply</p>
             <h2>Response Time</h2>
             <p>Thoughtful replies take time. I aim to respond within a few days, because careful questions deserve careful answers.</p>
+          </article>
+          <article className="contact-card">
+            <p className="eyebrow">Email</p>
+            <h2>Direct correspondence</h2>
+            <p>{siteConfig.contact.email ? <a href={`mailto:${siteConfig.contact.email}`}>{siteConfig.contact.email}</a> : "An email address will be published when the contact connection is configured."}</p>
+          </article>
+          <article className="contact-card">
+            <p className="eyebrow">Social Media</p>
+            <h2>Continue the conversation</h2>
+            <div className="contact-social-links">
+              {socialLinks.map(({ label, href }) => href ? <a key={label} href={href}>{label}</a> : <span className="footer-placeholder" key={label}>{label} unavailable</span>)}
+            </div>
           </article>
         </div>
       </section>

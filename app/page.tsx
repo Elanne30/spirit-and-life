@@ -1,14 +1,23 @@
+"use client";
+
+import { FormEvent, useState } from "react";
 import { Button } from "@/app/components/button";
 import { ContentCard } from "@/app/components/content-card";
 import { SectionHeading } from "@/app/components/section-heading";
-import { books } from "@/app/data/books";
-import { reflections } from "@/app/data/reflections";
+import { getFeaturedBook, getFeaturedReflection } from "@/app/content/featured";
+import { siteConfig } from "@/app/content/site-config";
 import Link from "next/link";
 import Image from "next/image";
 
 export default function Home() {
-  const featuredReflection = reflections[0];
-  const featuredBook = books.find((book) => book.contentSlug === "thy-word-is-truth-a-journey-through-john-17") ?? books[0];
+  const [newsletterMessage, setNewsletterMessage] = useState("");
+  const featuredReflection = getFeaturedReflection();
+  const featuredBook = getFeaturedBook();
+
+  function handleNewsletterSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setNewsletterMessage("Thanks for your interest. Subscriptions will open soon.");
+  }
 
   return (
     <div className="site-frame home-page">
@@ -18,17 +27,17 @@ export default function Home() {
           <div className="hero-copy">
             <Image
               className="hero-logo"
-              src="/spiri_life_logo.jpg"
+              src={siteConfig.brand.logo}
               alt="Spirit & Life"
-              width={1280}
-              height={853}
+              width={616}
+              height={496}
               priority
             />
-            <p className="eyebrow">Thoughtful writing · Honest questions · Timeless truth</p>
+            <p className="eyebrow">Thoughtful Writing. Honest Questions. Timeless Truth.</p>
             <h1 id="hero-title">Spirit &amp; Life</h1>
-            <p className="hero-introduction">A place where Scripture, thoughtful reflection, and careful reasoning come together.</p>
-            <p className="hero-supporting">Here you will find reflections, journals, biblical studies, and books written to encourage faith, deepen understanding, and cultivate a lifelong pursuit of truth.</p>
-            <p className="hero-supporting">Whether you are reading quietly, studying carefully, or wrestling with difficult questions, there is room here to stay with the text.</p>
+            <p className="hero-introduction">Welcome to Spirit &amp; Life, a place where Scripture, thoughtful reflection, and careful reasoning come together.</p>
+            <p className="hero-supporting">Here I share reflections, journals, biblical studies, and books written to encourage faith, deepen understanding, and cultivate a lifelong pursuit of truth.</p>
+            <p className="hero-supporting">Whether you are reading quietly, studying carefully, or wrestling with difficult questions, I hope you will find resources here that encourage thoughtful engagement with God&apos;s Word.</p>
             <div className="hero-actions">
               <Button href="/reflections">Begin Reading</Button>
               <Button href="/study-center" variant="secondary">
@@ -46,16 +55,16 @@ export default function Home() {
           />
           <div className="content-grid">
             <ContentCard label="01" title="Reflections" href="/reflections" action="Explore Reflections">
-              Thoughtful writings exploring Scripture, theology, philosophy, apologetics, and Christian living.
+              Thoughtful articles exploring Scripture, theology, philosophy, and Christian living.
             </ContentCard>
-            <ContentCard label="02" title="Journals" href="/journals" action="Explore Journals">
-              Personal observations, lessons learned, and reflections gathered through study and life.
+            <ContentCard label="02" title="Journals" href="/journals" action="Read Journals">
+              Personal observations, lessons, and reflections gathered through study and life.
             </ContentCard>
-            <ContentCard label="03" title="Books" href="/books" action="Explore Books">
+            <ContentCard label="03" title="Books" href="/books" action="Browse Books">
               Published and future writing projects exploring important biblical themes and questions.
             </ContentCard>
-            <ContentCard label="04" title="Study Center" href="/study-center" action="Enter Study Center">
-              Guided Bible study plans and practical learning resources for consistent study.
+            <ContentCard label="04" title="Study Center" href="/study-center" action="Open Study Center">
+              Guided Bible study plans and structured learning resources.
             </ContentCard>
           </div>
         </section>
@@ -63,7 +72,7 @@ export default function Home() {
         <section className="home-feature page-container" aria-labelledby="featured-reflection-title">
           <SectionHeading eyebrow="Featured Reflection" title="A place to begin" />
           <div className="feature-split">
-            <Image src={featuredReflection.image} alt="" width={1280} height={853} sizes="(max-width: 760px) 100vw, 50vw" />
+            <Image src={featuredReflection.image} alt={featuredReflection.title} width={1280} height={853} sizes="(max-width: 760px) 100vw, 50vw" />
             <div className="feature-copy">
               <p className="eyebrow">{featuredReflection.category}</p>
               <h2 id="featured-reflection-title">{featuredReflection.title}</h2>
@@ -72,7 +81,7 @@ export default function Home() {
               <div className="feature-action"><Button href={`/reflections/${featuredReflection.contentSlug}`}>Read More</Button><span>{featuredReflection.readingTime}</span></div>
             </div>
           </div>
-          <Link className="quiet-link" href="/reflections">View all reflections <span>→</span></Link>
+          <Link className="quiet-link" href="/reflections">View All Reflections <span aria-hidden="true">→</span></Link>
         </section>
 
         <section className="home-feature home-book-feature page-container" aria-labelledby="featured-book-title">
@@ -83,7 +92,7 @@ export default function Home() {
             </div>
             <div className="feature-copy">
               <h2 id="featured-book-title">{featuredBook.title}</h2>
-              <p className="eyebrow">Biblical Studies</p>
+              <p className="eyebrow">{featuredBook.category ?? "Book"}</p>
               <p>{featuredBook.description ?? "A growing collection of careful, Scripture-centered writing for readers who want to think deeply and live faithfully."}</p>
               <Button href={`/books/${featuredBook.contentSlug}`}>Learn More</Button>
             </div>
@@ -94,14 +103,15 @@ export default function Home() {
           <div>
             <p className="eyebrow">Newsletter</p>
             <h2 id="newsletter-title">Stay Connected</h2>
-            <p>Receive new reflections, biblical studies, and occasional notes from Spirit &amp; Life.</p>
+            <p>Receive new reflections, biblical studies, and updates from Spirit &amp; Life.</p>
           </div>
-          <form className="newsletter-form">
+          <form className="newsletter-form" onSubmit={handleNewsletterSubmit}>
             <label htmlFor="email">Email address</label>
             <div className="newsletter-field">
-              <input id="email" name="email" type="email" placeholder="you@example.com" />
+              <input id="email" name="email" type="email" placeholder="you@example.com" required />
               <Button type="submit">Subscribe</Button>
             </div>
+            {newsletterMessage ? <p className="form-note" role="status">{newsletterMessage}</p> : null}
           </form>
         </section>
       </main>

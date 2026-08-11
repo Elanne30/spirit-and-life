@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import type { StudyEntry } from "@/app/data/study-plan";
+import { getStudyProgressStatus } from "@/app/study-center/study-state";
 
 type StudyWorkspaceProps = {
   study: StudyEntry;
@@ -12,8 +13,59 @@ type StudyWorkspaceProps = {
 
 const reflectionKey = (date: string) => `spirit-life-reflection-${date}`;
 const completionKey = (date: string) => `spirit-life-completed-${date}`;
+const checklistKey = (date: string) => `spirit-life-checklist-${date}`;
+const journalKey = (date: string) => `spirit-life-journal-${date}`;
 const storedValue = (key: string) =>
   typeof window === "undefined" ? null : window.localStorage.getItem(key);
+
+const checklistItems = [
+  "Read the passage slowly and observe what the text says.",
+  "Study the context, structure, and meaning of the passage.",
+  "Write what this reveals about God, humanity, and obedience.",
+  "Bring one honest response to prayer.",
+] as const;
+
+const journalFieldDefinitions = [
+  { key: "Observation", label: "Observation" },
+  { key: "Meaning/context", label: "Meaning/context" },
+  { key: "God", label: "God" },
+  { key: "Humanity", label: "Humanity" },
+  { key: "Sin/desire", label: "Sin/desire" },
+  { key: "Grace", label: "Grace" },
+  { key: "Obedience", label: "Obedience" },
+  { key: "Personal response", label: "Personal response" },
+  { key: "Prayer", label: "Prayer" },
+  { key: "One sentence to remember", label: "One sentence to remember" },
+] as const;
+
+const legacyJournalPromptMap: Record<string, string> = {
+  "What does the text say?": "Observation",
+  "What does the text mean?": "Meaning/context",
+  "What does this reveal about God?": "God",
+  "What does this reveal about humanity?": "Humanity",
+  "What does this reveal about sin and desire?": "Sin/desire",
+  "What does this reveal about grace, mercy, or God's faithfulness?": "Grace",
+  "What does this reveal about obedience?": "Obedience",
+  "What does this reveal about me?": "Personal response",
+  "What am I tempted to resist?": "Personal response",
+  "What must I believe?": "Personal response",
+  "What must I do?": "Personal response",
+  Prayer: "Prayer",
+  "One sentence to remember": "One sentence to remember",
+};
+
+type JournalResponses = Record<string, string>;
+
+function readStoredObject<T>(key: string, fallback: T): T {
+  const value = storedValue(key);
+  if (!value) return fallback;
+
+  try {
+    return JSON.parse(value) as T;
+  } catch {
+    return fallback;
+  }
+}
 
 export function StudyWorkspace({ study, previous, next }: StudyWorkspaceProps) {
   const [reflection, setReflection] = useState(() => storedValue(reflectionKey(study.date)) ?? "");
@@ -21,10 +73,33 @@ export function StudyWorkspace({ study, previous, next }: StudyWorkspaceProps) {
   const [completed, setCompleted] = useState(
     () => storedValue(completionKey(study.date)) === "true",
   );
+  const [checklist, setChecklist] = useState<Record<string, boolean>>(() =>
+    readStoredObject(checklistKey(study.date), {}),
+  );
+  const [journalResponses, setJournalResponses] = useState<JournalResponses>(() => {
+    const stored = readStoredObject<Record<string, string>>(journalKey(study.date), {});
+
+    return journalFieldDefinitions.reduce<JournalResponses>((responses, field) => {
+      const legacyValue = stored[legacyJournalPromptMap[field.key]];
+      const storedValue = stored[field.key] ?? legacyValue;
+
+      if (storedValue) {
+        responses[field.key] = storedValue;
+      }
+
+      return responses;
+    }, {});
+  });
+
+  function persistReflection(nextValue: string, markSaved = false) {
+    localStorage.setItem(reflectionKey(study.date), nextValue);
+    setReflection(nextValue);
+    setSaved(markSaved);
+    window.dispatchEvent(new Event("spirit-life-progress-changed"));
+  }
 
   function saveReflection() {
-    localStorage.setItem(reflectionKey(study.date), reflection);
-    setSaved(true);
+    persistReflection(reflection, true);
   }
 
   function toggleComplete() {
@@ -34,7 +109,22 @@ export function StudyWorkspace({ study, previous, next }: StudyWorkspaceProps) {
     window.dispatchEvent(new Event("spirit-life-progress-changed"));
   }
 
+  function toggleChecklistItem(item: string) {
+    const nextChecklist = { ...checklist, [item]: !checklist[item] };
+    localStorage.setItem(checklistKey(study.date), JSON.stringify(nextChecklist));
+    setChecklist(nextChecklist);
+    window.dispatchEvent(new Event("spirit-life-progress-changed"));
+  }
+
+  function updateJournalResponse(prompt: string, value: string) {
+    const nextResponses = { ...journalResponses, [prompt]: value };
+    localStorage.setItem(journalKey(study.date), JSON.stringify(nextResponses));
+    setJournalResponses(nextResponses);
+    window.dispatchEvent(new Event("spirit-life-progress-changed"));
+  }
+
   const journalHref = `/journals/new?studyDate=${encodeURIComponent(study.date)}&week=${encodeURIComponent(study.weekTitle ?? "")}&passage=${encodeURIComponent(study.passage)}`;
+  const progressStatus = getStudyProgressStatus(study.date);
 
   return (
     <div className="study-workspace">
@@ -46,12 +136,33 @@ export function StudyWorkspace({ study, previous, next }: StudyWorkspaceProps) {
         <p className="eyebrow">Week {study.week}</p>
         <h1>{study.weekTitle}</h1>
         <p className="study-workspace-movement">{study.movement}</p>
+        <p className={`study-workspace-status is-${progressStatus}`} role="status">
+          {progressStatus.replace("-", " ")}
+        </p>
       </header>
 
       <section className="study-workspace-passage" aria-labelledby="study-passage-title">
         <p className="eyebrow">Passage</p>
         <h2 id="study-passage-title">{study.passage}</h2>
         <p>{study.focus}</p>
+      </section>
+
+      <section className="study-workspace-checklist" aria-labelledby="study-checklist-title">
+        <div>
+          <p className="eyebrow">Today&apos;s movement</p>
+          <h2 id="study-checklist-title">A simple path through the study.</h2>
+          <p>{Object.values(checklist).filter(Boolean).length} of {checklistItems.length} steps complete.</p>
+        </div>
+        <ul>
+          {checklistItems.map((item) => (
+            <li key={item} className={checklist[item] ? "is-complete" : ""}>
+              <label>
+                <input type="checkbox" checked={Boolean(checklist[item])} onChange={() => toggleChecklistItem(item)} />
+                <span>{item}</span>
+              </label>
+            </li>
+          ))}
+        </ul>
       </section>
 
       <section className="study-workspace-reflection" aria-labelledby="study-reflection-title">
@@ -61,10 +172,7 @@ export function StudyWorkspace({ study, previous, next }: StudyWorkspaceProps) {
         <textarea
           id="reflection-response"
           value={reflection}
-          onChange={(event) => {
-            setReflection(event.target.value);
-            setSaved(false);
-          }}
+          onChange={(event) => persistReflection(event.target.value)}
           placeholder="Write what you are noticing, considering, or praying through."
           rows={8}
         />
@@ -74,6 +182,34 @@ export function StudyWorkspace({ study, previous, next }: StudyWorkspaceProps) {
           </button>
           {saved ? <span className="study-saved-note" role="status">Reflection saved</span> : null}
         </div>
+      </section>
+
+      <section className="study-workspace-journal" aria-labelledby="study-journal-title">
+        <div className="study-workspace-section-heading">
+          <p className="eyebrow">Study journal</p>
+          <h2 id="study-journal-title">Stay with the text.</h2>
+          <p>Use these prompts to move from observation to understanding, prayer, and obedience.</p>
+        </div>
+        <div className="study-journal-fields">
+          {journalFieldDefinitions.map((field) => (
+            <label key={field.key}>
+              <span>{field.label}</span>
+              <textarea
+                value={journalResponses[field.key] ?? ""}
+                onChange={(event) => updateJournalResponse(field.key, event.target.value)}
+                rows={field.key === "One sentence to remember" ? 3 : 4}
+              />
+            </label>
+          ))}
+        </div>
+        <label className="study-known-truth">
+          <span>I know this, but what would it mean for me to actually live it?</span>
+          <textarea
+            value={journalResponses["I know this, but"] ?? ""}
+            onChange={(event) => updateJournalResponse("I know this, but", event.target.value)}
+            rows={4}
+          />
+        </label>
       </section>
 
       <section className="study-workspace-response" aria-labelledby="study-response-title">

@@ -1,10 +1,19 @@
 import Image from "next/image";
 import Link from "next/link";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { RelatedContent } from "@/app/components/related-content";
 import { getReflection, reflections } from "@/app/data/reflections";
+import { articleMetadata } from "@/app/content/seo";
 
 export function generateStaticParams() {
   return reflections.map((reflection) => ({ slug: reflection.contentSlug }));
+}
+
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params;
+  const reflection = getReflection(slug);
+  return reflection ? articleMetadata(reflection.title, reflection.introduction, `/reflections/${reflection.contentSlug}`) : articleMetadata("Reflections", "Thoughtful Christian reflections from Spirit & Life.", "/reflections");
 }
 
 export default async function ReflectionPage({
@@ -35,7 +44,7 @@ export default async function ReflectionPage({
         <div className="reflection-feature-image page-container">
           <Image
             src={reflection.image}
-            alt=""
+            alt={reflection.title}
             width={1280}
             height={853}
             priority
@@ -53,6 +62,7 @@ export default async function ReflectionPage({
           <Link className="button button-text" href="/reflections">
             Back to Reflections
           </Link>
+          <RelatedContent relations={reflection} />
         </div>
       </article>
     </main>
