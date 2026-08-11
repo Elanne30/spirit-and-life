@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { RelatedContent } from "@/app/components/related-content";
 import { getScriptureReference, scriptureReferences } from "@/app/content/scripture";
-import { reflections } from "@/app/data/reflections";
 
 export function generateStaticParams() {
   return scriptureReferences.map((reference) => ({ reference: reference.slug }));
@@ -33,8 +33,6 @@ export default async function ScriptureReferencePage({
     notFound();
   }
 
-  const relatedReflections = reflections.filter((reflection) => scripture.relatedReflectionSlugs?.includes(reflection.contentSlug));
-
   return (
     <main className="scripture-detail-page">
       <article className="page-container scripture-detail">
@@ -48,14 +46,7 @@ export default async function ScriptureReferencePage({
           <h2 id="passage-title">{scripture.passage}</h2>
           <p className="quiet-note">Passage text will be connected through the Scripture service. This reference is ready to collect related Spirit &amp; Life content.</p>
         </section>
-        {relatedReflections.length ? (
-          <section className="scripture-related" aria-labelledby="related-scripture-title">
-            <h2 id="related-scripture-title">Related Reflections</h2>
-            <ul>
-              {relatedReflections.map((reflection) => <li key={reflection.contentSlug}><Link href={`/reflections/${reflection.contentSlug}`}>{reflection.title}</Link></li>)}
-            </ul>
-          </section>
-        ) : null}
+        <RelatedContent relations={scripture} />
         <Link className="button button-text" href="/scripture">Back to Scripture</Link>
       </article>
     </main>

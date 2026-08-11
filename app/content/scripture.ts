@@ -18,6 +18,8 @@ export const scriptureReferences: ScriptureReference[] = [
     passage: "Nehemiah 8:8",
     summary: "A reference connected to careful reading and faithful understanding of Scripture.",
     relatedReflectionSlugs: ["reading-scripture-in-context-why-it-matters"],
+    relatedJournalSlugs: ["on-slowing-down-to-read"],
+    relatedBookSlugs: ["thy-word-is-truth-a-journey-through-john-17"],
   },
   {
     slug: "romans-8-28",
@@ -27,6 +29,8 @@ export const scriptureReferences: ScriptureReference[] = [
     passage: "Romans 8:28",
     summary: "A reference connected to grace, suffering, and God's redemptive purpose.",
     relatedReflectionSlugs: ["the-grace-that-transforms-a-reflection-on-romans-8"],
+    relatedJournalSlugs: ["notes-from-morning-prayer"],
+    relatedStudyPlanDates: ["2026-11-21", "2026-11-22"],
   },
   {
     slug: "mark-9-24",

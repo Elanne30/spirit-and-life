@@ -3,7 +3,9 @@
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
-import { JOURNAL_DRAFTS_STORAGE_KEY, type JournalDraft } from "@/app/data/journal-drafts";
+import { getReaderStateStore } from "@/app/state/reader-state";
+
+const readerState = getReaderStateStore();
 
 export function JournalComposer() {
   const searchParams = useSearchParams();
@@ -14,9 +16,7 @@ export function JournalComposer() {
   const [saved, setSaved] = useState(false);
 
   function saveEntry() {
-    const entries = JSON.parse(localStorage.getItem(JOURNAL_DRAFTS_STORAGE_KEY) ?? "[]") as JournalDraft[];
-    entries.push({ body, studyDate, week, passage, savedAt: new Date().toISOString() });
-    localStorage.setItem(JOURNAL_DRAFTS_STORAGE_KEY, JSON.stringify(entries));
+    readerState.saveJournalDraft({ body, studyDate, week, passage });
     setSaved(true);
   }
 

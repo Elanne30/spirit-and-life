@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { StudyEntry } from "@/app/data/study-plan";
+import { getReaderStateStore } from "@/app/state/reader-state";
 import { getStudyProgressStatus } from "@/app/study-center/study-state";
 
 type StudyWorkspaceProps = {
@@ -11,12 +12,7 @@ type StudyWorkspaceProps = {
   next?: StudyEntry;
 };
 
-const reflectionKey = (date: string) => `spirit-life-reflection-${date}`;
-const completionKey = (date: string) => `spirit-life-completed-${date}`;
-const checklistKey = (date: string) => `spirit-life-checklist-${date}`;
-const journalKey = (date: string) => `spirit-life-journal-${date}`;
-const storedValue = (key: string) =>
-  typeof window === "undefined" ? null : window.localStorage.getItem(key);
+const readerState = getReaderStateStore();
 
 const checklistItems = [
   "Read the passage slowly and observe what the text says.",
@@ -56,28 +52,13 @@ const legacyJournalPromptMap: Record<string, string> = {
 
 type JournalResponses = Record<string, string>;
 
-function readStoredObject<T>(key: string, fallback: T): T {
-  const value = storedValue(key);
-  if (!value) return fallback;
-
-  try {
-    return JSON.parse(value) as T;
-  } catch {
-    return fallback;
-  }
-}
-
 export function StudyWorkspace({ study, previous, next }: StudyWorkspaceProps) {
-  const [reflection, setReflection] = useState(() => storedValue(reflectionKey(study.date)) ?? "");
+  const [reflection, setReflection] = useState(() => readerState.getStudyDayState(study.date).reflection);
   const [saved, setSaved] = useState(false);
-  const [completed, setCompleted] = useState(
-    () => storedValue(completionKey(study.date)) === "true",
-  );
-  const [checklist, setChecklist] = useState<Record<string, boolean>>(() =>
-    readStoredObject(checklistKey(study.date), {}),
-  );
+  const [completed, setCompleted] = useState(() => readerState.getStudyDayState(study.date).completed);
+  const [checklist, setChecklist] = useState<Record<string, boolean>>(() => readerState.getStudyDayState(study.date).checklist);
   const [journalResponses, setJournalResponses] = useState<JournalResponses>(() => {
-    const stored = readStoredObject<Record<string, string>>(journalKey(study.date), {});
+    const stored = readerState.getStudyDayState(study.date).journal;
 
     return journalFieldDefinitions.reduce<JournalResponses>((responses, field) => {
       const legacyValue = stored[legacyJournalPromptMap[field.key]];
@@ -91,11 +72,36 @@ export function StudyWorkspace({ study, previous, next }: StudyWorkspaceProps) {
     }, {});
   });
 
+  useEffect(() => {
+    const stored = readerState.getStudyDayState(study.date);
+    const frame = window.requestAnimationFrame(() => {
+      setReflection(stored.reflection);
+      setCompleted(stored.completed);
+      setChecklist(stored.checklist);
+      setSaved(false);
+      setJournalResponses(
+        journalFieldDefinitions.reduce<JournalResponses>((responses, field) => {
+          const legacyValue = stored.journal[legacyJournalPromptMap[field.key]];
+          const storedValue = stored.journal[field.key] ?? legacyValue;
+
+          if (storedValue) {
+            responses[field.key] = storedValue;
+          }
+
+          return responses;
+        }, {}),
+      );
+    });
+
+    return () => {
+      window.cancelAnimationFrame(frame);
+    };
+  }, [study.date]);
+
   function persistReflection(nextValue: string, markSaved = false) {
-    localStorage.setItem(reflectionKey(study.date), nextValue);
+    readerState.setStudyReflection(study.date, nextValue);
     setReflection(nextValue);
     setSaved(markSaved);
-    window.dispatchEvent(new Event("spirit-life-progress-changed"));
   }
 
   function saveReflection() {
@@ -104,23 +110,20 @@ export function StudyWorkspace({ study, previous, next }: StudyWorkspaceProps) {
 
   function toggleComplete() {
     const nextValue = !completed;
-    localStorage.setItem(completionKey(study.date), String(nextValue));
+    readerState.setStudyCompleted(study.date, nextValue);
     setCompleted(nextValue);
-    window.dispatchEvent(new Event("spirit-life-progress-changed"));
   }
 
   function toggleChecklistItem(item: string) {
     const nextChecklist = { ...checklist, [item]: !checklist[item] };
-    localStorage.setItem(checklistKey(study.date), JSON.stringify(nextChecklist));
+    readerState.setStudyChecklist(study.date, nextChecklist);
     setChecklist(nextChecklist);
-    window.dispatchEvent(new Event("spirit-life-progress-changed"));
   }
 
   function updateJournalResponse(prompt: string, value: string) {
     const nextResponses = { ...journalResponses, [prompt]: value };
-    localStorage.setItem(journalKey(study.date), JSON.stringify(nextResponses));
+    readerState.setStudyJournal(study.date, nextResponses);
     setJournalResponses(nextResponses);
-    window.dispatchEvent(new Event("spirit-life-progress-changed"));
   }
 
   const journalHref = `/journals/new?studyDate=${encodeURIComponent(study.date)}&week=${encodeURIComponent(study.weekTitle ?? "")}&passage=${encodeURIComponent(study.passage)}`;

@@ -8,6 +8,7 @@ export type Reflection = ImageManifestEntry & ContentRelations & {
   date: string;
   readingTime: string;
   category: ReflectionCategory;
+  tags?: string[];
   scripture: string;
   introduction: string;
   sections: ContentSection[];
@@ -16,7 +17,9 @@ export type Reflection = ImageManifestEntry & ContentRelations & {
 
 const reflectionContent: Record<string, Omit<Reflection, keyof ImageManifestEntry | "image">> = {
   "reading-scripture-in-context-why-it-matters": {
-    date: "July 15, 2026", readingTime: "6 min read", category: "SCRIPTURE", scripture: "Nehemiah 8:8", featured: true,
+    date: "July 15, 2026", readingTime: "6 min read", category: "Biblical Studies", tags: ["Scripture", "Interpretation", "Hermeneutics", "Context"], scripture: "Nehemiah 8:8", featured: true,
+    relatedJournalSlugs: ["on-slowing-down-to-read"],
+    relatedBookSlugs: ["thy-word-is-truth-a-journey-through-john-17"],
     introduction: "Every reader of Scripture faces a simple but profound question: how do we move from an ancient text to faithful understanding? The answer begins with context.",
     sections: [
       { heading: "The Principle of Context", paragraphs: ["When we read any piece of writing, we instinctively consider its context. We read a sentence in light of the paragraph, a paragraph in light of the chapter, and a chapter in light of the whole book. Scripture deserves the same care.", "Yet too often, verses are lifted from their surroundings and treated as self-contained promises or commands. A single phrase, separated from its passage, can be made to say almost anything."] },
@@ -25,7 +28,9 @@ const reflectionContent: Record<string, Omit<Reflection, keyof ImageManifestEntr
     ],
   },
   "the-grace-that-transforms-a-reflection-on-romans-8": {
-    date: "June 20, 2026", readingTime: "7 min read", category: "SCRIPTURE", scripture: "Romans 8:28",
+    date: "June 20, 2026", readingTime: "7 min read", category: "Christian Living", tags: ["Grace", "Faith", "Assurance", "Suffering"], scripture: "Romans 8:28",
+    relatedJournalSlugs: ["notes-from-morning-prayer"],
+    relatedStudyPlanDates: ["2026-11-21", "2026-11-22"],
     introduction: "Romans 8 is one of the most beloved chapters in all of Scripture, and for good reason. It holds together the weight of human struggle and the breathtaking scope of God's grace.",
     sections: [
       { heading: "No Condemnation", paragraphs: ["The chapter opens with a declaration: There is therefore now no condemnation for those who are in Christ Jesus. This is not a feeling. It is a verdict, secured by Christ's finished work."] },
@@ -35,7 +40,7 @@ const reflectionContent: Record<string, Omit<Reflection, keyof ImageManifestEntr
     ],
   },
   "honest-questions-and-faithful-faith": {
-    date: "May 10, 2026", readingTime: "5 min read", category: "SCRIPTURE", scripture: "Mark 9:24",
+    date: "May 10, 2026", readingTime: "5 min read", category: "Apologetics", tags: ["Faith", "Questions", "Doubt", "Truth"], scripture: "Mark 9:24",
     introduction: "There is a quiet fear in many Christian circles that asking hard questions signals a weak faith. But the opposite is often true. The refusal to ask may be the greater danger.",
     sections: [
       { heading: "Questions in Scripture", paragraphs: ["Scripture is full of questions. The Psalms cry out, How long, O Lord? Habakkuk asks why the wicked prosper. Thomas asks for evidence. None are rebuked for asking. The rebuke comes when questions are dishonest, when we have already decided the answer and simply seek confirmation."] },

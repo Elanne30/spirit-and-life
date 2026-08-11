@@ -3,7 +3,10 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import type { StudyEntry } from "@/app/data/study-plan";
+import { getReaderStateStore } from "@/app/state/reader-state";
 import { getStudyProgressStatus, type StudyProgressStatus } from "@/app/study-center/study-state";
+
+const readerState = getReaderStateStore();
 
 export function WeekProgress({ studies, currentDate, showNavigation = true }: { studies: StudyEntry[]; currentDate: string; showNavigation?: boolean }) {
   const navRef = useRef<HTMLDivElement>(null);
@@ -13,12 +16,8 @@ export function WeekProgress({ studies, currentDate, showNavigation = true }: { 
 
   useEffect(() => {
     const refresh = () => setStatuses(Object.fromEntries(studies.map((study) => [study.date, getStudyProgressStatus(study.date)])));
-    window.addEventListener("storage", refresh);
-    window.addEventListener("spirit-life-progress-changed", refresh);
-    return () => {
-      window.removeEventListener("storage", refresh);
-      window.removeEventListener("spirit-life-progress-changed", refresh);
-    };
+
+    return readerState.subscribeToStudyProgress(refresh);
   }, [studies]);
 
   /* Scroll the today card into view on first render */

@@ -498,6 +498,10 @@ html[data-theme="light"] .hero-introduction {
   border-top: 1px solid var(--line);
 }
 
+#newsletter {
+  scroll-margin-top: 7.5rem;
+}
+
 .newsletter-section h2 {
   max-width: 12ch;
   margin-inline: 0;
@@ -754,6 +758,130 @@ html[data-theme="light"] .hero-introduction {
   max-width: 58rem;
   padding-block: 2rem 5rem;
   text-align: center;
+}
+
+.admin-auth-page {
+  max-width: 42rem;
+  padding-block: 4rem 6rem;
+}
+
+.admin-shell {
+  padding-block: 3rem 6rem;
+}
+
+.admin-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1.5rem;
+}
+
+.admin-header h1 {
+  margin-bottom: 0.5rem;
+  font-size: clamp(2rem, 4vw, 3rem);
+}
+
+.admin-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-top: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.admin-nav-link {
+  padding: 0.45rem 0.8rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--muted);
+  font-size: 0.84rem;
+  font-weight: 600;
+}
+
+.admin-nav-link:hover {
+  color: var(--foreground);
+}
+
+.admin-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.admin-stack {
+  display: grid;
+  gap: 1rem;
+}
+
+.admin-card {
+  padding: 1.3rem;
+  border: 1px solid var(--line);
+  background: var(--surface);
+}
+
+.admin-card h2 {
+  margin-bottom: 0.6rem;
+  font-size: 1.55rem;
+}
+
+.admin-form {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.admin-form label {
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.admin-form input,
+.admin-form textarea {
+  width: 100%;
+  padding: 0.75rem 0.9rem;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--foreground);
+  font: inherit;
+}
+
+.admin-checkbox {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.admin-preview {
+  padding: 1rem;
+  border: 1px solid var(--line);
+  background: var(--surface-muted);
+}
+
+.admin-preview h3 {
+  margin-bottom: 0.6rem;
+  font-size: 1.05rem;
+}
+
+.admin-preview-subject {
+  margin-bottom: 0.7rem;
+  font-weight: 700;
+}
+
+.admin-list {
+  margin: 0;
+  padding-left: 1.2rem;
+}
+
+.admin-list li {
+  margin-bottom: 0.45rem;
+}
+
+@media (max-width: 860px) {
+  .admin-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .journals-introduction h1 {

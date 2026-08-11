@@ -432,7 +432,7 @@ export const studies: StudyEntry[] = [
   { date: "2026-12-27", weekday: "Sunday", week: 22, weekTitle: "Bringing the Pieces Together", movement: "From Knowing to Walking", passage: "Psalm 139; Luke 15 (review)", focus: "Review the entire five-month study.", reflection: "What has God repeatedly brought to my attention?", kind: "daily" },
 
   {
-    date: "2026-12-28", weekday: "Monday",
+    date: "2026-12-28", weekday: "Monday", week: 22, weekTitle: "Bringing the Pieces Together", movement: "From Knowing to Walking",
     passage: "Exodus 34:6–7; Psalm 103:1–14; Romans 11:33–36; 1 John 4:7–21",
     focus: "What Have I Learned About God?", kind: "retreat",
     retreatQuestions: [
@@ -448,7 +448,7 @@ export const studies: StudyEntry[] = [
   },
 
   {
-    date: "2026-12-29", weekday: "Tuesday",
+    date: "2026-12-29", weekday: "Tuesday", week: 22, weekTitle: "Bringing the Pieces Together", movement: "From Knowing to Walking",
     passage: "Genesis 3:1–13; Genesis 4:1–7; Jeremiah 17:5–10; Psalm 51:1–12; Romans 7:14–25",
     focus: "What Have I Learned About Myself?", kind: "retreat",
     retreatQuestions: [
@@ -463,7 +463,7 @@ export const studies: StudyEntry[] = [
   },
 
   {
-    date: "2026-12-30", weekday: "Wednesday",
+    date: "2026-12-30", weekday: "Wednesday", week: 22, weekTitle: "Bringing the Pieces Together", movement: "From Knowing to Walking",
     passage: "Matthew 7:24–27; Romans 12:1–21; James 1:22–27; 1 John 2:1–6",
     focus: "What Does God Want Me to Do With What I Know?", kind: "retreat",
     retreatQuestions: [
@@ -477,7 +477,7 @@ export const studies: StudyEntry[] = [
   },
 
   {
-    date: "2026-12-31", weekday: "Thursday",
+    date: "2026-12-31", weekday: "Thursday", week: 22, weekTitle: "Bringing the Pieces Together", movement: "From Knowing to Walking",
     passage: "Psalm 119:9–16; Psalm 119:33–40; Psalm 119:97–112; Psalm 119:129–136",
     focus: "The Covenant of the Heart", kind: "retreat",
     retreatQuestions: [

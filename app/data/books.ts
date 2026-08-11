@@ -20,6 +20,7 @@ const verifiedBookDetails: Record<string, Omit<Book, keyof ImageManifestEntry | 
     status: "Coming Soon",
     category: "Biblical Studies",
     featured: true,
+    relatedStudyPlanDates: ["2026-07-27", "2026-08-03", "2026-08-10"],
     subtitle: "Before Eden: The Hidden Origin of Evil",
     expectedPublication: "December 2026",
     description: "What if the story of evil did not begin in Eden? This book invites readers to examine Scripture with fresh attention, exploring the events that precede humanity's fall and the larger biblical account surrounding creation, rebellion, free will, and redemption.\n\nWritten with reverence for Scripture and a commitment to careful reasoning, it seeks to encourage readers to think deeply about God's purposes while keeping Christ at the center of the biblical story.",
@@ -27,6 +28,8 @@ const verifiedBookDetails: Record<string, Omit<Book, keyof ImageManifestEntry | 
   "thy-word-is-truth-a-journey-through-john-17": {
     status: "Coming Soon",
     category: "Biblical Studies",
+    relatedReflectionSlugs: ["reading-scripture-in-context-why-it-matters"],
+    relatedJournalSlugs: ["on-slowing-down-to-read"],
     author: "Oluwaseun",
     description: "A reflective study of Christ's high priestly prayer in John 17, exploring themes of truth, unity, and mission. This book walks through the passage verse by verse, drawing out its theological depth and practical application for believers today.",
     publisher: "Spirit & Life",

@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Cormorant_Garamond, DM_Sans } from "next/font/google";
 import { Footer } from "@/app/components/footer";
 import { Header } from "@/app/components/header";
+import { ensurePublishingIntegrity } from "@/app/content/publishing-validation";
+import { socialPreviewImage } from "@/app/content/seo";
 import { siteConfig } from "@/app/content/site-config";
 import "./globals.css";
 
@@ -30,11 +32,14 @@ export const metadata: Metadata = {
     description: siteConfig.description,
     type: "website",
     siteName: siteConfig.name,
+    images: [{ url: socialPreviewImage, width: 1280, height: 512, alt: "Spirit & Life social preview image" }],
   },
-  twitter: { card: "summary" },
+  twitter: { card: "summary_large_image", images: [socialPreviewImage] },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
+  ensurePublishingIntegrity();
+
   return (
     <html
       lang="en"

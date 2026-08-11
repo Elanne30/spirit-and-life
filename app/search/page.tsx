@@ -18,10 +18,11 @@ export default function SearchPage() {
   const [query, setQuery] = useState("");
   const [submittedQuery, setSubmittedQuery] = useState("");
   const results = searchContent(submittedQuery);
+  const hasSubmittedQuery = submittedQuery.length > 0;
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setSubmittedQuery(query);
+    setSubmittedQuery(query.trim());
   }
 
   return (
@@ -29,7 +30,7 @@ export default function SearchPage() {
       <section className="page-container page-intro">
         <p className="eyebrow">The Library</p>
         <h1>Search</h1>
-        <p>Search across Reflections, Journals, Books, and Scripture references.</p>
+        <p>Search across Reflections, Journals, Books, Scripture references, and Study Center resources.</p>
       </section>
       <section className="page-container search-content" aria-labelledby="search-title">
         <h2 id="search-title" className="sr-only">Search Spirit &amp; Life</h2>
@@ -40,8 +41,8 @@ export default function SearchPage() {
             <button className="button button-primary" type="submit">Search</button>
           </div>
         </form>
-        {submittedQuery ? <p className="search-status" role="status">{results.length} result{results.length === 1 ? "" : "s"} for &ldquo;{submittedQuery}&rdquo;</p> : null}
-        {results.length ? <ul className="search-results">{results.map((result) => <SearchResultItem key={`${result.type}-${result.href}`} result={result} />)}</ul> : submittedQuery ? <p className="empty-state">No matching content was found. Try another search.</p> : <p className="quiet-note">Search is ready for the current library and can be extended as new content types are added.</p>}
+        {hasSubmittedQuery ? <p className="search-status" role="status">{results.length} result{results.length === 1 ? "" : "s"} for &ldquo;{submittedQuery}&rdquo;</p> : null}
+        {results.length ? <ul className="search-results">{results.map((result) => <SearchResultItem key={`${result.type}-${result.href}`} result={result} />)}</ul> : hasSubmittedQuery ? <p className="empty-state">No matching content was found for this search. Try another title, topic, Scripture reference, or content type.</p> : <p className="quiet-note">Search by title, topic, Scripture reference, or content type across the current Spirit &amp; Life library.</p>}
       </section>
     </main>
   );

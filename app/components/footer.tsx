@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { siFacebook, siInstagram, siX, siYoutube } from "simple-icons";
+import { siFacebook, siWhatsapp, siYoutube } from "simple-icons";
 import { navigation } from "@/app/content/navigation";
 import { socialLinks } from "@/app/content/social";
 import { siteConfig } from "@/app/content/site-config";
@@ -11,7 +11,7 @@ const additionalLinks = [
   { label: "Terms of Use", href: "/terms-of-use" },
 ];
 
-const socialIcons = { YouTube: siYoutube, Facebook: siFacebook, Instagram: siInstagram, X: siX };
+const socialIcons = { YouTube: siYoutube, Facebook: siFacebook, WhatsApp: siWhatsapp };
 
 export function Footer() {
   return (
@@ -32,7 +32,7 @@ export function Footer() {
               const icon = socialIcons[label];
               const iconMarkup = <svg aria-hidden="true" className="footer-social-icon" viewBox="0 0 24 24" focusable="false"><path d={icon.path} /></svg>;
 
-              return href ? <a className="footer-social-link" key={label} href={href} aria-label={label}>{iconMarkup}</a> : <span className="footer-social-link footer-placeholder" key={label} aria-label={`${label} link unavailable`}>{iconMarkup}</span>;
+              return <a className="footer-social-link" key={label} href={href} target="_blank" rel="noopener noreferrer" aria-label={label}>{iconMarkup}</a>;
             })}
           </div>
         </div>
