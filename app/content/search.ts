@@ -1,7 +1,5 @@
-import { books } from "@/app/data/books";
-import { journals } from "@/app/data/journals";
-import { reflections } from "@/app/data/reflections";
 import { scriptureReferences } from "@/app/content/scripture";
+import { listPublishedBooks, listPublishedJournals, listPublishedReflections } from "@/app/content/repository";
 import { studies } from "@/app/data/study-plan";
 
 export type SearchResult = {
@@ -24,7 +22,7 @@ function normalizeSearchText(value: string) {
 }
 
 const searchIndex: IndexedSearchResult[] = [
-  ...reflections.map((reflection): IndexedSearchResult => ({
+  ...listPublishedReflections().map((reflection): IndexedSearchResult => ({
     type: "Reflection" as const,
     title: reflection.title,
     description: `${reflection.category} - ${reflection.introduction}`,
@@ -40,7 +38,7 @@ const searchIndex: IndexedSearchResult[] = [
       ...reflection.sections.flatMap((section) => section.paragraphs),
     ].join(" "),
   })),
-  ...journals.map((journal): IndexedSearchResult => ({
+  ...listPublishedJournals().map((journal): IndexedSearchResult => ({
     type: "Journal" as const,
     title: journal.title,
     description: journal.introduction,
@@ -55,7 +53,7 @@ const searchIndex: IndexedSearchResult[] = [
       ...journal.sections.flatMap((section) => section.paragraphs),
     ].join(" "),
   })),
-  ...books.map((book): IndexedSearchResult => ({
+  ...listPublishedBooks().map((book): IndexedSearchResult => ({
     type: "Book" as const,
     title: book.title,
     description: book.description ?? `${book.status} - Spirit & Life digital library`,

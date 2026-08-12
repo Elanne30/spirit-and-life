@@ -1,12 +1,13 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
-import { journals } from "@/app/data/journals";
 import { pageMetadata } from "@/app/content/seo";
+import { listPublishedJournals } from "@/app/content/repository";
 
 export const metadata: Metadata = pageMetadata("Journals", "Read personal observations and reflections gathered through study and life.", "/journals");
 
 export default function JournalsPage() {
+  const journals = listPublishedJournals();
   return (
     <main className="journals-page">
       <section className="journals-introduction page-container page-intro">

@@ -3,16 +3,16 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { RelatedContent } from "@/app/components/related-content";
-import { getJournal, journals } from "@/app/data/journals";
 import { articleMetadata } from "@/app/content/seo";
+import { getPublishedJournal, listPublishedJournals } from "@/app/content/repository";
 
 export function generateStaticParams() {
-  return journals.map((journal) => ({ slug: journal.contentSlug }));
+  return listPublishedJournals().map((journal) => ({ slug: journal.contentSlug }));
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
-  const journal = getJournal(slug);
+  const journal = getPublishedJournal(slug);
   return journal ? articleMetadata(journal.title, journal.introduction, `/journals/${journal.contentSlug}`) : articleMetadata("Journals", "Personal observations and reflections from Spirit & Life.", "/journals");
 }
 
@@ -22,7 +22,7 @@ export default async function JournalPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const journal = getJournal(slug);
+  const journal = getPublishedJournal(slug);
 
   if (!journal) {
     notFound();

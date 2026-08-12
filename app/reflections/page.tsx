@@ -3,9 +3,10 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
-import { reflections } from "@/app/data/reflections";
+import { listPublishedReflections } from "@/app/content/repository";
 
 export default function ReflectionsPage() {
+  const reflections = listPublishedReflections();
   const categories = ["All", ...new Set(reflections.map((reflection) => reflection.category))];
   const [selectedCategory, setSelectedCategory] = useState("All");
   const visibleReflections = selectedCategory === "All"

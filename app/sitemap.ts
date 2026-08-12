@@ -1,9 +1,7 @@
 import type { MetadataRoute } from "next";
 import { ensurePublishingIntegrity } from "@/app/content/publishing-validation";
+import { listPublishedBooks, listPublishedJournals, listPublishedReflections } from "@/app/content/repository";
 import { siteConfig } from "@/app/content/site-config";
-import { books } from "@/app/data/books";
-import { journals } from "@/app/data/journals";
-import { reflections } from "@/app/data/reflections";
 import { studies } from "@/app/data/study-plan";
 import { scriptureReferences } from "@/app/content/scripture";
 
@@ -12,9 +10,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   const routes = ["", "reflections", "journals", "books", "study-center", "about", "contact", "scripture", "search", "privacy-policy", "terms-of-use"];
   const contentRoutes = [
-    ...reflections.map((item) => `reflections/${item.contentSlug}`),
-    ...journals.map((item) => `journals/${item.contentSlug}`),
-    ...books.map((item) => `books/${item.contentSlug}`),
+    ...listPublishedReflections().map((item) => `reflections/${item.contentSlug}`),
+    ...listPublishedJournals().map((item) => `journals/${item.contentSlug}`),
+    ...listPublishedBooks().map((item) => `books/${item.contentSlug}`),
     ...scriptureReferences.map((item) => `scripture/${item.slug}`),
     ...studies.map((item) => `study-center/${item.date}`),
   ];

@@ -1,8 +1,6 @@
-import { books } from "@/app/data/books";
-import { journals } from "@/app/data/journals";
-import { reflections } from "@/app/data/reflections";
 import { studies } from "@/app/data/study-plan";
 import { scriptureReferences } from "@/app/content/scripture";
+import { listPublishedBooks, listPublishedJournals, listPublishedReflections } from "@/app/content/repository";
 import type { ContentRelations } from "@/app/content/types";
 
 let hasValidatedPublishingData = false;
@@ -72,6 +70,9 @@ export function ensurePublishingIntegrity() {
   const studyDatePattern = /^\d{4}-\d{2}-\d{2}$/;
   const scriptureReferencePattern = /^(?:[1-3]\s)?[A-Za-z]+(?:\s[A-Za-z]+)*\s\d+:\d+(?:-\d+)?$/;
 
+  const reflections = listPublishedReflections();
+  const journals = listPublishedJournals();
+  const books = listPublishedBooks();
   const reflectionSlugs = reflections.map((item) => item.contentSlug);
   const journalSlugs = journals.map((item) => item.contentSlug);
   const bookSlugs = books.map((item) => item.contentSlug);

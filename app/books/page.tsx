@@ -1,12 +1,13 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
-import { books } from "@/app/data/books";
 import { pageMetadata } from "@/app/content/seo";
+import { listPublishedBooks } from "@/app/content/repository";
 
 export const metadata: Metadata = pageMetadata("Books", "Explore the Spirit & Life digital library and future writing projects.", "/books");
 
 export default function BooksPage() {
+  const books = listPublishedBooks();
   return (
     <main className="books-page">
       <section className="books-introduction page-container page-intro">

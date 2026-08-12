@@ -1,8 +1,6 @@
 import Link from "next/link";
-import { books } from "@/app/data/books";
-import { journals } from "@/app/data/journals";
-import { reflections } from "@/app/data/reflections";
 import { studies } from "@/app/data/study-plan";
+import { listPublishedBooks, listPublishedJournals, listPublishedReflections } from "@/app/content/repository";
 import type { ContentRelations } from "@/app/content/types";
 
 type RelatedItem = {
@@ -17,6 +15,9 @@ type RelatedContentProps = {
 };
 
 export function RelatedContent({ relations }: RelatedContentProps) {
+  const books = listPublishedBooks();
+  const journals = listPublishedJournals();
+  const reflections = listPublishedReflections();
   const relatedItems: RelatedItem[] = [
     ...(relations.relatedReflectionSlugs ?? [])
       .map((slug) => reflections.find((reflection) => reflection.contentSlug === slug))

@@ -3,16 +3,16 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { RelatedContent } from "@/app/components/related-content";
-import { getReflection, reflections } from "@/app/data/reflections";
 import { articleMetadata } from "@/app/content/seo";
+import { getPublishedReflection, listPublishedReflections } from "@/app/content/repository";
 
 export function generateStaticParams() {
-  return reflections.map((reflection) => ({ slug: reflection.contentSlug }));
+  return listPublishedReflections().map((reflection) => ({ slug: reflection.contentSlug }));
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
-  const reflection = getReflection(slug);
+  const reflection = getPublishedReflection(slug);
   return reflection ? articleMetadata(reflection.title, reflection.introduction, `/reflections/${reflection.contentSlug}`) : articleMetadata("Reflections", "Thoughtful Christian reflections from Spirit & Life.", "/reflections");
 }
 
@@ -22,7 +22,7 @@ export default async function ReflectionPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const reflection = getReflection(slug);
+  const reflection = getPublishedReflection(slug);
 
   if (!reflection) {
     notFound();
