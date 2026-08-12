@@ -15,11 +15,6 @@ export type ContentDraftActionState = {
   message: string;
 };
 
-export const initialContentDraftActionState: ContentDraftActionState = {
-  status: "idle",
-  message: "",
-};
-
 type ParsedDraftInput =
   | { draftId: string; contentType: DraftContentType; title: string; slug: string }
   | { error: string };

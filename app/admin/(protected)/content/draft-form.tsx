@@ -1,7 +1,12 @@
 "use client";
 
 import { useActionState } from "react";
-import { createDraftAction, initialContentDraftActionState } from "@/app/admin/(protected)/actions/content";
+import { createDraftAction } from "@/app/admin/(protected)/actions/content";
+
+const initialContentDraftActionState = {
+  status: "idle" as const,
+  message: "",
+};
 
 export function DraftForm() {
   const [state, formAction, isPending] = useActionState(createDraftAction, initialContentDraftActionState);
