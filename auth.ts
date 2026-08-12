@@ -23,14 +23,33 @@ function getErrorName(error: unknown): string {
   return "UnknownError";
 }
 
-export const authOptions: NextAuthOptions = {
-  secret: process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET,
-  providers: [
-    Google({
+console.info("[auth][diagnostic] env presence", {
+  hasGoogleClientId: Boolean(process.env.GOOGLE_CLIENT_ID),
+  hasGoogleClientSecret: Boolean(process.env.GOOGLE_CLIENT_SECRET),
+  hasNextAuthSecret: Boolean(process.env.NEXTAUTH_SECRET),
+  hasAuthSecret: Boolean(process.env.AUTH_SECRET),
+  hasAdminEmailAllowlist: Boolean(process.env.ADMIN_EMAIL_ALLOWLIST),
+});
+
+const googleProvider = (() => {
+  try {
+    return Google({
       clientId: process.env.GOOGLE_CLIENT_ID ?? "",
       clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? "",
-    }),
-  ],
+    });
+  } catch (error) {
+    console.error("[auth][diagnostic] google provider init failed", {
+      errorName: getErrorName(error),
+      errorMessage: error instanceof Error ? error.message : "Unknown error",
+    });
+
+    throw error;
+  }
+})();
+
+export const authOptions: NextAuthOptions = {
+  secret: process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET,
+  providers: [googleProvider],
   pages: {
     signIn: "/admin/signin",
     error: "/admin/signin",
