@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/auth";
 import { isAdminEmail } from "@/app/lib/admin-auth";
+import { GoogleSignInButton } from "./google-sign-in-button";
 
 type AdminSignInPageProps = {
   searchParams: Promise<{ callbackUrl?: string; error?: string }>;
@@ -11,8 +12,6 @@ type AdminSignInPageProps = {
 export default async function AdminSignInPage({ searchParams }: AdminSignInPageProps) {
   const session = await getServerSession(authOptions);
   const query = await searchParams;
-  const callbackUrl = query.callbackUrl && query.callbackUrl.startsWith("/") ? query.callbackUrl : "/admin";
-  const signInHref = `/api/auth/signin/google?callbackUrl=${encodeURIComponent(callbackUrl)}`;
 
   if (session?.user?.email && isAdminEmail(session.user.email)) {
     redirect("/admin");
@@ -27,7 +26,7 @@ export default async function AdminSignInPage({ searchParams }: AdminSignInPageP
       <p>Sign in with an authorized Google account to access the private control panel.</p>
       {showAccessDenied ? <p className="form-error" role="alert">That Google account is not authorized for Spirit &amp; Life administration.</p> : null}
       <p>
-        <a className="button button-primary" href={signInHref}>Sign in with Google</a>
+        <GoogleSignInButton />
       </p>
       <p className="quiet-note">
         <Link href="/">Return to public website</Link>
