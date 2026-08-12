@@ -86,7 +86,7 @@ function isValidEmail(value: string) {
 }
 
 function getTokenSecret() {
-  return process.env.NEWSLETTER_TOKEN_SECRET ?? process.env.RESEND_API_KEY ?? "dev-newsletter-token-secret";
+  return process.env.NEWSLETTER_TOKEN_SECRET ?? "dev-newsletter-token-secret";
 }
 
 function createSignedToken(payload: NewsletterTokenPayload) {
@@ -129,10 +129,6 @@ function getSiteUrl() {
 
 function unsubscribeUrl(token: string) {
   return `${getSiteUrl()}/unsubscribe?token=${encodeURIComponent(token)}`;
-}
-
-function confirmUrl(token: string) {
-  return `${getSiteUrl()}/newsletter/confirm?token=${encodeURIComponent(token)}`;
 }
 
 async function ensureSchema() {
@@ -304,53 +300,15 @@ export async function subscribeToNewsletter(emailInput: string) {
     return { status: "success" as const, message: "You're already subscribed." };
   }
 
-  const subscriberId = await storeSubscriber({
+  await storeSubscriber({
     email,
-    status: "pending",
-    subscribedAt: null,
+    status: "subscribed",
+    subscribedAt: nowIso(),
     unsubscribedAt: null,
     existingId: existing?.id,
   });
 
-  const confirmationLink = confirmUrl(createSignedToken({ id: subscriberId, email, purpose: "confirm" }));
-  const unsubscribeLink = unsubscribeUrl(createSignedToken({ id: subscriberId, email, purpose: "unsubscribe" }));
-
-  const html = renderNewsletterEmail({
-    preheader: "Confirm your Spirit & Life subscription.",
-    headline: "Confirm your subscription",
-    bodyParagraphs: [
-      "Thanks for subscribing to Spirit & Life. Please confirm your email address so we can activate your subscription.",
-      "If you did not request this, you can ignore this message.",
-    ],
-    ctaLabel: "Confirm subscription",
-    ctaHref: confirmationLink,
-    footerNote: "You will receive reflections, journals, and study updates after confirmation.",
-    unsubscribeHref: unsubscribeLink,
-  });
-
-  const text = renderPlainTextNewsletter({
-    headline: "Confirm your subscription",
-    paragraphs: [
-      "Thanks for subscribing to Spirit & Life. Please confirm your email address so we can activate your subscription.",
-      "If you did not request this, you can ignore this message.",
-    ],
-    ctaLabel: "Confirm subscription",
-    ctaHref: confirmationLink,
-    unsubscribeHref: unsubscribeLink,
-  });
-
-  const emailResult = await sendNewsletterEmail({
-    to: email,
-    subject: "Confirm your Spirit & Life subscription",
-    html,
-    text,
-  });
-
-  if (!emailResult.ok) {
-    return { status: "error" as const, message: "Something went wrong. Please try again." };
-  }
-
-  return { status: "success" as const, message: "Check your email to confirm your subscription." };
+  return { status: "success" as const, message: "You're subscribed to Spirit & Life." };
 }
 
 export async function confirmNewsletterSubscription(token: string) {

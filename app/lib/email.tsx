@@ -1,7 +1,9 @@
 import "server-only";
 
 import crypto from "node:crypto";
-import { Resend } from "resend";
+
+const BREVO_TRANSACTIONAL_EMAIL_ENDPOINT = "https://api.brevo.com/v3/smtp/email";
+const NEWSLETTER_SENDER_NAME = "Spirit & Life";
 
 type EmailPayload = {
   to: string;
@@ -20,7 +22,9 @@ type EmailShellProps = {
   unsubscribeHref: string;
 };
 
-const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
+type EmailDeliveryResult =
+  | { ok: true; id: string }
+  | { ok: false; error: string };
 
 function toText(value: string) {
   return value.replace(/\s+/g, " ").trim();
@@ -100,29 +104,66 @@ export function renderPlainTextNewsletter(params: {
   return parts.join("\n");
 }
 
-export async function sendNewsletterEmail(payload: EmailPayload) {
-  const fromEmail = process.env.NEWSLETTER_FROM_EMAIL;
-
-  if (!fromEmail || !resend) {
-    if (process.env.NODE_ENV !== "production") {
-      console.info("[newsletter-email]", payload.subject, payload.to);
-      return { ok: true as const, id: `dev-${crypto.randomUUID()}` };
-    }
-
-    return { ok: false as const, error: "Email delivery is not configured." };
-  }
-
+async function sendViaBrevo(payload: EmailPayload, fromEmail: string, apiKey: string): Promise<EmailDeliveryResult> {
   try {
-    const result = await resend.emails.send({
-      from: fromEmail,
-      to: payload.to,
-      subject: payload.subject,
-      html: payload.html,
-      text: payload.text,
+    const response = await fetch(BREVO_TRANSACTIONAL_EMAIL_ENDPOINT, {
+      method: "POST",
+      headers: {
+        accept: "application/json",
+        "api-key": apiKey,
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({
+        sender: {
+          name: NEWSLETTER_SENDER_NAME,
+          email: fromEmail,
+        },
+        to: [{ email: payload.to }],
+        subject: payload.subject,
+        htmlContent: payload.html,
+        textContent: payload.text,
+      }),
     });
 
-    return { ok: true as const, id: result.data?.id ?? crypto.randomUUID() };
+    if (!response.ok) {
+      let providerCode: string | null = null;
+
+      try {
+        const errorBody = (await response.json()) as { code?: unknown };
+
+        if (typeof errorBody.code === "string") {
+          providerCode = errorBody.code;
+        }
+      } catch {
+        providerCode = null;
+      }
+
+      console.error(
+        `[newsletter-email] Brevo request failed with status ${response.status}${providerCode ? ` (${providerCode})` : ""}.`,
+      );
+
+      if (response.status === 400 || response.status === 401 || response.status === 403) {
+        return { ok: false, error: "Email delivery is not configured." };
+      }
+
+      return { ok: false, error: "Email delivery failed." };
+    }
+
+    const result = (await response.json()) as { messageId?: string };
+    return { ok: true, id: result.messageId ?? crypto.randomUUID() };
   } catch {
-    return { ok: false as const, error: "Email delivery failed." };
+    console.error("[newsletter-email] Brevo transport error.");
+    return { ok: false, error: "Email delivery failed." };
   }
+}
+
+export async function sendNewsletterEmail(payload: EmailPayload) {
+  const fromEmail = process.env.NEWSLETTER_FROM_EMAIL?.trim();
+  const brevoApiKey = process.env.BREVO_API_KEY?.trim();
+
+  if (!fromEmail || !brevoApiKey) {
+    return { ok: false as const, error: "Brevo email delivery is not configured." };
+  }
+
+  return sendViaBrevo(payload, fromEmail, brevoApiKey);
 }
