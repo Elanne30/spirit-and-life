@@ -27,7 +27,7 @@ export default async function AdminSignInPage({ searchParams }: AdminSignInPageP
       <p>Sign in with an authorized Google account to access the private control panel.</p>
       {showAccessDenied ? <p className="form-error" role="alert">That Google account is not authorized for Spirit &amp; Life administration.</p> : null}
       <p>
-        <Link className="button button-primary" href={signInHref}>Sign in with Google</Link>
+        <a className="button button-primary" href={signInHref}>Sign in with Google</a>
       </p>
       <p className="quiet-note">
         <Link href="/">Return to public website</Link>
