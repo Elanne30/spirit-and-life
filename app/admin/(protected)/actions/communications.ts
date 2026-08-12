@@ -9,11 +9,6 @@ export type AdminActionState = {
   message: string;
 };
 
-export const initialAdminActionState: AdminActionState = {
-  status: "idle",
-  message: "",
-};
-
 function splitParagraphs(value: string) {
   return value
     .split(/\n\s*\n/g)

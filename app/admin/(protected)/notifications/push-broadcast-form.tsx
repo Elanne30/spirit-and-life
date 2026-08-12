@@ -1,7 +1,12 @@
 "use client";
 
 import { useActionState, useState } from "react";
-import { initialAdminActionState, sendAdminPushBroadcastAction } from "@/app/admin/(protected)/actions/communications";
+import { sendAdminPushBroadcastAction } from "@/app/admin/(protected)/actions/communications";
+
+const initialAdminActionState = {
+  status: "idle" as const,
+  message: "",
+};
 
 export function PushBroadcastForm({ activeRecipientCount }: { activeRecipientCount: number }) {
   const [title, setTitle] = useState("");

@@ -1,7 +1,12 @@
 "use client";
 
 import { useActionState, useMemo, useState } from "react";
-import { initialAdminActionState, sendAdminNewsletterBroadcastAction } from "@/app/admin/(protected)/actions/communications";
+import { sendAdminNewsletterBroadcastAction } from "@/app/admin/(protected)/actions/communications";
+
+const initialAdminActionState = {
+  status: "idle" as const,
+  message: "",
+};
 
 export function NewsletterBroadcastForm({ activeRecipientCount }: { activeRecipientCount: number }) {
   const [subject, setSubject] = useState("");
