@@ -24,6 +24,8 @@ export default async function AdminContentPage() {
             {drafts.map((draft) => (
               <li key={draft.id}>
                 <strong>{draft.title}</strong> - {draft.content_type} - <span>{draft.slug}</span>
+                {" "}
+                <a href={`/admin/content/${draft.id}`}>Edit</a>
               </li>
             ))}
           </ul>
