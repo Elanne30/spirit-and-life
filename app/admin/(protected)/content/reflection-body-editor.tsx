@@ -2,13 +2,14 @@
 
 import { useState } from "react";
 
-type ReflectionSection = {
+export type ReflectionSection = {
   heading: string;
   paragraphs: string[];
 };
 
 type ReflectionBodyEditorProps = {
   name?: string;
+  initialSections?: ReflectionSection[];
 };
 
 const emptySection = (): ReflectionSection => ({
@@ -16,12 +17,29 @@ const emptySection = (): ReflectionSection => ({
   paragraphs: [""],
 });
 
+function normalizeInitialSections(
+  sections?: ReflectionSection[],
+): ReflectionSection[] {
+  if (!sections?.length) {
+    return [emptySection()];
+  }
+
+  return sections.map((section) => ({
+    heading: section.heading ?? "",
+    paragraphs:
+      section.paragraphs?.length
+        ? section.paragraphs
+        : [""],
+  }));
+}
+
 export function ReflectionBodyEditor({
   name = "sections",
+  initialSections,
 }: ReflectionBodyEditorProps) {
-  const [sections, setSections] = useState<ReflectionSection[]>([
-    emptySection(),
-  ]);
+  const [sections, setSections] = useState<ReflectionSection[]>(
+    () => normalizeInitialSections(initialSections),
+  );
 
   function updateSectionHeading(sectionIndex: number, heading: string) {
     setSections((current) =>
@@ -90,7 +108,8 @@ export function ReflectionBodyEditor({
         return {
           ...section,
           paragraphs: section.paragraphs.filter(
-            (_, paragraphIndexValue) => paragraphIndexValue !== paragraphIndex,
+            (_, paragraphIndexValue) =>
+              paragraphIndexValue !== paragraphIndex,
           ),
         };
       }),
