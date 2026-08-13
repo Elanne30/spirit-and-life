@@ -28,6 +28,7 @@ type ParsedDraftInput =
       category: string;
       tags: string[];
       featured: boolean;
+      sections: Array<{ heading: string; paragraphs: string[] }>;
     }
   | { error: string };
 
@@ -49,6 +50,34 @@ function readDraftInput(formData: FormData): ParsedDraftInput {
     .filter(Boolean);
 
   const featured = String(formData.get("featured") ?? "") === "yes";
+  const rawSections = String(formData.get("sections") ?? "[]");
+
+  let sections: Array<{ heading: string; paragraphs: string[] }> = [];
+
+  try {
+    const parsed = JSON.parse(rawSections);
+
+    if (Array.isArray(parsed)) {
+      sections = parsed
+        .filter(
+          (section): section is { heading?: unknown; paragraphs?: unknown } =>
+            typeof section === "object" &&
+            section !== null,
+        )
+        .map((section) => ({
+          heading: typeof section.heading === "string" ? section.heading.trim() : "",
+          paragraphs: Array.isArray(section.paragraphs)
+            ? section.paragraphs
+                .filter((paragraph): paragraph is string => typeof paragraph === "string")
+                .map((paragraph) => paragraph.trim())
+                .filter(Boolean)
+            : [],
+        }))
+        .filter((section) => section.heading || section.paragraphs.length);
+    }
+  } catch {
+    return { error: "The reflection sections could not be read." };
+  }
 
   if (!(["reflection", "journal", "book"] as DraftContentType[]).includes(contentType)) {
     return { error: "Choose a valid content type." };
@@ -76,6 +105,7 @@ function readDraftInput(formData: FormData): ParsedDraftInput {
     category,
     tags,
     featured,
+    sections,
   };
 }
 
@@ -106,6 +136,7 @@ export async function createDraftAction(
         readingTime: input.readingTime,
         scripture: input.scripture,
         featured: input.featured,
+        sections: input.sections,
       },
     });
 
@@ -162,6 +193,7 @@ export async function updateDraftAction(
         readingTime: input.readingTime,
         scripture: input.scripture,
         featured: input.featured,
+        sections: input.sections,
       },
     });
 

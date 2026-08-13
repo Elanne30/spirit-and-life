@@ -1,7 +1,8 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { createDraftAction } from "@/app/admin/(protected)/actions/content";
+import { ReflectionBodyEditor } from "@/app/admin/(protected)/content/reflection-body-editor";
 
 const initialContentDraftActionState = {
   status: "idle" as const,
@@ -13,6 +14,7 @@ export function DraftForm() {
     createDraftAction,
     initialContentDraftActionState,
   );
+  const [contentType, setContentType] = useState("reflection");
 
   return (
     <form className="admin-form" action={formAction}>
@@ -20,7 +22,8 @@ export function DraftForm() {
       <select
         id="draft-content-type"
         name="contentType"
-        defaultValue="reflection"
+        value={contentType}
+        onChange={(event) => setContentType(event.target.value)}
         required
       >
         <option value="reflection">Reflection</option>
@@ -111,6 +114,8 @@ export function DraftForm() {
         />
         Feature this reflection
       </label>
+
+      {contentType === "reflection" ? <ReflectionBodyEditor /> : null}
 
       <button
         className="button button-primary"
