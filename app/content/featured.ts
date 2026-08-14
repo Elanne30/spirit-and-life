@@ -1,7 +1,7 @@
 import { listPublishedBooks, listPublishedReflections } from "@/app/content/repository";
 
-export function getFeaturedReflection() {
-  const reflections = listPublishedReflections();
+export async function getFeaturedReflection() {
+  const reflections = await listPublishedReflections();
   return reflections.find((reflection) => reflection.featured) ?? reflections[0];
 }
 

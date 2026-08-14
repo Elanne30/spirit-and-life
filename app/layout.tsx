@@ -37,8 +37,8 @@ export const metadata: Metadata = {
   twitter: { card: "summary_large_image", images: [socialPreviewImage] },
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
-  ensurePublishingIntegrity();
+export default async function RootLayout({ children }: LayoutProps<"/">) {
+  await ensurePublishingIntegrity();
 
   return (
     <html

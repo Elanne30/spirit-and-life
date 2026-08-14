@@ -14,10 +14,10 @@ type RelatedContentProps = {
   relations: ContentRelations;
 };
 
-export function RelatedContent({ relations }: RelatedContentProps) {
+export async function RelatedContent({ relations }: RelatedContentProps) {
   const books = listPublishedBooks();
   const journals = listPublishedJournals();
-  const reflections = listPublishedReflections();
+  const reflections = await listPublishedReflections();
   const relatedItems: RelatedItem[] = [
     ...(relations.relatedReflectionSlugs ?? [])
       .map((slug) => reflections.find((reflection) => reflection.contentSlug === slug))

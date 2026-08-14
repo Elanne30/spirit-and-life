@@ -5,12 +5,13 @@ import { siteConfig } from "@/app/content/site-config";
 import { studies } from "@/app/data/study-plan";
 import { scriptureReferences } from "@/app/content/scripture";
 
-export default function sitemap(): MetadataRoute.Sitemap {
-  ensurePublishingIntegrity();
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  await ensurePublishingIntegrity();
 
   const routes = ["", "reflections", "journals", "books", "study-center", "about", "contact", "scripture", "search", "privacy-policy", "terms-of-use"];
+  const reflections = await listPublishedReflections();
   const contentRoutes = [
-    ...listPublishedReflections().map((item) => `reflections/${item.contentSlug}`),
+    ...reflections.map((item) => `reflections/${item.contentSlug}`),
     ...listPublishedJournals().map((item) => `journals/${item.contentSlug}`),
     ...listPublishedBooks().map((item) => `books/${item.contentSlug}`),
     ...scriptureReferences.map((item) => `scripture/${item.slug}`),

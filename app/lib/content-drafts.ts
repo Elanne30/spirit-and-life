@@ -104,6 +104,49 @@ export async function getDraft(id: string) {
   return result.rows[0] ?? null;
 }
 
+export async function listPublishedDrafts(
+  contentType?: DraftContentType,
+) {
+  await ensureSchema();
+
+  const result = contentType
+    ? await sql<ContentDraft>`
+        SELECT *
+        FROM content_drafts
+        WHERE status = 'published'
+          AND content_type = ${contentType}
+        ORDER BY published_at DESC NULLS LAST, updated_at DESC
+      `
+    : await sql<ContentDraft>`
+        SELECT *
+        FROM content_drafts
+        WHERE status = 'published'
+        ORDER BY published_at DESC NULLS LAST, updated_at DESC
+      `;
+
+  return result.rows;
+}
+
+export async function getPublishedDraft(
+  contentType: DraftContentType,
+  slug: string,
+) {
+  await ensureSchema();
+
+  const normalizedSlug = normalizeDraftSlug(slug);
+
+  const result = await sql<ContentDraft>`
+    SELECT *
+    FROM content_drafts
+    WHERE status = 'published'
+      AND content_type = ${contentType}
+      AND slug = ${normalizedSlug}
+    LIMIT 1
+  `;
+
+  return result.rows[0] ?? null;
+}
+
 export async function createDraft(input: DraftInput) {
   await ensureSchema();
 

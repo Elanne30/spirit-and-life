@@ -1,3 +1,5 @@
+"use server";
+
 import { scriptureReferences } from "@/app/content/scripture";
 import { listPublishedBooks, listPublishedJournals, listPublishedReflections } from "@/app/content/repository";
 import { studies } from "@/app/data/study-plan";
@@ -21,8 +23,11 @@ function normalizeSearchText(value: string) {
     .trim();
 }
 
-const searchIndex: IndexedSearchResult[] = [
-  ...listPublishedReflections().map((reflection): IndexedSearchResult => ({
+async function buildSearchIndex(): Promise<IndexedSearchResult[]> {
+  const reflections = await listPublishedReflections();
+
+  return [
+  ...reflections.map((reflection): IndexedSearchResult => ({
     type: "Reflection" as const,
     title: reflection.title,
     description: `${reflection.category} - ${reflection.introduction}`,
@@ -105,15 +110,17 @@ const searchIndex: IndexedSearchResult[] = [
       study.prayerPrompt ?? "",
     ].join(" "),
   })),
-];
+  ];
+}
 
-export function searchContent(query: string) {
+export async function searchContent(query: string): Promise<SearchResult[]> {
   const normalizedQuery = normalizeSearchText(query);
 
   if (!normalizedQuery) {
     return [];
   }
 
+  const searchIndex = await buildSearchIndex();
   const queryTokens = normalizedQuery.split(" ");
 
   return searchIndex

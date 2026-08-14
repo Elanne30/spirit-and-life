@@ -59,7 +59,7 @@ function addRelationshipErrors(
   }
 }
 
-export function ensurePublishingIntegrity() {
+export async function ensurePublishingIntegrity() {
   if (hasValidatedPublishingData || typeof window !== "undefined") {
     return;
   }
@@ -70,7 +70,7 @@ export function ensurePublishingIntegrity() {
   const studyDatePattern = /^\d{4}-\d{2}-\d{2}$/;
   const scriptureReferencePattern = /^(?:[1-3]\s)?[A-Za-z]+(?:\s[A-Za-z]+)*\s\d+:\d+(?:-\d+)?$/;
 
-  const reflections = listPublishedReflections();
+  const reflections = await listPublishedReflections();
   const journals = listPublishedJournals();
   const books = listPublishedBooks();
   const reflectionSlugs = reflections.map((item) => item.contentSlug);
