@@ -83,14 +83,16 @@ export default async function AdminContentDetailPage({
         {draft ? (
           <p className="quiet-note">
             {draft.status === "published"
-              ? "This content is published from the database and is live on the public site."
+              ? draft.has_unpublished_changes
+                ? "This content is published and live, but you have unpublished changes saved. Press Publish Changes to make them live."
+                : "This content is published from the database and is live on the public site."
               : "This is an unpublished draft. Saving changes will not affect the public site until you Publish."}
           </p>
         ) : (
           <p className="quiet-note">This is existing static content. Click Edit to start managing it from the admin.</p>
         )}
 
-        {draft ? <PublishForm draftId={draft.id} status={draft.status} /> : null}
+        {draft ? <PublishForm draftId={draft.id} status={draft.status} hasUnpublishedChanges={draft.has_unpublished_changes} /> : null}
       </article>
 
       <article className="admin-card admin-preview">

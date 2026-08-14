@@ -13,7 +13,8 @@ const sections: Array<{ contentType: DraftContentType; label: string }> = [
 
 function statusLabel(item: AdminContentItem) {
   if (item.status === "published") {
-    return item.isStaticSource && !item.hasDraft ? "Published (static)" : "Published";
+    if (item.isStaticSource && !item.hasDraft) return "Published (static)";
+    return item.hasUnpublishedChanges ? "Published (unpublished changes)" : "Published";
   }
 
   if (item.status === "draft") {

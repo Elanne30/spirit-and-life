@@ -5,26 +5,41 @@ import { publishDraftAction, type ContentDraftActionState } from "@/app/admin/(p
 
 const initialState: ContentDraftActionState = { status: "idle", message: "" };
 
-export function PublishForm({ draftId, status }: { draftId: string; status: "draft" | "published" }) {
+export function PublishForm({
+  draftId,
+  status,
+  hasUnpublishedChanges,
+}: {
+  draftId: string;
+  status: "draft" | "published";
+  hasUnpublishedChanges: boolean;
+}) {
   const [state, formAction, isPending] = useActionState(publishDraftAction, initialState);
 
-  if (status === "published" && state.status !== "success") {
+  // Nothing to publish once already-live content has no unpublished changes.
+  if (status === "published" && !hasUnpublishedChanges && state.status !== "success") {
     return <p className="form-note" role="status">Published — visible on the public website.</p>;
   }
+
+  const isRepublish = status === "published";
+  const label = isRepublish ? "Publish Changes" : "Publish";
+  const confirmMessage = isRepublish
+    ? "Publish these changes? The updated version will become visible on the public website."
+    : "Publish this content? It will become visible on the public website.";
 
   return (
     <form
       className="admin-publish-form"
       action={formAction}
       onSubmit={(event) => {
-        if (!window.confirm("Publish this content? It will become visible on the public website.")) {
+        if (!window.confirm(confirmMessage)) {
           event.preventDefault();
         }
       }}
     >
       <input type="hidden" name="draftId" value={draftId} />
       <button className="button button-primary" type="submit" disabled={isPending}>
-        {isPending ? "Publishing..." : "Publish"}
+        {isPending ? "Publishing..." : label}
       </button>
       {state.message ? (
         <p className={state.status === "error" ? "form-error" : "form-note"} role="status">

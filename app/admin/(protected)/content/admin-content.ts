@@ -14,6 +14,7 @@ export type AdminContentItem = {
   updatedAt?: string;
   status: AdminContentStatus;
   hasDraft: boolean;
+  hasUnpublishedChanges: boolean;
   draftId?: string;
   isStaticSource: boolean;
   image?: string;
@@ -52,6 +53,7 @@ export async function listAdminContentItems(contentType: DraftContentType): Prom
       updatedAt: draft?.updated_at,
       status: draft ? (draft.status === "published" ? "published" : "draft") : "static",
       hasDraft: Boolean(draft),
+      hasUnpublishedChanges: draft?.has_unpublished_changes ?? false,
       draftId: draft?.id,
       isStaticSource: true,
       image: draft?.image_reference ?? item.image,
@@ -67,6 +69,7 @@ export async function listAdminContentItems(contentType: DraftContentType): Prom
     updatedAt: draft.updated_at,
     status: draft.status === "published" ? "published" : "draft",
     hasDraft: true,
+    hasUnpublishedChanges: draft.has_unpublished_changes,
     draftId: draft.id,
     isStaticSource: false,
     image: draft.image_reference ?? undefined,

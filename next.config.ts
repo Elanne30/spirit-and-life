@@ -9,6 +9,15 @@ const nextConfig: NextConfig = {
       bodySizeLimit: "10mb",
     },
   },
+  images: {
+    remotePatterns: [
+      {
+        // Uploaded content images are served from a Vercel Blob public store.
+        protocol: "https",
+        hostname: "*.public.blob.vercel-storage.com",
+      },
+    ],
+  },
 };
 
 export default nextConfig;
