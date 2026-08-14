@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ArrowRight, FileText, Mail, Send, Users } from "lucide-react";
 import { getNewsletterSubscriberSummary } from "@/app/lib/newsletter";
 import { getPushSubscriberSummary } from "@/app/lib/push";
 
@@ -8,33 +9,36 @@ export default async function AdminDashboardPage() {
     getPushSubscriberSummary(),
   ]);
 
+  const cards = [
+    { title: "Content", description: "Manage reflections, journals, and books.", icon: FileText, href: "/admin/content", action: "Open content planning", detail: "File-based content and drafts" },
+    { title: "Newsletter", description: "Manage email campaigns and subscribers.", icon: Mail, href: "/admin/newsletter", action: "Manage newsletter", detail: `${newsletterSummary.subscribed} active, ${newsletterSummary.pending} pending` },
+    { title: "Push notifications", description: "Send updates to your push audience.", icon: Send, href: "/admin/notifications", action: "Send push update", detail: `${pushSummary.active} active, ${pushSummary.inactive} inactive` },
+    { title: "Subscribers", description: "View email and push audiences.", icon: Users, href: "/admin/subscribers", action: "View subscriber summary", detail: `${newsletterSummary.subscribed} email, ${pushSummary.active} push` },
+  ];
+
   return (
-    <section className="admin-grid">
-      <article className="admin-card">
-        <h2>Content</h2>
-        <p>Reflection, journal, and book content is currently file-based and preserved.</p>
-        <Link className="button button-text" href="/admin/content">Open content planning</Link>
-      </article>
-
-      <article className="admin-card">
-        <h2>Newsletter</h2>
-        <p>{newsletterSummary.subscribed} active email subscriber{newsletterSummary.subscribed === 1 ? "" : "s"}</p>
-        <p>{newsletterSummary.pending} pending, {newsletterSummary.unsubscribed} unsubscribed</p>
-        <Link className="button button-text" href="/admin/newsletter">Manage newsletter</Link>
-      </article>
-
-      <article className="admin-card">
-        <h2>Push notifications</h2>
-        <p>{pushSummary.active} active push subscriber{pushSummary.active === 1 ? "" : "s"}</p>
-        <p>{pushSummary.inactive} inactive subscriptions on record</p>
-        <Link className="button button-text" href="/admin/notifications">Send push update</Link>
-      </article>
-
-      <article className="admin-card">
-        <h2>Subscribers</h2>
-        <p>Email and push audiences are separated and managed independently.</p>
-        <Link className="button button-text" href="/admin/subscribers">View subscriber summary</Link>
-      </article>
+    <section className="admin-dashboard">
+      <div className="admin-page-introduction">
+        <div>
+          <h2>Welcome back</h2>
+          <p>Here&apos;s what&apos;s happening with Spirit &amp; Life.</p>
+        </div>
+        <span className="admin-date">Admin overview</span>
+      </div>
+      <div className="admin-grid">
+        {cards.map((card) => {
+          const Icon = card.icon;
+          return <article className="admin-card admin-summary-card" key={card.title}>
+            <div className="admin-card-heading">
+              <span className="admin-icon"><Icon aria-hidden="true" size={19} strokeWidth={1.8} /></span>
+              <h3>{card.title}</h3>
+            </div>
+            <p>{card.description}</p>
+            <div className="admin-card-detail">{card.detail}</div>
+            <Link className="admin-card-link" href={card.href}>{card.action}<ArrowRight aria-hidden="true" size={15} /></Link>
+          </article>;
+        })}
+      </div>
     </section>
   );
 }
