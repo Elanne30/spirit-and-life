@@ -16,18 +16,20 @@ export type AdminContentItem = {
   hasDraft: boolean;
   draftId?: string;
   isStaticSource: boolean;
+  image?: string;
+  readingTime?: string;
 };
 
-function staticItemsFor(contentType: DraftContentType): Array<{ contentSlug: string; title: string; category?: string; date?: string }> {
+function staticItemsFor(contentType: DraftContentType): Array<{ contentSlug: string; title: string; category?: string; date?: string; image?: string; readingTime?: string }> {
   if (contentType === "reflection") {
-    return reflections;
+    return reflections.map((item) => ({ contentSlug: item.contentSlug, title: item.title, category: item.category, date: item.date, image: item.image, readingTime: item.readingTime }));
   }
 
   if (contentType === "journal") {
-    return journals;
+    return journals.map((item) => ({ contentSlug: item.contentSlug, title: item.title, category: item.category, date: item.date, image: item.image }));
   }
 
-  return books.map((book) => ({ contentSlug: book.contentSlug, title: book.title, category: book.category, date: book.expectedPublication }));
+  return books.map((book) => ({ contentSlug: book.contentSlug, title: book.title, category: book.category, date: book.expectedPublication, image: book.cover }));
 }
 
 // Combines the static source-of-truth articles with any database drafts (of
@@ -52,6 +54,8 @@ export async function listAdminContentItems(contentType: DraftContentType): Prom
       hasDraft: Boolean(draft),
       draftId: draft?.id,
       isStaticSource: true,
+      image: draft?.image_reference ?? item.image,
+      readingTime: item.readingTime,
     };
   });
 
@@ -65,6 +69,7 @@ export async function listAdminContentItems(contentType: DraftContentType): Prom
     hasDraft: true,
     draftId: draft.id,
     isStaticSource: false,
+    image: draft.image_reference ?? undefined,
   }));
 
   return [...merged, ...additional];

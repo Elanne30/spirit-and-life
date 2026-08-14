@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowRight, BookOpen, FilePenLine, FileText } from "lucide-react";
 import { DraftForm } from "@/app/admin/(protected)/content/draft-form";
 import { listAdminContentItems, type AdminContentItem } from "@/app/admin/(protected)/content/admin-content";
@@ -23,6 +24,13 @@ function statusLabel(item: AdminContentItem) {
 }
 
 type ContentFilter = "reflection" | "journal" | "book" | "draft";
+
+function filterTitle(filter: ContentFilter | undefined) {
+  if (filter === "reflection") return "Reflection";
+  if (filter === "journal") return "Journal";
+  if (filter === "book") return "Book";
+  return "Draft";
+}
 
 function sortRecentItems(items: AdminContentItem[]) {
   return [...items].sort((left, right) => {
@@ -64,10 +72,41 @@ export default async function AdminContentPage({
     { type: "draft" as const, title: "Drafts", description: "Continue editing drafts", icon: FilePenLine, count: draftCount, href: "/admin/content?type=draft" },
   ];
 
+  const libraryItems = filter && filter !== "draft"
+    ? visibleItemsByType[filter]
+    : [];
+
+  if (filter && filter !== "draft") {
+    const libraryType = filter as "reflection" | "journal" | "book";
+    const libraryLabel = { reflection: "Reflections", journal: "Journals", book: "Books" }[libraryType];
+
+    return (
+      <section className="admin-library-page">
+        <div className="admin-library-heading">
+          <div>
+            <p className="eyebrow">Content library</p>
+            <h2>{libraryLabel}</h2>
+            <p>Manage and edit all {libraryType}s in Spirit &amp; Life.</p>
+          </div>
+          <div className="admin-library-actions"><Link className="admin-outline-link" href="/admin">Back to dashboard <ArrowRight size={14} /></Link><Link className="admin-outline-link" href="/admin/content">Back to content <ArrowRight size={14} /></Link></div>
+        </div>
+        <div className="admin-library-grid">
+          {libraryItems.map((item) => (
+            <Link className="admin-library-card" href={`/admin/content/${item.contentType}/${item.slug}`} key={`${item.contentType}-${item.slug}`}>
+              <div className="admin-library-image">{item.image ? <Image src={item.image} alt="" fill sizes="(max-width: 900px) 100vw, 25vw" /> : <span className="admin-icon"><BookOpen size={22} /></span>}</div>
+              <div className="admin-library-card-body"><div className="admin-library-card-title"><h3>{item.title}</h3><span className={`admin-status admin-status-${item.status}`}>{statusLabel(item)}</span></div><p>{item.category ?? "Spirit & Life content"}</p><div className="admin-library-meta"><span>{item.date ?? "No date"}</span>{item.readingTime ? <span>{item.readingTime}</span> : null}</div></div>
+            </Link>
+          ))}
+        </div>
+        {!libraryItems.length ? <p className="quiet-note">Nothing here yet.</p> : null}
+      </section>
+    );
+  }
+
   return (
     <section className="admin-content-page">
       <article className="admin-card admin-page-intro-card">
-        <h2>{filter ? `${filter === "draft" ? "Draft" : filter.charAt(0).toUpperCase() + filter.slice(1)} Content` : "Content Management Overview"}</h2>
+        <h2>{filter ? `${filterTitle(filter)} Content` : "Content Management Overview"}</h2>
         <p>{filter ? "Browse every matching record across Spirit &amp; Life." : "Browse and manage all content across Spirit &amp; Life."}</p>
         <div className="admin-content-overview-grid">
           {overview.map((item) => { const Icon = item.icon; return <article className="admin-content-overview-card" key={item.title}><span className="admin-icon"><Icon size={19} /></span><h3>{item.title}</h3><p>{item.description}</p><strong>{item.count}</strong><small>{item.type === "draft" ? "Drafts" : "Published"}</small><Link href={item.href}>View all <ArrowRight size={14} /></Link></article>; })}
