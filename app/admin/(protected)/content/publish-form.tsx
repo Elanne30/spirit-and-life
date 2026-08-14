@@ -16,14 +16,9 @@ export function PublishForm({
 }) {
   const [state, formAction, isPending] = useActionState(publishDraftAction, initialState);
 
-  // Nothing to publish once already-live content has no unpublished changes.
-  if (status === "published" && !hasUnpublishedChanges && state.status !== "success") {
-    return <p className="form-note" role="status">Published — visible on the public website.</p>;
-  }
-
-  const isRepublish = status === "published";
-  const label = isRepublish ? "Publish Changes" : "Publish";
-  const confirmMessage = isRepublish
+  const hasPendingPublish = status === "published" && hasUnpublishedChanges;
+  const label = hasPendingPublish ? "Publish Changes" : "Publish";
+  const confirmMessage = hasPendingPublish
     ? "Publish these changes? The updated version will become visible on the public website."
     : "Publish this content? It will become visible on the public website.";
 
