@@ -1,11 +1,12 @@
 import { NewsletterBroadcastForm } from "@/app/admin/(protected)/newsletter/newsletter-broadcast-form";
-import { getNewsletterSubscriberSummary, listRecentNewsletterBroadcasts } from "@/app/lib/newsletter";
+import { getNewsletterSubscriberSummary, listNewsletterSubscribers, listRecentNewsletterBroadcasts } from "@/app/lib/newsletter";
 import { Mail, Send, Users } from "lucide-react";
 
 export default async function AdminNewsletterPage() {
-  const [summary, broadcasts] = await Promise.all([
+  const [summary, broadcasts, subscribers] = await Promise.all([
     getNewsletterSubscriberSummary(),
-    listRecentNewsletterBroadcasts(8),
+    listRecentNewsletterBroadcasts(50),
+    listNewsletterSubscribers(),
   ]);
 
   return (
@@ -19,7 +20,7 @@ export default async function AdminNewsletterPage() {
       <article className="admin-card admin-management-card">
         <div className="admin-card-heading"><span className="admin-icon"><Send size={19} /></span><h3>Compose email broadcast</h3></div>
         <p>Compose, preview, confirm, and send one message to active email subscribers.</p>
-        <NewsletterBroadcastForm activeRecipientCount={summary.subscribed} />
+        <NewsletterBroadcastForm activeRecipientCount={summary.subscribed} subscribers={subscribers} />
       </article>
 
       <article className="admin-card admin-management-card">
@@ -28,7 +29,7 @@ export default async function AdminNewsletterPage() {
           <ul className="admin-list admin-scroll-list">
             {broadcasts.map((item) => (
               <li key={item.id}>
-                <strong>{item.subject}</strong> - {item.status} - recipients {item.recipient_count}
+                <strong>{item.subject}</strong> - {item.status} - recipients {item.recipient_count} - {new Date(item.created_at).toLocaleString()}
               </li>
             ))}
           </ul>

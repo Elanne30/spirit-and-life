@@ -1545,6 +1545,131 @@ html[data-theme="dark"] .admin-brand-logo {
   text-transform: uppercase;
 }
 
+.admin-subscriber-row > span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-recipient-picker {
+  display: grid;
+  gap: 0.8rem;
+  margin: 0;
+  padding: 1rem;
+  border: 1px solid var(--line);
+  border-radius: 0.45rem;
+}
+
+.admin-recipient-picker legend {
+  padding-inline: 0.35rem;
+  color: var(--foreground);
+  font-weight: 700;
+}
+
+.admin-recipient-actions,
+.admin-recipient-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.admin-recipient-toolbar {
+  justify-content: space-between;
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
+.admin-recipient-toolbar button {
+  border: 0;
+  background: transparent;
+  color: var(--accent-strong);
+  cursor: pointer;
+  font: inherit;
+  font-weight: 700;
+}
+
+.admin-recipient-list {
+  display: grid;
+  max-height: 18rem;
+  overflow-y: auto;
+  border-top: 1px solid var(--line);
+}
+
+.admin-recipient-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.7rem;
+  padding: 0.7rem 0.25rem;
+  border-bottom: 1px solid var(--line);
+  cursor: pointer;
+}
+
+.admin-recipient-row span {
+  display: grid;
+  min-width: 0;
+  gap: 0.15rem;
+}
+
+.admin-recipient-row strong,
+.admin-recipient-row small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-recipient-row small {
+  color: var(--muted);
+  font-size: 0.68rem;
+}
+
+.admin-image-control {
+  display: grid;
+  gap: 0.7rem;
+  margin-bottom: 1rem;
+  padding: 1rem;
+  border: 1px solid var(--line);
+  border-radius: 0.45rem;
+  background: color-mix(in srgb, var(--surface) 70%, transparent);
+}
+
+.admin-form-label {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.admin-image-preview {
+  width: min(100%, 24rem);
+  max-height: 14rem;
+  border: 1px solid var(--line);
+  border-radius: 0.4rem;
+  object-fit: cover;
+}
+
+.admin-image-upload-form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.admin-image-upload-form input[type="file"] {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.admin-image-upload-form p {
+  flex-basis: 100%;
+  margin: 0;
+}
+
 .admin-empty-table {
   min-width: 48rem;
   margin: 0;

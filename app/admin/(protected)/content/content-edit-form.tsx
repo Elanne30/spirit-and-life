@@ -1,8 +1,9 @@
 "use client";
+/* eslint-disable @next/next/no-img-element */
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import type { ContentDraft } from "@/app/lib/content-drafts";
-import { updateDraftAction, type ContentDraftActionState } from "@/app/admin/(protected)/actions/content";
+import { updateDraftAction, uploadContentImageAction, type ContentDraftActionState } from "@/app/admin/(protected)/actions/content";
 import { ReflectionBodyEditor, type ReflectionSection } from "@/app/admin/(protected)/content/reflection-body-editor";
 
 const initialState: ContentDraftActionState = { status: "idle", message: "" };
@@ -32,6 +33,8 @@ function getInitialSections(draft: ContentDraft): ReflectionSection[] {
 
 export function ContentEditForm({ draft }: { draft: ContentDraft }) {
   const [state, formAction, isPending] = useActionState(updateDraftAction, initialState);
+  const [uploadState, uploadAction, isUploading] = useActionState(uploadContentImageAction, initialState);
+  const [preview, setPreview] = useState(draft.image_reference ?? "");
 
   const date = getBodyValue<string>(draft.body, "date") ?? "";
   const readingTime = getBodyValue<string>(draft.body, "readingTime") ?? "";
@@ -47,7 +50,19 @@ export function ContentEditForm({ draft }: { draft: ContentDraft }) {
   const categoryOptions = draft.content_type === "reflection" ? reflectionCategories : contentCategoryOptions;
 
   return (
-    <form className="admin-form" action={formAction}>
+    <>
+      <div className="admin-image-control">
+        <p className="admin-form-label">Current image</p>
+        {preview ? <img className="admin-image-preview" src={preview} alt="Current content image" /> : <p className="quiet-note">No image selected.</p>}
+        <form action={uploadAction} className="admin-image-upload-form">
+          <input type="hidden" name="draftId" value={draft.id} />
+          <label className="button button-secondary" htmlFor="edit-image-upload">{preview ? "Change image" : "Upload image"}</label>
+          <input id="edit-image-upload" name="image" type="file" accept="image/jpeg,image/png,image/webp,image/gif" onChange={(event) => { const file = event.target.files?.[0]; if (file) setPreview(URL.createObjectURL(file)); }} />
+          <button className="button button-primary" type="submit" disabled={isUploading}>{isUploading ? "Uploading..." : "Upload and save image"}</button>
+          {uploadState.message ? <p className={uploadState.status === "error" ? "form-error" : "form-note"} role="status">{uploadState.message}</p> : null}
+        </form>
+      </div>
+      <form className="admin-form" action={formAction}>
       <input type="hidden" name="draftId" value={draft.id} />
       <input type="hidden" name="contentType" value={draft.content_type} />
 
@@ -135,5 +150,6 @@ export function ContentEditForm({ draft }: { draft: ContentDraft }) {
         </p>
       ) : null}
     </form>
+    </>
   );
 }

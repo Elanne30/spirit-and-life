@@ -21,6 +21,16 @@ export type PushSubscriberSummary = {
   total: number;
 };
 
+export type PushSubscriberRecord = {
+  id: string;
+  subscriber_id: string | null;
+  endpoint: string;
+  expiration_time: string | null;
+  status: "active" | "inactive";
+  created_at: string;
+  updated_at: string;
+};
+
 function nowIso() {
   return new Date().toISOString();
 }
@@ -187,4 +197,13 @@ export async function getPushSubscriberSummary(): Promise<PushSubscriberSummary>
   }
 
   return summary;
+}
+
+export async function listPushSubscriberRecords(): Promise<PushSubscriberRecord[]> {
+  await ensureSchema();
+  const result = await sql<PushSubscriberRecord>`
+    SELECT id, subscriber_id, endpoint, expiration_time, status, created_at, updated_at
+    FROM push_subscriptions ORDER BY created_at DESC
+  `;
+  return result.rows;
 }

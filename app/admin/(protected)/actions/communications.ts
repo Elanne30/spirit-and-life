@@ -26,6 +26,8 @@ export async function sendAdminNewsletterBroadcastAction(_previousState: AdminAc
   const message = String(formData.get("message") ?? "").trim();
   const confirmSend = String(formData.get("confirmSend") ?? "") === "yes";
   const ctaHrefRaw = String(formData.get("ctaHref") ?? "").trim();
+  const recipientMode = String(formData.get("recipientMode") ?? "all");
+  const recipientIds = formData.getAll("recipientId").map(String).filter(Boolean);
 
   if (!subject || !message) {
     return { status: "error", message: "Subject and message are required." };
@@ -33,6 +35,10 @@ export async function sendAdminNewsletterBroadcastAction(_previousState: AdminAc
 
   if (!confirmSend) {
     return { status: "error", message: "Please confirm before sending." };
+  }
+
+  if (recipientMode === "selected" && !recipientIds.length) {
+    return { status: "error", message: "Select at least one active recipient." };
   }
 
   const paragraphs = splitParagraphs(message);
@@ -43,6 +49,7 @@ export async function sendAdminNewsletterBroadcastAction(_previousState: AdminAc
     bodyParagraphs: paragraphs,
     ctaLabel: ctaHref ? "Visit Spirit & Life" : undefined,
     ctaHref,
+    recipientIds: recipientMode === "selected" ? recipientIds : undefined,
   });
 
   return {

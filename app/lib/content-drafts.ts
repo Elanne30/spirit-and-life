@@ -239,6 +239,18 @@ export async function updateDraft(id: string, input: DraftInput) {
   return getDraft(id);
 }
 
+export async function updateDraftImage(id: string, imageReference: string) {
+  await ensureSchema();
+
+  await sql`
+    UPDATE content_drafts
+    SET image_reference = ${imageReference}, updated_at = ${nowIso()}
+    WHERE id = ${id}
+  `;
+
+  return getDraft(id);
+}
+
 export async function publishDraft(id: string) {
   await ensureSchema();
 

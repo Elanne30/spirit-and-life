@@ -2,7 +2,6 @@ import "server-only";
 
 import crypto from "node:crypto";
 import { sql } from "@vercel/postgres";
-import { books } from "@/app/data/books";
 import { journals } from "@/app/data/journals";
 import { reflections } from "@/app/data/reflections";
 import { siteConfig } from "@/app/content/site-config";
@@ -382,6 +381,14 @@ export async function listActiveNewsletterSubscribers() {
   return result.rows;
 }
 
+export async function listNewsletterSubscribers() {
+  await ensureSchema();
+  const result = await sql<SubscriberRecord>`
+    SELECT * FROM newsletter_subscribers ORDER BY created_at DESC
+  `;
+  return result.rows;
+}
+
 export async function getNewsletterSubscriberSummary(): Promise<NewsletterSubscriberSummary> {
   await ensureSchema();
 
@@ -434,10 +441,14 @@ export async function listRecentNewsletterBroadcasts(limit = 10) {
   return result.rows;
 }
 
-export async function sendManualNewsletterBroadcast(draft: BroadcastDraft) {
+export async function sendManualNewsletterBroadcast(draft: BroadcastDraft & { recipientIds?: string[] }) {
   await ensureSchema();
 
-  const subscribers = await listActiveNewsletterSubscribers();
+  const activeSubscribers = await listActiveNewsletterSubscribers();
+  const selectedIds = new Set(draft.recipientIds ?? []);
+  const subscribers = draft.recipientIds?.length
+    ? activeSubscribers.filter((subscriber) => selectedIds.has(subscriber.id))
+    : activeSubscribers;
   const recipientCount = subscribers.length;
   const broadcastId = crypto.randomUUID();
 

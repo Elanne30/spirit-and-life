@@ -9,17 +9,65 @@ import {
   normalizeDraftSlug,
   publishDraft,
   updateDraft,
+  updateDraftImage,
   type DraftContentType,
 } from "@/app/lib/content-drafts";
 import { reflections } from "@/app/data/reflections";
 import { journals } from "@/app/data/journals";
 import { books } from "@/app/data/books";
 import { revalidatePath } from "next/cache";
+import { put } from "@vercel/blob";
 
 export type ContentDraftActionState = {
   status: "idle" | "success" | "error";
   message: string;
 };
+
+const allowedImageTypes = new Set(["image/jpeg", "image/png", "image/webp", "image/gif"]);
+const maxImageSize = 8 * 1024 * 1024;
+
+export async function uploadContentImageAction(_previousState: ContentDraftActionState, formData: FormData): Promise<ContentDraftActionState> {
+  if (!(await requireAdminActionAccess())) {
+    return { status: "error", message: "Unauthorized." };
+  }
+
+  const draftId = String(formData.get("draftId") ?? "").trim();
+  const file = formData.get("image");
+
+  if (!draftId || !(file instanceof File) || file.size === 0) {
+    return { status: "error", message: "Choose an image before uploading." };
+  }
+
+  if (!allowedImageTypes.has(file.type)) {
+    return { status: "error", message: "Use a JPG, PNG, WebP, or GIF image." };
+  }
+
+  if (file.size > maxImageSize) {
+    return { status: "error", message: "Images must be 8 MB or smaller." };
+  }
+
+  try {
+    const draft = await import("@/app/lib/content-drafts").then(({ getDraft }) => getDraft(draftId));
+    if (!draft) return { status: "error", message: "Draft not found." };
+
+    const extension = file.name.split(".").pop()?.toLowerCase() || "jpg";
+    const blob = await put(`content/${draft.content_type}/${draft.slug}-${Date.now()}.${extension}`, file, {
+      access: "public",
+      addRandomSuffix: true,
+      contentType: file.type,
+    });
+    const updated = await updateDraftImage(draftId, blob.url);
+    if (!updated) return { status: "error", message: "Draft not found." };
+
+    revalidatePath(`/admin/content/${draft.content_type}/${draft.slug}`);
+    revalidatePath(`/admin/content/${draft.content_type}/${draft.slug}?view=edit`);
+    revalidatePath(`/${draft.content_type === "reflection" ? "reflections" : draft.content_type === "journal" ? "journals" : "books"}/${draft.slug}`);
+    return { status: "success", message: "Image uploaded and saved." };
+  } catch (error) {
+    console.error("[content-images] Upload failed.", error instanceof Error ? error.message : "Unknown error");
+    return { status: "error", message: "The image could not be uploaded. Your existing image is unchanged." };
+  }
+}
 
 type ParsedDraftInput =
   | {

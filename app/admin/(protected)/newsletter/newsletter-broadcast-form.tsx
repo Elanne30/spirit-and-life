@@ -2,23 +2,28 @@
 
 import { useActionState, useMemo, useState } from "react";
 import { sendAdminNewsletterBroadcastAction } from "@/app/admin/(protected)/actions/communications";
+import type { SubscriberRecord } from "@/app/lib/newsletter";
 
 const initialAdminActionState = {
   status: "idle" as const,
   message: "",
 };
 
-export function NewsletterBroadcastForm({ activeRecipientCount }: { activeRecipientCount: number }) {
+export function NewsletterBroadcastForm({ activeRecipientCount, subscribers }: { activeRecipientCount: number; subscribers: SubscriberRecord[] }) {
   const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
   const [ctaHref, setCtaHref] = useState("");
   const [confirmed, setConfirmed] = useState(false);
+  const [recipientMode, setRecipientMode] = useState<"all" | "selected">("all");
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [state, formAction, isPending] = useActionState(sendAdminNewsletterBroadcastAction, initialAdminActionState);
 
   const previewParagraphs = useMemo(
     () => message.split(/\n\s*\n/g).map((paragraph) => paragraph.trim()).filter(Boolean),
     [message],
   );
+  const activeSubscribers = subscribers.filter((subscriber) => subscriber.status === "subscribed");
+  const recipientCount = recipientMode === "all" ? activeSubscribers.length : selectedIds.length;
 
   return (
     <div className="admin-stack">
@@ -32,7 +37,15 @@ export function NewsletterBroadcastForm({ activeRecipientCount }: { activeRecipi
         <label htmlFor="newsletter-cta">Optional website link</label>
         <input id="newsletter-cta" name="ctaHref" type="url" placeholder="https://example.com" value={ctaHref} onChange={(event) => setCtaHref(event.target.value)} />
 
-        <p className="quiet-note">Active recipients: {activeRecipientCount}</p>
+        <fieldset className="admin-recipient-picker">
+          <legend>Recipients</legend>
+          <div className="admin-recipient-actions"><button className={`admin-tab${recipientMode === "all" ? " is-active" : ""}`} type="button" onClick={() => setRecipientMode("all")}>Send to all active subscribers</button><button className={`admin-tab${recipientMode === "selected" ? " is-active" : ""}`} type="button" onClick={() => setRecipientMode("selected")}>Send to selected</button></div>
+          <div className="admin-recipient-toolbar"><span>{recipientMode === "all" ? activeRecipientCount : selectedIds.length} selected</span><button type="button" onClick={() => setSelectedIds(activeSubscribers.map((subscriber) => subscriber.id))}>Select all</button><button type="button" onClick={() => setSelectedIds([])}>Clear selection</button></div>
+          <div className="admin-recipient-list">{activeSubscribers.map((subscriber) => <label className="admin-recipient-row" key={subscriber.id}><input type="checkbox" name="recipientId" value={subscriber.id} checked={selectedIds.includes(subscriber.id)} onChange={(event) => setSelectedIds((current) => event.target.checked ? [...current, subscriber.id] : current.filter((id) => id !== subscriber.id))} /><span><strong>{subscriber.email}</strong><small>{subscriber.id} · {subscriber.status}</small></span></label>)}</div>
+          <input type="hidden" name="recipientMode" value={recipientMode} />
+        </fieldset>
+
+        <p className="quiet-note">You are about to send this newsletter to {recipientCount} subscriber{recipientCount === 1 ? "" : "s"}.</p>
 
         <label className="admin-checkbox" htmlFor="newsletter-confirm">
           <input id="newsletter-confirm" type="checkbox" checked={confirmed} onChange={(event) => setConfirmed(event.target.checked)} />
