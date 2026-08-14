@@ -1,7 +1,7 @@
 import { books } from "@/app/data/books";
 import { journals } from "@/app/data/journals";
 import { reflections } from "@/app/data/reflections";
-import { listPublishedDrafts, getPublishedDraft, type ContentDraft, type DraftContentType } from "@/app/lib/content-drafts";
+import { listDeletedContentSlugs, listPublishedDrafts, getPublishedDraft, isContentDeleted, type ContentDraft, type DraftContentType } from "@/app/lib/content-drafts";
 import {
   publishedDraftToReflection,
   publishedDraftToJournal,
@@ -15,10 +15,10 @@ async function mergePublished<T extends { contentSlug: string }>(
   contentType: DraftContentType,
   adapt: (draft: ContentDraft) => T | null,
 ): Promise<T[]> {
-  const publishedDrafts = await listPublishedDrafts(contentType);
+  const [publishedDrafts, deletedSlugs] = await Promise.all([listPublishedDrafts(contentType), listDeletedContentSlugs(contentType)]);
   const draftsBySlug = new Map(publishedDrafts.map((draft) => [draft.slug, draft]));
 
-  const merged = staticItems.map((item) => {
+  const merged = staticItems.filter((item) => !deletedSlugs.has(item.contentSlug)).map((item) => {
     const draft = draftsBySlug.get(item.contentSlug);
 
     if (!draft) {
@@ -41,6 +41,7 @@ export async function listPublishedReflections() {
 }
 
 export async function getPublishedReflection(slug: string) {
+  if (await isContentDeleted("reflection", slug)) return null;
   const draft = await getPublishedDraft("reflection", slug);
   const staticReflection = reflections.find((reflection) => reflection.contentSlug === slug);
 
@@ -56,6 +57,7 @@ export async function listPublishedJournals() {
 }
 
 export async function getPublishedJournal(slug: string) {
+  if (await isContentDeleted("journal", slug)) return null;
   const draft = await getPublishedDraft("journal", slug);
   const staticJournal = journals.find((journal) => journal.contentSlug === slug);
 
@@ -71,6 +73,7 @@ export async function listPublishedBooks() {
 }
 
 export async function getPublishedBook(slug: string) {
+  if (await isContentDeleted("book", slug)) return null;
   const draft = await getPublishedDraft("book", slug);
   const staticBook = books.find((book) => book.contentSlug === slug);
 

@@ -1,7 +1,7 @@
 import { reflections } from "@/app/data/reflections";
 import { journals } from "@/app/data/journals";
 import { books } from "@/app/data/books";
-import { listAllDrafts, type ContentDraft, type DraftContentType } from "@/app/lib/content-drafts";
+import { listAllDrafts, listDeletedContentSlugs, type ContentDraft, type DraftContentType } from "@/app/lib/content-drafts";
 
 export type AdminContentStatus = "static" | "draft" | "published";
 
@@ -36,8 +36,8 @@ function staticItemsFor(contentType: DraftContentType): Array<{ contentSlug: str
 // Combines the static source-of-truth articles with any database drafts (of
 // any status) so the admin can see and open everything in one list.
 export async function listAdminContentItems(contentType: DraftContentType): Promise<AdminContentItem[]> {
-  const staticItems = staticItemsFor(contentType);
-  const drafts = await listAllDrafts(contentType);
+  const [deletedSlugs, drafts] = await Promise.all([listDeletedContentSlugs(contentType), listAllDrafts(contentType)]);
+  const staticItems = staticItemsFor(contentType).filter((item) => !deletedSlugs.has(item.contentSlug));
   const draftsBySlug = new Map(drafts.map((draft) => [draft.slug, draft]));
 
   const merged: AdminContentItem[] = staticItems.map((item) => {

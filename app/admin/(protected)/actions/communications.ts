@@ -2,7 +2,9 @@
 
 import { broadcastPushNotification } from "@/app/lib/push";
 import { requireAdminActionAccess } from "@/app/lib/admin-session";
-import { sendManualNewsletterBroadcast } from "@/app/lib/newsletter";
+import { deletePushSubscriberRecord } from "@/app/lib/push";
+import { deleteNewsletterBroadcast, removeNewsletterSubscriber, sendManualNewsletterBroadcast } from "@/app/lib/newsletter";
+import { revalidatePath } from "next/cache";
 
 export type AdminActionState = {
   status: "idle" | "success" | "error";
@@ -52,10 +54,51 @@ export async function sendAdminNewsletterBroadcastAction(_previousState: AdminAc
     recipientIds: recipientMode === "selected" ? recipientIds : undefined,
   });
 
+  revalidatePath("/admin/newsletter");
+
   return {
     status: result.status,
     message: result.message,
   };
+}
+
+function revalidateAudienceViews() {
+  revalidatePath("/admin");
+  revalidatePath("/admin/subscribers");
+  revalidatePath("/admin/newsletter");
+}
+
+export async function removeSubscriberAction(_previousState: AdminActionState, formData: FormData): Promise<AdminActionState> {
+  if (!(await requireAdminActionAccess())) {
+    return { status: "error", message: "Unauthorized." };
+  }
+
+  const id = String(formData.get("subscriberId") ?? "").trim();
+  const type = String(formData.get("subscriberType") ?? "").trim();
+  if (!id || (type !== "newsletter" && type !== "push")) {
+    return { status: "error", message: "Subscriber details are required." };
+  }
+
+  const removed = type === "newsletter" ? await removeNewsletterSubscriber(id) : await deletePushSubscriberRecord(id);
+  if (!removed) return { status: "error", message: "Subscriber record not found." };
+
+  revalidateAudienceViews();
+  return { status: "success", message: "Subscriber removed." };
+}
+
+export async function deleteNewsletterBroadcastAction(_previousState: AdminActionState, formData: FormData): Promise<AdminActionState> {
+  if (!(await requireAdminActionAccess())) {
+    return { status: "error", message: "Unauthorized." };
+  }
+
+  const id = String(formData.get("broadcastId") ?? "").trim();
+  if (!id) return { status: "error", message: "Broadcast details are required." };
+
+  const removed = await deleteNewsletterBroadcast(id);
+  if (!removed) return { status: "error", message: "Broadcast not found." };
+
+  revalidatePath("/admin/newsletter");
+  return { status: "success", message: "Broadcast history removed." };
 }
 
 export async function sendAdminPushBroadcastAction(_previousState: AdminActionState, formData: FormData): Promise<AdminActionState> {

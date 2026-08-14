@@ -1,21 +1,24 @@
 "use client";
 
-import { useActionState, useMemo, useState } from "react";
+import { useActionState, useDeferredValue, useMemo, useState } from "react";
 import { sendAdminNewsletterBroadcastAction } from "@/app/admin/(protected)/actions/communications";
 import type { SubscriberRecord } from "@/app/lib/newsletter";
+import { getSubscriberDisplayName } from "@/app/lib/subscriber-display-name";
 
 const initialAdminActionState = {
   status: "idle" as const,
   message: "",
 };
 
-export function NewsletterBroadcastForm({ activeRecipientCount, subscribers }: { activeRecipientCount: number; subscribers: SubscriberRecord[] }) {
-  const [subject, setSubject] = useState("");
-  const [message, setMessage] = useState("");
+export function NewsletterBroadcastForm({ activeRecipientCount, subscribers, initialSubject = "", initialMessage = "" }: { activeRecipientCount: number; subscribers: SubscriberRecord[]; initialSubject?: string; initialMessage?: string }) {
+  const [subject, setSubject] = useState(initialSubject);
+  const [message, setMessage] = useState(initialMessage);
   const [ctaHref, setCtaHref] = useState("");
   const [confirmed, setConfirmed] = useState(false);
   const [recipientMode, setRecipientMode] = useState<"all" | "selected">("all");
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [recipientSearch, setRecipientSearch] = useState("");
+  const deferredRecipientSearch = useDeferredValue(recipientSearch.trim().toLowerCase());
   const [state, formAction, isPending] = useActionState(sendAdminNewsletterBroadcastAction, initialAdminActionState);
 
   const previewParagraphs = useMemo(
@@ -23,7 +26,9 @@ export function NewsletterBroadcastForm({ activeRecipientCount, subscribers }: {
     [message],
   );
   const activeSubscribers = subscribers.filter((subscriber) => subscriber.status === "subscribed");
+  const visibleSubscribers = activeSubscribers.filter((subscriber) => !deferredRecipientSearch || [getSubscriberDisplayName(subscriber), subscriber.email, subscriber.id].some((value) => value.toLowerCase().includes(deferredRecipientSearch)));
   const recipientCount = recipientMode === "all" ? activeSubscribers.length : selectedIds.length;
+  const allVisibleSelected = Boolean(visibleSubscribers.length) && visibleSubscribers.every((subscriber) => selectedIds.includes(subscriber.id));
 
   return (
     <div className="admin-stack">
@@ -40,8 +45,9 @@ export function NewsletterBroadcastForm({ activeRecipientCount, subscribers }: {
         <fieldset className="admin-recipient-picker">
           <legend>Recipients</legend>
           <div className="admin-recipient-actions"><button className={`admin-tab${recipientMode === "all" ? " is-active" : ""}`} type="button" onClick={() => setRecipientMode("all")}>Send to all active subscribers</button><button className={`admin-tab${recipientMode === "selected" ? " is-active" : ""}`} type="button" onClick={() => setRecipientMode("selected")}>Send to selected</button></div>
-          <div className="admin-recipient-toolbar"><span>{recipientMode === "all" ? activeRecipientCount : selectedIds.length} selected</span><button type="button" onClick={() => setSelectedIds(activeSubscribers.map((subscriber) => subscriber.id))}>Select all</button><button type="button" onClick={() => setSelectedIds([])}>Clear selection</button></div>
-          <div className="admin-recipient-list">{activeSubscribers.map((subscriber) => <label className="admin-recipient-row" key={subscriber.id}><input type="checkbox" name="recipientId" value={subscriber.id} checked={selectedIds.includes(subscriber.id)} onChange={(event) => setSelectedIds((current) => event.target.checked ? [...current, subscriber.id] : current.filter((id) => id !== subscriber.id))} /><span><strong>{subscriber.email}</strong><small>{subscriber.id} · {subscriber.status}</small></span></label>)}</div>
+          <label className="admin-search-control" htmlFor="newsletter-recipient-search"><span className="sr-only">Search recipients</span><input id="newsletter-recipient-search" type="search" value={recipientSearch} onChange={(event) => setRecipientSearch(event.target.value)} placeholder="Search active recipients" /></label>
+          <div className="admin-recipient-toolbar"><span>{recipientMode === "all" ? activeRecipientCount : selectedIds.length} selected</span><button type="button" onClick={() => setSelectedIds((current) => allVisibleSelected ? current.filter((id) => !visibleSubscribers.some((subscriber) => subscriber.id === id)) : Array.from(new Set([...current, ...visibleSubscribers.map((subscriber) => subscriber.id)])))}>{allVisibleSelected ? "Unselect visible" : "Select visible"}</button><button type="button" onClick={() => setSelectedIds([])}>Clear selection</button></div>
+          <div className="admin-recipient-list">{visibleSubscribers.map((subscriber) => <label className="admin-recipient-row" key={subscriber.id}><input type="checkbox" name="recipientId" value={subscriber.id} checked={selectedIds.includes(subscriber.id)} onChange={(event) => setSelectedIds((current) => event.target.checked ? [...current, subscriber.id] : current.filter((id) => id !== subscriber.id))} /><span><strong>{getSubscriberDisplayName(subscriber)}</strong><small>{subscriber.email} · {subscriber.id} · {subscriber.status}</small></span></label>)}{!visibleSubscribers.length ? <p className="quiet-note">No active recipients match this search.</p> : null}</div>
           <input type="hidden" name="recipientMode" value={recipientMode} />
         </fieldset>
 

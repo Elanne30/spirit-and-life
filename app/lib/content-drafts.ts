@@ -92,6 +92,15 @@ async function ensureSchema() {
       await sql`ALTER TABLE content_drafts ADD COLUMN IF NOT EXISTS published_snapshot jsonb`;
       await sql`ALTER TABLE content_drafts ADD COLUMN IF NOT EXISTS has_unpublished_changes boolean NOT NULL DEFAULT false`;
 
+      await sql`
+        CREATE TABLE IF NOT EXISTS content_deletions (
+          content_type text NOT NULL CHECK (content_type IN ('reflection', 'journal', 'book')),
+          slug text NOT NULL,
+          deleted_at timestamptz NOT NULL DEFAULT now(),
+          PRIMARY KEY (content_type, slug)
+        )
+      `;
+
       await sql`CREATE INDEX IF NOT EXISTS content_drafts_content_type_idx ON content_drafts (content_type)`;
       await sql`CREATE INDEX IF NOT EXISTS content_drafts_status_idx ON content_drafts (status)`;
       await sql`CREATE INDEX IF NOT EXISTS content_drafts_updated_at_idx ON content_drafts (updated_at DESC)`;
@@ -126,6 +135,35 @@ export async function listAllDrafts(contentType?: DraftContentType) {
       `;
 
   return result.rows;
+}
+
+export async function listDeletedContentSlugs(contentType: DraftContentType) {
+  await ensureSchema();
+  const result = await sql<{ slug: string }>`SELECT slug FROM content_deletions WHERE content_type = ${contentType}`;
+  return new Set(result.rows.map((row) => row.slug));
+}
+
+export async function isContentDeleted(contentType: DraftContentType, slug: string) {
+  await ensureSchema();
+  const result = await sql<{ slug: string }>`
+    SELECT slug FROM content_deletions WHERE content_type = ${contentType} AND slug = ${normalizeDraftSlug(slug)} LIMIT 1
+  `;
+  return Boolean(result.rows[0]);
+}
+
+export async function deleteContent(contentType: DraftContentType, slug: string) {
+  await ensureSchema();
+  const normalizedSlug = normalizeDraftSlug(slug);
+  await sql`
+    DELETE FROM content_drafts
+    WHERE content_type = ${contentType}
+      AND (slug = ${normalizedSlug} OR published_snapshot->>'slug' = ${normalizedSlug})
+  `;
+  await sql`
+    INSERT INTO content_deletions (content_type, slug, deleted_at)
+    VALUES (${contentType}, ${normalizedSlug}, ${nowIso()})
+    ON CONFLICT (content_type, slug) DO UPDATE SET deleted_at = EXCLUDED.deleted_at
+  `;
 }
 
 // Overlays the published snapshot onto the row so public rendering always

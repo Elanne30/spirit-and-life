@@ -1529,8 +1529,8 @@ html[data-theme="dark"] .admin-brand-logo {
 
 .admin-subscriber-row {
   display: grid;
-  min-width: 48rem;
-  grid-template-columns: minmax(8rem, 1fr) minmax(11rem, 1.4fr) minmax(6rem, 0.7fr) minmax(9rem, 1fr) minmax(8rem, 0.9fr) minmax(5rem, 0.6fr);
+  min-width: 70rem;
+  grid-template-columns: 2rem minmax(8rem, 0.9fr) minmax(9rem, 1fr) minmax(12rem, 1.4fr) minmax(6rem, 0.7fr) minmax(8rem, 0.8fr) minmax(7rem, 0.7fr) 2.5rem;
   gap: 0.8rem;
   align-items: center;
   padding: 0.8rem 1rem;
@@ -1547,6 +1547,154 @@ html[data-theme="dark"] .admin-brand-logo {
 
 .admin-subscriber-row > span {
   min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-records-stack,
+.admin-broadcast-stack {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.admin-record-controls {
+  display: grid;
+  grid-template-columns: minmax(14rem, 1fr) repeat(2, minmax(8rem, 0.35fr));
+  gap: 0.7rem;
+}
+
+.admin-record-controls > label {
+  display: grid;
+  gap: 0.3rem;
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.admin-record-controls select,
+.admin-search-control input {
+  min-width: 0;
+  padding: 0.55rem 0.65rem;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--foreground);
+  font: inherit;
+}
+
+.admin-search-control {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding-inline: 0.65rem;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--muted);
+}
+
+.admin-search-control input {
+  flex: 1;
+  border: 0;
+  padding-inline: 0;
+}
+
+.admin-selection-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.65rem;
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
+.admin-selection-toolbar button {
+  border: 0;
+  background: transparent;
+  color: var(--accent-strong);
+  cursor: pointer;
+  font: inherit;
+  font-weight: 700;
+}
+
+.admin-selection-toolbar button:disabled {
+  cursor: default;
+  opacity: 0.45;
+}
+
+.admin-icon-button {
+  display: inline-flex;
+  width: 2rem;
+  height: 2rem;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--line);
+  border-radius: 0.4rem;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.admin-icon-button:hover:not(:disabled) {
+  border-color: var(--accent);
+  color: var(--accent-strong);
+}
+
+.admin-icon-button-danger:hover:not(:disabled) {
+  border-color: #a33;
+  color: #a33;
+}
+
+.admin-broadcast-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  gap: 0.75rem;
+  max-height: 24rem;
+  overflow-y: auto;
+  padding-right: 0.25rem;
+}
+
+.admin-broadcast-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.75rem;
+  padding: 0.9rem;
+  border: 1px solid var(--line);
+  border-radius: 0.5rem;
+}
+
+.admin-broadcast-link {
+  display: grid;
+  min-width: 0;
+  gap: 0.35rem;
+}
+
+.admin-broadcast-link strong,
+.admin-broadcast-link small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-broadcast-link strong {
+  color: var(--foreground);
+  font-size: 0.84rem;
+}
+
+.admin-broadcast-link span,
+.admin-broadcast-link small {
+  color: var(--muted);
+  font-size: 0.68rem;
+}
+
+.admin-delivery-row {
+  display: grid;
+  min-width: 36rem;
+  grid-template-columns: minmax(12rem, 1.3fr) minmax(12rem, 1fr) minmax(7rem, 0.5fr);
+  gap: 0.8rem;
+  padding: 0.8rem 1rem;
+}
+
+.admin-delivery-row > span {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;

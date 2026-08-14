@@ -3,7 +3,7 @@ import Link from "next/link";
 import { reflections } from "@/app/data/reflections";
 import { journals } from "@/app/data/journals";
 import { books } from "@/app/data/books";
-import { getDraftByTypeAndSlug, normalizeDraftSlug, type DraftContentType } from "@/app/lib/content-drafts";
+import { getDraftByTypeAndSlug, isContentDeleted, normalizeDraftSlug, type DraftContentType } from "@/app/lib/content-drafts";
 import { draftToReflectionPreview, draftToJournalPreview, draftToBookPreview } from "@/app/content/published-draft-adapter";
 import { ReflectionArticle } from "@/app/components/reflection-article";
 import { JournalArticle } from "@/app/components/journal-article";
@@ -11,6 +11,7 @@ import { BookArticle } from "@/app/components/book-article";
 import { ContentEditForm } from "@/app/admin/(protected)/content/content-edit-form";
 import { PublishForm } from "@/app/admin/(protected)/content/publish-form";
 import { startEditingContentAction } from "@/app/admin/(protected)/actions/content";
+import { ContentDeleteForm } from "@/app/admin/(protected)/content/content-delete-form";
 
 const validTypes: DraftContentType[] = ["reflection", "journal", "book"];
 
@@ -30,6 +31,10 @@ export default async function AdminContentDetailPage({
 
   const contentType = type as DraftContentType;
   const slug = normalizeDraftSlug(rawSlug);
+
+  if (await isContentDeleted(contentType, slug)) {
+    notFound();
+  }
 
   const staticReflection = contentType === "reflection" ? reflections.find((item) => item.contentSlug === slug) : undefined;
   const staticJournal = contentType === "journal" ? journals.find((item) => item.contentSlug === slug) : undefined;
@@ -59,6 +64,7 @@ export default async function AdminContentDetailPage({
           <Link className="button button-secondary" href="/admin/content">
             Back to content
           </Link>
+          <ContentDeleteForm contentType={contentType} slug={slug} title={draft?.title ?? staticTitle ?? "this content"} />
         </div>
 
         <nav className="admin-tab-row" aria-label="Preview or edit">

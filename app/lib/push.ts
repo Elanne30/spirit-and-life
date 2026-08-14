@@ -207,3 +207,9 @@ export async function listPushSubscriberRecords(): Promise<PushSubscriberRecord[
   `;
   return result.rows;
 }
+
+export async function deletePushSubscriberRecord(id: string) {
+  await ensureSchema();
+  const result = await sql<{ id: string }>`DELETE FROM push_subscriptions WHERE id = ${id} RETURNING id`;
+  return Boolean(result.rows[0]);
+}

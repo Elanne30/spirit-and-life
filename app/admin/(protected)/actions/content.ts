@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { requireAdminActionAccess } from "@/app/lib/admin-session";
 import {
   createDraft,
+  deleteContent,
   getDraftByTypeAndSlug,
   isValidDraftSlug,
   normalizeDraftSlug,
@@ -363,6 +364,20 @@ export async function publishDraftAction(
 
     return { status: "error", message: "That content could not be published." };
   }
+}
+
+export async function deleteContentAction(formData: FormData) {
+  if (!(await requireAdminActionAccess())) return;
+
+  const contentType = String(formData.get("contentType") ?? "").trim() as DraftContentType;
+  const slug = normalizeDraftSlug(String(formData.get("slug") ?? ""));
+  if (!( ["reflection", "journal", "book"] as DraftContentType[]).includes(contentType) || !slug) return;
+
+  await deleteContent(contentType, slug);
+  revalidatePath("/admin");
+  revalidatePath("/admin/content");
+  revalidatePublicRoutes(contentType, slug);
+  redirect("/admin/content");
 }
 
 function findStaticSeed(contentType: DraftContentType, slug: string) {

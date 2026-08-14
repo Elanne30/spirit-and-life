@@ -11,6 +11,7 @@ export type SubscriberStatus = "pending" | "subscribed" | "unsubscribed";
 
 export type SubscriberRecord = {
   id: string;
+  name?: string | null;
   email: string;
   status: SubscriberStatus;
   subscribed_at: string | null;
@@ -36,10 +37,24 @@ export type NewsletterSubscriberSummary = {
 export type NewsletterBroadcastRecord = {
   id: string;
   subject: string;
+  body?: string;
   recipient_count: number;
+  successful_recipient_count?: number;
+  failed_recipient_count?: number;
   status: "draft" | "sent" | "failed";
   created_at: string;
   sent_at: string | null;
+  error_message?: string | null;
+};
+
+export type NewsletterBroadcastRecipient = {
+  id: string;
+  broadcast_id: string;
+  subscriber_id: string | null;
+  email: string;
+  delivery_status: "sent" | "failed";
+  error_message: string | null;
+  created_at: string;
 };
 
 export type BroadcastChannel = "email" | "push" | "both";
@@ -159,6 +174,21 @@ async function ensureSchema() {
           created_at timestamptz NOT NULL DEFAULT now(),
           sent_at timestamptz,
           error_message text
+        )
+      `;
+
+      await sql`ALTER TABLE newsletter_broadcasts ADD COLUMN IF NOT EXISTS successful_recipient_count integer NOT NULL DEFAULT 0`;
+      await sql`ALTER TABLE newsletter_broadcasts ADD COLUMN IF NOT EXISTS failed_recipient_count integer NOT NULL DEFAULT 0`;
+
+      await sql`
+        CREATE TABLE IF NOT EXISTS newsletter_broadcast_recipients (
+          id text PRIMARY KEY,
+          broadcast_id text NOT NULL REFERENCES newsletter_broadcasts(id) ON DELETE CASCADE,
+          subscriber_id text,
+          email text NOT NULL,
+          delivery_status text NOT NULL CHECK (delivery_status IN ('sent', 'failed')),
+          error_message text,
+          created_at timestamptz NOT NULL DEFAULT now()
         )
       `;
 
@@ -389,6 +419,12 @@ export async function listNewsletterSubscribers() {
   return result.rows;
 }
 
+export async function removeNewsletterSubscriber(id: string) {
+  await ensureSchema();
+  const result = await sql<{ id: string }>`DELETE FROM newsletter_subscribers WHERE id = ${id} RETURNING id`;
+  return Boolean(result.rows[0]);
+}
+
 export async function getNewsletterSubscriberSummary(): Promise<NewsletterSubscriberSummary> {
   await ensureSchema();
 
@@ -432,13 +468,40 @@ export async function listRecentNewsletterBroadcasts(limit = 10) {
   const safeLimit = Number.isFinite(limit) ? Math.max(1, Math.min(50, Math.floor(limit))) : 10;
 
   const result = await sql<NewsletterBroadcastRecord>`
-    SELECT id, subject, recipient_count, status, created_at, sent_at
+    SELECT id, subject, recipient_count, successful_recipient_count, failed_recipient_count, status, created_at, sent_at, error_message
     FROM newsletter_broadcasts
     ORDER BY created_at DESC
     LIMIT ${safeLimit}
   `;
 
   return result.rows;
+}
+
+export async function countNewsletterBroadcasts() {
+  await ensureSchema();
+  const result = await sql<{ count: string }>`SELECT COUNT(*)::text AS count FROM newsletter_broadcasts`;
+  return Number(result.rows[0]?.count ?? 0);
+}
+
+export async function getNewsletterBroadcast(id: string) {
+  await ensureSchema();
+  const broadcast = await sql<NewsletterBroadcastRecord>`
+    SELECT id, subject, body, recipient_count, successful_recipient_count, failed_recipient_count, status, created_at, sent_at, error_message
+    FROM newsletter_broadcasts WHERE id = ${id} LIMIT 1
+  `;
+  if (!broadcast.rows[0]) return null;
+
+  const recipients = await sql<NewsletterBroadcastRecipient>`
+    SELECT id, broadcast_id, subscriber_id, email, delivery_status, error_message, created_at
+    FROM newsletter_broadcast_recipients WHERE broadcast_id = ${id} ORDER BY created_at ASC
+  `;
+  return { ...broadcast.rows[0], recipients: recipients.rows };
+}
+
+export async function deleteNewsletterBroadcast(id: string) {
+  await ensureSchema();
+  const result = await sql<{ id: string }>`DELETE FROM newsletter_broadcasts WHERE id = ${id} RETURNING id`;
+  return Boolean(result.rows[0]);
 }
 
 export async function sendManualNewsletterBroadcast(draft: BroadcastDraft & { recipientIds?: string[] }) {
@@ -473,6 +536,7 @@ export async function sendManualNewsletterBroadcast(draft: BroadcastDraft & { re
   `;
 
   let sentCount = 0;
+  let failedCount = 0;
 
   for (const subscriber of subscribers) {
     const unsubscribeLink = unsubscribeUrl(createSignedToken({ id: subscriber.id, email: subscriber.email, purpose: "unsubscribe" }));
@@ -499,13 +563,22 @@ export async function sendManualNewsletterBroadcast(draft: BroadcastDraft & { re
 
     if (result.ok) {
       sentCount += 1;
+    } else {
+      failedCount += 1;
     }
+
+    await sql`
+      INSERT INTO newsletter_broadcast_recipients (id, broadcast_id, subscriber_id, email, delivery_status, error_message, created_at)
+      VALUES (${crypto.randomUUID()}, ${broadcastId}, ${subscriber.id}, ${subscriber.email}, ${result.ok ? "sent" : "failed"}, ${result.ok ? null : "Delivery failed."}, ${nowIso()})
+    `;
   }
 
   await sql`
     UPDATE newsletter_broadcasts
     SET status = ${sentCount > 0 ? "sent" : "failed"},
         recipient_count = ${recipientCount},
+        successful_recipient_count = ${sentCount},
+        failed_recipient_count = ${failedCount},
         sent_at = ${sentCount > 0 ? nowIso() : null},
         error_message = ${sentCount > 0 ? null : "No subscribers received the broadcast."}
     WHERE id = ${broadcastId}
@@ -513,7 +586,11 @@ export async function sendManualNewsletterBroadcast(draft: BroadcastDraft & { re
 
   return {
     status: sentCount > 0 ? ("success" as const) : ("error" as const),
-    message: sentCount > 0 ? `Broadcast sent to ${sentCount} subscriber${sentCount === 1 ? "" : "s"}.` : "No active subscribers received the broadcast.",
+    message: sentCount > 0
+      ? failedCount
+        ? `Newsletter sent to ${sentCount} of ${recipientCount} subscribers. ${failedCount} delivery ${failedCount === 1 ? "failed" : "failures"}.`
+        : `Newsletter sent successfully to ${sentCount} subscriber${sentCount === 1 ? "" : "s"}.`
+      : "No active subscribers received the broadcast.",
   };
 }
 
