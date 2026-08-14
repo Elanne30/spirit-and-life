@@ -17,7 +17,9 @@ export function DraftForm() {
   const [contentType, setContentType] = useState("reflection");
 
   return (
-    <form className="admin-form" action={formAction}>
+    <form className="admin-form admin-draft-form" action={formAction}>
+      <div className="admin-draft-column">
+      <h3>Content Information</h3>
       <label htmlFor="draft-content-type">Content type</label>
       <select
         id="draft-content-type"
@@ -114,16 +116,14 @@ export function DraftForm() {
         />
         Feature this reflection
       </label>
+      </div>
 
-      {contentType === "reflection" ? <ReflectionBodyEditor /> : null}
+      <div className="admin-draft-column admin-structure-column">
+        <h3>Content Structure</h3>
+        {contentType === "reflection" ? <ReflectionBodyEditor /> : <p className="quiet-note">Content structure is available when creating a reflection. Other content types retain their existing draft fields.</p>}
+      </div>
 
-      <button
-        className="button button-primary"
-        type="submit"
-        disabled={isPending}
-      >
-        {isPending ? "Saving..." : "Save draft"}
-      </button>
+      <div className="admin-draft-actions"><button className="button button-secondary" type="submit" disabled={isPending}>{isPending ? "Saving..." : "Save draft"}</button><button className="button button-primary" type="submit" disabled={isPending}>{isPending ? "Saving..." : "Save & continue editing"}</button></div>
 
       {state.message ? (
         <p

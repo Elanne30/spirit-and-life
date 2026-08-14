@@ -1,14 +1,9 @@
 import Link from "next/link";
-import { FileText, LayoutDashboard, LogOut, Mail, Send, Users } from "lucide-react";
+import Image from "next/image";
+import { LogOut } from "lucide-react";
+import { AdminNav } from "@/app/admin/(protected)/admin-nav";
+import { siteConfig } from "@/app/content/site-config";
 import { requireAdminPageAccess } from "@/app/lib/admin-session";
-
-const adminNavigation = [
-  { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
-  { label: "Content", href: "/admin/content", icon: FileText },
-  { label: "Newsletter", href: "/admin/newsletter", icon: Mail },
-  { label: "Push", href: "/admin/notifications", icon: Send },
-  { label: "Subscribers", href: "/admin/subscribers", icon: Users },
-];
 
 export default async function AdminProtectedLayout({ children }: { children: React.ReactNode }) {
   const session = await requireAdminPageAccess();
@@ -17,24 +12,14 @@ export default async function AdminProtectedLayout({ children }: { children: Rea
     <main className="admin-shell">
       <aside className="admin-sidebar">
         <Link className="admin-brand" href="/admin" aria-label="Spirit & Life Admin dashboard">
-          <span className="admin-brand-mark">S<span>&amp;</span>L</span>
+          <Image className="admin-brand-logo" src={siteConfig.brand.logo} alt="" width={616} height={496} />
           <span>
             <strong>Spirit &amp; Life</strong>
             <small>Admin workspace</small>
           </span>
         </Link>
         <p className="admin-sidebar-label">Private control panel</p>
-        <nav className="admin-nav" aria-label="Admin sections">
-          {adminNavigation.map((item) => {
-            const Icon = item.icon;
-            return (
-              <Link key={item.href} href={item.href} className="admin-nav-link">
-                <Icon aria-hidden="true" size={17} strokeWidth={1.8} />
-                <span>{item.label}</span>
-              </Link>
-            );
-          })}
-        </nav>
+        <AdminNav />
         <div className="admin-sidebar-footer">
           <p className="quiet-note">{session.user?.email}</p>
           <Link className="admin-signout" href="/api/auth/signout?callbackUrl=%2Fadmin%2Fsignin">
@@ -48,7 +33,7 @@ export default async function AdminProtectedLayout({ children }: { children: Rea
           <div>
             <p className="eyebrow">Private control panel</p>
             <h1>Spirit &amp; Life Admin</h1>
-            <p className="quiet-note">Signed in and ready to tend the library.</p>
+            <p className="quiet-note">Signed in as {session.user?.email}</p>
           </div>
         </header>
         {children}

@@ -789,6 +789,18 @@ html[data-theme="light"] .hero-introduction {
   padding: 0.2rem 0.35rem 2.5rem;
 }
 
+.admin-brand-logo {
+  width: 2.7rem;
+  height: 2.7rem;
+  object-fit: cover;
+  opacity: 0.9;
+  mix-blend-mode: multiply;
+}
+
+html[data-theme="dark"] .admin-brand-logo {
+  mix-blend-mode: screen;
+}
+
 .admin-brand-mark {
   display: inline-flex;
   width: 2.55rem;
@@ -890,7 +902,7 @@ html[data-theme="light"] .hero-introduction {
   color: var(--foreground);
 }
 
-.admin-nav-link[href="/admin"] {
+.admin-nav-link.is-active {
   border-color: color-mix(in srgb, var(--accent) 12%, transparent);
   background: color-mix(in srgb, var(--accent) 9%, var(--surface));
   color: var(--accent-strong);
@@ -950,6 +962,9 @@ html[data-theme="light"] .hero-introduction {
 }
 
 .admin-date {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
   padding: 0.55rem 0.8rem;
   border: 1px solid var(--line);
   border-radius: 0.5rem;
@@ -1041,6 +1056,355 @@ html[data-theme="light"] .hero-introduction {
 
 .admin-card-link:hover {
   color: var(--foreground);
+}
+
+.admin-card-metrics {
+  display: flex;
+  gap: 1.25rem;
+}
+
+.admin-card-metrics span {
+  display: grid;
+  min-width: 4.8rem;
+  gap: 0.15rem;
+}
+
+.admin-card-metrics span + span {
+  padding-left: 1.25rem;
+  border-left: 1px solid var(--line);
+}
+
+.admin-card-metrics strong {
+  font-family: var(--font-display), serif;
+  font-size: 1.65rem;
+  font-weight: 500;
+  line-height: 1;
+}
+
+.admin-card-metrics small,
+.admin-overview-row small,
+.admin-content-list small {
+  color: var(--muted);
+  font-size: 0.68rem;
+  line-height: 1.35;
+}
+
+.admin-dashboard-lower {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.admin-panel-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.1rem;
+}
+
+.admin-panel-heading h2,
+.admin-panel-heading h3 {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.2rem;
+  font-size: 1.2rem;
+}
+
+.admin-panel-heading p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
+.admin-outline-link,
+.admin-content-list a {
+  color: var(--accent-strong);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.admin-outline-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex: 0 0 auto;
+  padding: 0.55rem 0.7rem;
+  border: 1px solid var(--line);
+  border-radius: 0.45rem;
+}
+
+.admin-overview-row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.7rem;
+  padding-block: 0.65rem;
+  border-top: 1px solid var(--line);
+}
+
+.admin-overview-row div {
+  display: grid;
+  gap: 0.12rem;
+}
+
+.admin-overview-row b {
+  display: grid;
+  justify-items: end;
+  font-family: var(--font-display), serif;
+  font-size: 1.3rem;
+  font-weight: 500;
+}
+
+.admin-empty-activity {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-height: 10rem;
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.admin-empty-activity p {
+  margin: 0;
+}
+
+.admin-content-page {
+  display: grid;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.admin-page-intro-card > h2,
+.admin-draft-card > h2 {
+  margin-bottom: 0.25rem;
+  font-size: 1.3rem;
+}
+
+.admin-page-intro-card > p,
+.admin-draft-card > p {
+  margin-bottom: 1.2rem;
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.admin-content-overview-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.7rem;
+}
+
+.admin-content-overview-card {
+  display: flex;
+  min-height: 12rem;
+  flex-direction: column;
+  padding: 1rem;
+  border: 1px solid var(--line);
+  border-radius: 0.5rem;
+  background: color-mix(in srgb, var(--surface) 70%, transparent);
+}
+
+.admin-content-overview-card h3 {
+  margin: 0.9rem 0 0.25rem;
+  font-size: 1.15rem;
+}
+
+.admin-content-overview-card p {
+  min-height: 2.5rem;
+  margin-bottom: 0.9rem;
+  color: var(--muted);
+  font-size: 0.75rem;
+  line-height: 1.4;
+}
+
+.admin-content-overview-card > strong {
+  font-family: var(--font-display), serif;
+  font-size: 1.65rem;
+  font-weight: 500;
+  line-height: 1;
+}
+
+.admin-content-overview-card > small {
+  color: var(--muted);
+  font-size: 0.68rem;
+}
+
+.admin-content-overview-card > a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-top: auto;
+  padding-top: 0.8rem;
+  color: var(--accent-strong);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.admin-recent-columns {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1.2rem;
+}
+
+.admin-recent-columns > div + div {
+  padding-left: 1.2rem;
+  border-left: 1px solid var(--line);
+}
+
+.admin-recent-columns h3 {
+  margin-bottom: 0.7rem;
+  font-size: 0.9rem;
+}
+
+.admin-content-list {
+  display: grid;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.admin-content-list li {
+  border-top: 1px solid var(--line);
+}
+
+.admin-content-list a {
+  display: grid;
+  gap: 0.18rem;
+  padding: 0.7rem 0;
+}
+
+.admin-content-list strong {
+  overflow: hidden;
+  color: var(--foreground);
+  font-size: 0.76rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-draft-form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 1rem;
+}
+
+.admin-draft-column {
+  display: grid;
+  align-content: start;
+  gap: 0.65rem;
+  padding: 1rem;
+  border: 1px solid var(--line);
+  border-radius: 0.45rem;
+}
+
+.admin-draft-column h3 {
+  margin-bottom: 0.45rem;
+  font-size: 1rem;
+}
+
+.admin-draft-column .admin-stack {
+  gap: 0.7rem;
+}
+
+.admin-structure-column > .admin-stack > label {
+  margin-bottom: 0.2rem;
+}
+
+.admin-draft-actions {
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.7rem;
+}
+
+.admin-draft-actions .button {
+  width: 100%;
+}
+
+.admin-management-page {
+  display: grid;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.admin-management-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.admin-management-heading h2 {
+  margin-bottom: 0.2rem;
+  font-size: 1.8rem;
+}
+
+.admin-management-heading p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.admin-management-card {
+  min-height: 12rem;
+}
+
+.admin-stat-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.admin-stat-list span {
+  display: grid;
+  min-width: 5rem;
+  gap: 0.15rem;
+}
+
+.admin-stat-list span + span {
+  padding-left: 1rem;
+  border-left: 1px solid var(--line);
+}
+
+.admin-stat-list strong {
+  font-family: var(--font-display), serif;
+  font-size: 1.55rem;
+  font-weight: 500;
+  line-height: 1;
+}
+
+.admin-subscriber-table {
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: 0.45rem;
+}
+
+.admin-subscriber-row {
+  display: grid;
+  min-width: 48rem;
+  grid-template-columns: minmax(8rem, 1fr) minmax(11rem, 1.4fr) minmax(6rem, 0.7fr) minmax(9rem, 1fr) minmax(8rem, 0.9fr) minmax(5rem, 0.6fr);
+  gap: 0.8rem;
+  align-items: center;
+  padding: 0.8rem 1rem;
+}
+
+.admin-subscriber-heading {
+  border-bottom: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.admin-empty-table {
+  min-width: 48rem;
+  margin: 0;
+  padding: 1.5rem 1rem;
+  color: var(--muted);
+  font-size: 0.78rem;
 }
 
 .admin-form {
@@ -1174,7 +1538,32 @@ html[data-theme="light"] .hero-introduction {
     grid-template-columns: 1fr;
   }
 
+  .admin-dashboard-lower,
+  .admin-content-overview-grid,
+  .admin-draft-form {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-draft-actions {
+    grid-column: auto;
+  }
+
+  .admin-recent-columns {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-recent-columns > div + div {
+    padding-top: 1rem;
+    padding-left: 0;
+    border-top: 1px solid var(--line);
+    border-left: 0;
+  }
+
   .admin-page-introduction {
+    flex-direction: column;
+  }
+
+  .admin-management-heading {
     flex-direction: column;
   }
 }
