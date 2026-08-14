@@ -1523,15 +1523,18 @@ html[data-theme="dark"] .admin-brand-logo {
 
 .admin-subscriber-table {
   max-height: 32rem;
-  overflow: auto;
+  overflow-x: auto;
+  overflow-y: auto;
+  scrollbar-gutter: stable;
   border: 1px solid var(--line);
   border-radius: 0.45rem;
 }
 
 .admin-subscriber-row {
   display: grid;
-  min-width: 70rem;
-  grid-template-columns: 2rem minmax(8rem, 0.9fr) minmax(9rem, 1fr) minmax(12rem, 1.4fr) minmax(6rem, 0.7fr) minmax(8rem, 0.8fr) minmax(7rem, 0.7fr) 2.5rem;
+  width: 78rem;
+  min-width: 78rem;
+  grid-template-columns: 2rem minmax(9rem, 0.9fr) minmax(11rem, 1fr) minmax(15rem, 1.4fr) minmax(7rem, 0.7fr) minmax(9rem, 0.8fr) minmax(8rem, 0.7fr) minmax(5.5rem, auto);
   gap: 0.8rem;
   align-items: center;
   padding: 0.8rem 1rem;
@@ -1759,10 +1762,19 @@ html[data-theme="dark"] .admin-brand-logo {
   cursor: pointer;
 }
 
-.admin-recipient-row span {
+.admin-recipient-details {
   display: grid;
+  flex: 1 1 auto;
+  grid-template-columns: minmax(8rem, 0.75fr) minmax(10rem, 1fr) minmax(14rem, 1.35fr);
   min-width: 0;
+  align-items: center;
+  column-gap: 0.85rem;
   gap: 0.2rem;
+}
+
+.admin-recipient-details strong,
+.admin-recipient-details small {
+  min-width: 0;
 }
 
 .admin-recipient-row input[type="checkbox"] {
