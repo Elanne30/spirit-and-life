@@ -6,8 +6,8 @@ import { listPublishedJournals } from "@/app/content/repository";
 
 export const metadata: Metadata = pageMetadata("Journals", "Read personal observations and reflections gathered through study and life.", "/journals");
 
-export default function JournalsPage() {
-  const journals = listPublishedJournals();
+export default async function JournalsPage() {
+  const journals = await listPublishedJournals();
   return (
     <main className="journals-page">
       <section className="journals-introduction page-container page-intro">

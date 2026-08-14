@@ -25,6 +25,8 @@ function normalizeSearchText(value: string) {
 
 async function buildSearchIndex(): Promise<IndexedSearchResult[]> {
   const reflections = await listPublishedReflections();
+  const journals = await listPublishedJournals();
+  const books = await listPublishedBooks();
 
   return [
   ...reflections.map((reflection): IndexedSearchResult => ({
@@ -43,7 +45,7 @@ async function buildSearchIndex(): Promise<IndexedSearchResult[]> {
       ...reflection.sections.flatMap((section) => section.paragraphs),
     ].join(" "),
   })),
-  ...listPublishedJournals().map((journal): IndexedSearchResult => ({
+  ...journals.map((journal): IndexedSearchResult => ({
     type: "Journal" as const,
     title: journal.title,
     description: journal.introduction,
@@ -58,7 +60,7 @@ async function buildSearchIndex(): Promise<IndexedSearchResult[]> {
       ...journal.sections.flatMap((section) => section.paragraphs),
     ].join(" "),
   })),
-  ...listPublishedBooks().map((book): IndexedSearchResult => ({
+  ...books.map((book): IndexedSearchResult => ({
     type: "Book" as const,
     title: book.title,
     description: book.description ?? `${book.status} - Spirit & Life digital library`,

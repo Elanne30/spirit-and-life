@@ -15,8 +15,8 @@ type RelatedContentProps = {
 };
 
 export async function RelatedContent({ relations }: RelatedContentProps) {
-  const books = listPublishedBooks();
-  const journals = listPublishedJournals();
+  const books = await listPublishedBooks();
+  const journals = await listPublishedJournals();
   const reflections = await listPublishedReflections();
   const relatedItems: RelatedItem[] = [
     ...(relations.relatedReflectionSlugs ?? [])

@@ -94,11 +94,37 @@ export async function listDrafts() {
   return result.rows;
 }
 
+export async function listAllDrafts(contentType?: DraftContentType) {
+  await ensureSchema();
+
+  const result = contentType
+    ? await sql<ContentDraft>`
+        SELECT * FROM content_drafts WHERE content_type = ${contentType} ORDER BY updated_at DESC
+      `
+    : await sql<ContentDraft>`
+        SELECT * FROM content_drafts ORDER BY updated_at DESC
+      `;
+
+  return result.rows;
+}
+
 export async function getDraft(id: string) {
   await ensureSchema();
 
   const result = await sql<ContentDraft>`
-    SELECT * FROM content_drafts WHERE id = ${id} AND status = 'draft' LIMIT 1
+    SELECT * FROM content_drafts WHERE id = ${id} LIMIT 1
+  `;
+
+  return result.rows[0] ?? null;
+}
+
+export async function getDraftByTypeAndSlug(contentType: DraftContentType, slug: string) {
+  await ensureSchema();
+
+  const normalizedSlug = normalizeDraftSlug(slug);
+
+  const result = await sql<ContentDraft>`
+    SELECT * FROM content_drafts WHERE content_type = ${contentType} AND slug = ${normalizedSlug} LIMIT 1
   `;
 
   return result.rows[0] ?? null;
@@ -207,7 +233,23 @@ export async function updateDraft(id: string, input: DraftInput) {
         tags = ${JSON.stringify(input.tags ?? [])}::jsonb,
         image_reference = ${input.imageReference ?? null},
         updated_at = ${nowIso()}
-    WHERE id = ${id} AND status = 'draft'
+    WHERE id = ${id}
+  `;
+
+  return getDraft(id);
+}
+
+export async function publishDraft(id: string) {
+  await ensureSchema();
+
+  const timestamp = nowIso();
+
+  await sql`
+    UPDATE content_drafts
+    SET status = 'published',
+        published_at = COALESCE(published_at, ${timestamp}),
+        updated_at = ${timestamp}
+    WHERE id = ${id}
   `;
 
   return getDraft(id);

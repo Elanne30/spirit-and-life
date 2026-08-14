@@ -878,6 +878,43 @@ html[data-theme="light"] .hero-introduction {
   margin-bottom: 0.45rem;
 }
 
+.admin-header-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.admin-tab-row {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.9rem;
+}
+
+.admin-tab {
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.admin-tab.is-active,
+.admin-tab:hover {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+.admin-publish-form {
+  margin-top: 0.9rem;
+}
+
 @media (max-width: 860px) {
   .admin-grid {
     grid-template-columns: 1fr;

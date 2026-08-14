@@ -6,8 +6,8 @@ import { listPublishedBooks } from "@/app/content/repository";
 
 export const metadata: Metadata = pageMetadata("Books", "Explore the Spirit & Life digital library and future writing projects.", "/books");
 
-export default function BooksPage() {
-  const books = listPublishedBooks();
+export default async function BooksPage() {
+  const books = await listPublishedBooks();
   return (
     <main className="books-page">
       <section className="books-introduction page-container page-intro">

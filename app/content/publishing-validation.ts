@@ -71,8 +71,8 @@ export async function ensurePublishingIntegrity() {
   const scriptureReferencePattern = /^(?:[1-3]\s)?[A-Za-z]+(?:\s[A-Za-z]+)*\s\d+:\d+(?:-\d+)?$/;
 
   const reflections = await listPublishedReflections();
-  const journals = listPublishedJournals();
-  const books = listPublishedBooks();
+  const journals = await listPublishedJournals();
+  const books = await listPublishedBooks();
   const reflectionSlugs = reflections.map((item) => item.contentSlug);
   const journalSlugs = journals.map((item) => item.contentSlug);
   const bookSlugs = books.map((item) => item.contentSlug);

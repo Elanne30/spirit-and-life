@@ -9,7 +9,7 @@ import { HomeNewsletterSection } from "@/app/home-newsletter-section";
 
 export default async function Home() {
   const featuredReflection = await getFeaturedReflection();
-  const featuredBook = getFeaturedBook();
+  const featuredBook = await getFeaturedBook();
 
   return (
     <div className="site-frame home-page">

@@ -5,7 +5,7 @@ export async function getFeaturedReflection() {
   return reflections.find((reflection) => reflection.featured) ?? reflections[0];
 }
 
-export function getFeaturedBook() {
-  const books = listPublishedBooks();
+export async function getFeaturedBook() {
+  const books = await listPublishedBooks();
   return books.find((book) => book.featured) ?? books[0];
 }

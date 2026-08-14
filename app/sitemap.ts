@@ -10,10 +10,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const routes = ["", "reflections", "journals", "books", "study-center", "about", "contact", "scripture", "search", "privacy-policy", "terms-of-use"];
   const reflections = await listPublishedReflections();
+  const journals = await listPublishedJournals();
+  const books = await listPublishedBooks();
   const contentRoutes = [
     ...reflections.map((item) => `reflections/${item.contentSlug}`),
-    ...listPublishedJournals().map((item) => `journals/${item.contentSlug}`),
-    ...listPublishedBooks().map((item) => `books/${item.contentSlug}`),
+    ...journals.map((item) => `journals/${item.contentSlug}`),
+    ...books.map((item) => `books/${item.contentSlug}`),
     ...scriptureReferences.map((item) => `scripture/${item.slug}`),
     ...studies.map((item) => `study-center/${item.date}`),
   ];
