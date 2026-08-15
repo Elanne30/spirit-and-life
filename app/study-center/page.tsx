@@ -58,7 +58,7 @@ export default function StudyCenterPage() {
           />
           <div className="study-hero-copy">
             <p className="eyebrow">A daily practice of attention</p>
-            <h1>{studyPlan.title}</h1>
+            <h2>{studyPlan.title}</h2>
             <p>{studyPlan.subtitle}</p>
           </div>
           <div className="study-hero-aside">

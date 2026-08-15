@@ -73,7 +73,7 @@ export function HomeNewsletterSection() {
           <input id="email" name="email" type="email" placeholder="you@example.com" required />
           <Button type="submit">{isPending ? "Subscribing..." : "Subscribe"}</Button>
         </div>
-        {newsletterState.message ? <p className="form-note" role="status">{newsletterState.message}</p> : null}
+        {newsletterState.message ? <p className={newsletterState.status === "error" ? "form-error" : "form-note"} role={newsletterState.status === "error" ? "alert" : "status"}>{newsletterState.message}</p> : null}
         <Button type="button" variant="secondary" onClick={handleEnablePush}>Enable web push notifications</Button>
         {pushMessage ? <p className="form-note" role="status">{pushMessage}</p> : null}
       </form>

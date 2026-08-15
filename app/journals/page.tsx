@@ -17,7 +17,7 @@ export default async function JournalsPage() {
       </section>
 
       <section className="journal-library page-container library-section" aria-label="Journal library">
-        <div className="journal-grid">
+        {journals.length ? <div className="journal-grid">
           {journals.map((journal) => (
             <article className="journal-card" key={journal.contentSlug}>
               <Link className="journal-card-image" href={`/journals/${journal.contentSlug}`}>
@@ -43,7 +43,7 @@ export default async function JournalsPage() {
               </div>
             </article>
           ))}
-        </div>
+        </div> : <p className="empty-state">Journal entries will appear here when they are published.</p>}
       </section>
     </main>
   );

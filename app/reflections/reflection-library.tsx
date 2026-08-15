@@ -14,7 +14,7 @@ export function ReflectionLibrary({ reflections }: { reflections: Reflection[] }
 
   return (
     <section className="reflection-library page-container library-section" aria-label="Reflection library">
-      <div className="filter-row" aria-label="Reflection categories">
+      {reflections.length ? <><div className="filter-row" aria-label="Reflection categories">
         {categories.map((category) => (
           <button
             className={`filter-pill${selectedCategory === category ? " is-active" : ""}`}
@@ -54,7 +54,7 @@ export function ReflectionLibrary({ reflections }: { reflections: Reflection[] }
             </div>
           </article>
         ))}
-      </div>
+      </div></> : <p className="empty-state">Reflections will appear here when they are published.</p>}
     </section>
   );
 }

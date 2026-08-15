@@ -17,7 +17,7 @@ export default async function BooksPage() {
       </section>
 
       <section className="book-library page-container library-section" aria-label="Book library">
-        <div className="book-grid">
+        {books.length ? <div className="book-grid">
           {books.map((book) => (
             <article className="book-card" key={book.contentSlug}>
               <Link className="book-card-cover" href={`/books/${book.contentSlug}`}>
@@ -47,7 +47,7 @@ export default async function BooksPage() {
               </div>
             </article>
           ))}
-        </div>
+        </div> : <p className="empty-state">Books will appear here when they are added to the library.</p>}
       </section>
     </main>
   );

@@ -4,6 +4,8 @@ import type { Journal } from "@/app/data/journals";
 import type { Book } from "@/app/data/books";
 import type { ContentDraft } from "@/app/lib/content-drafts";
 
+const fallbackContentImage = "/images/study_center_hero.jpg";
+
 type ReflectionBody = {
   date?: unknown;
   readingTime?: unknown;
@@ -124,7 +126,7 @@ function draftToReflection(draft: ContentDraft): Reflection | null {
     type: "reflection",
     contentSlug: draft.slug,
     title: draft.title,
-    image: draft.image_reference || "/images/placeholder-content.jpg",
+    image: draft.image_reference || fallbackContentImage,
     date,
     readingTime,
     category: asReflectionCategory(draft.category),
@@ -163,7 +165,7 @@ function draftToJournal(draft: ContentDraft): Journal | null {
     type: "journal",
     contentSlug: draft.slug,
     title: draft.title,
-    image: draft.image_reference || "/images/placeholder-content.jpg",
+    image: draft.image_reference || fallbackContentImage,
     date: asString(body.date),
     label: asString(body.label, "JOURNAL ENTRY"),
     category: asContentCategory(draft.category),

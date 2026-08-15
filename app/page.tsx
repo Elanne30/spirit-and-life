@@ -61,7 +61,7 @@ export default async function Home() {
           </div>
         </section>
 
-        <section className="home-feature page-container" aria-labelledby="featured-reflection-title">
+        {featuredReflection ? <section className="home-feature page-container" aria-labelledby="featured-reflection-title">
           <SectionHeading eyebrow="Featured Reflection" title="A place to begin" />
           <div className="feature-split">
             <Image src={featuredReflection.image} alt={featuredReflection.title} width={1280} height={853} sizes="(max-width: 760px) 100vw, 50vw" />
@@ -74,9 +74,9 @@ export default async function Home() {
             </div>
           </div>
           <Link className="quiet-link" href="/reflections">View All Reflections <span aria-hidden="true">→</span></Link>
-        </section>
+        </section> : <section className="home-feature page-container"><SectionHeading eyebrow="Featured Reflection" title="A place to begin" /><p className="empty-state">Featured reflections will appear here when they are published.</p></section>}
 
-        <section className="home-feature home-book-feature page-container" aria-labelledby="featured-book-title">
+        {featuredBook ? <section className="home-feature home-book-feature page-container" aria-labelledby="featured-book-title">
           <SectionHeading eyebrow="Featured Book" title="From the Library" />
           <div className="feature-split feature-split-book">
             <div className="book-cover-wrap">
@@ -89,7 +89,7 @@ export default async function Home() {
               <Button href={`/books/${featuredBook.contentSlug}`}>Learn More</Button>
             </div>
           </div>
-        </section>
+        </section> : <section className="home-feature home-book-feature page-container"><SectionHeading eyebrow="Featured Book" title="From the Library" /><p className="empty-state">Featured books will appear here when they are added to the library.</p></section>}
 
         <HomeNewsletterSection />
       </main>

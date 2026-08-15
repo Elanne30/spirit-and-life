@@ -45,6 +45,7 @@ export function Header() {
           ))}
           <Link className="search-button" href="/search" aria-label="Search">
             <span aria-hidden="true" />
+            <span className="search-button-label">Search</span>
           </Link>
           <ThemeToggle />
         </nav>

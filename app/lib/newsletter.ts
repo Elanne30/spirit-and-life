@@ -77,7 +77,7 @@ type BroadcastDraft = {
   footerNote?: string;
 };
 
-type NewsletterTokenPurpose = "confirm" | "unsubscribe";
+type NewsletterTokenPurpose = "unsubscribe";
 
 type NewsletterTokenPayload = {
   id: string;
@@ -317,53 +317,31 @@ async function storeSubscriber(input: {
 }
 
 export async function subscribeToNewsletter(emailInput: string) {
-  await ensureSchema();
-
   const email = normalizeEmail(emailInput);
   if (!isValidEmail(email)) {
     return { status: "error" as const, message: "Please enter a valid email address." };
   }
 
-  const existing = await getSubscriberByEmail(email);
-  if (existing?.status === "subscribed") {
-    return { status: "success" as const, message: "You're already subscribed." };
-  }
+  try {
+    await ensureSchema();
+    const existing = await getSubscriberByEmail(email);
+    if (existing?.status === "subscribed") {
+      return { status: "success" as const, message: "You're already subscribed." };
+    }
 
-  await storeSubscriber({
-    email,
-    status: "subscribed",
-    subscribedAt: nowIso(),
-    unsubscribedAt: null,
-    existingId: existing?.id,
-  });
+    await storeSubscriber({
+      email,
+      status: "subscribed",
+      subscribedAt: nowIso(),
+      unsubscribedAt: null,
+      existingId: existing?.id,
+    });
+  } catch (error) {
+    console.error("[newsletter] Subscription could not be stored.", error instanceof Error ? error.message : "Unknown error");
+    return { status: "error" as const, message: "Subscription is unavailable right now. Please try again." };
+  }
 
   return { status: "success" as const, message: "You're subscribed to Spirit & Life." };
-}
-
-export async function confirmNewsletterSubscription(token: string) {
-  await ensureSchema();
-
-  const payload = verifySignedToken(token, "confirm");
-  if (!payload) {
-    return { status: "error" as const, message: "This confirmation link is no longer valid." };
-  }
-
-  const subscriber = await getSubscriberByEmail(payload.email);
-  if (!subscriber || subscriber.id !== payload.id) {
-    return { status: "error" as const, message: "This confirmation link is no longer valid." };
-  }
-
-  await sql`
-    UPDATE newsletter_subscribers
-    SET status = 'subscribed',
-        subscribed_at = COALESCE(subscribed_at, ${nowIso()}),
-        unsubscribed_at = NULL,
-        confirmation_token_hash = NULL,
-        updated_at = ${nowIso()}
-    WHERE id = ${subscriber.id}
-  `;
-
-  return { status: "success" as const, message: "Thank you. You're subscribed to Spirit & Life." };
 }
 
 export async function unsubscribeNewsletter(token: string) {

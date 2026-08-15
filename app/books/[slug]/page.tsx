@@ -12,7 +12,7 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
   const book = await getPublishedBook(slug);
-  return book ? pageMetadata(book.title, book.description ?? `${book.title} in the Spirit & Life digital library.`, `/books/${book.contentSlug}`) : pageMetadata("Books", "Explore the Spirit & Life digital library.", "/books");
+  return book ? pageMetadata(book.title, book.description ?? `${book.title} in the Spirit & Life digital library.`, `/books/${book.contentSlug}`, book.cover) : pageMetadata("Books", "Explore the Spirit & Life digital library.", "/books");
 }
 
 export default async function BookPage({
