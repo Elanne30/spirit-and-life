@@ -1,50 +1,71 @@
 "use client";
 
 import { useActionState, useState } from "react";
+import { Bell } from "lucide-react";
 import { Button } from "@/app/components/button";
 import { subscribeNewsletterAction, type NewsletterFormState } from "@/app/actions/newsletter";
 
 export function HomeNewsletterSection() {
   const [newsletterState, formAction, isPending] = useActionState(subscribeNewsletterAction, { status: "idle", message: "" } satisfies NewsletterFormState);
-  const [pushMessage, setPushMessage] = useState("");
+  const [pushState, setPushState] = useState<{ status: "idle" | "success" | "error"; message: string }>({ status: "idle", message: "" });
+  const [isEnablingPush, setIsEnablingPush] = useState(false);
 
   async function handleEnablePush() {
-    setPushMessage("");
+    setPushState({ status: "idle", message: "" });
 
     if (!("serviceWorker" in navigator) || !("PushManager" in window) || !("Notification" in window)) {
-      setPushMessage("This browser does not support web push notifications.");
+      setPushState({ status: "error", message: "This browser does not support push notifications." });
       return;
     }
 
-    const permission = await Notification.requestPermission();
-    if (permission !== "granted") {
-      setPushMessage("Push notifications were not enabled.");
+    if (Notification.permission === "denied") {
+      setPushState({ status: "error", message: "Notifications are blocked in your browser settings." });
       return;
     }
 
     const publicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
     if (!publicKey) {
-      setPushMessage("Push notifications are not configured yet.");
+      setPushState({ status: "error", message: "Push notifications are not configured yet." });
       return;
     }
 
-    const registration = await navigator.serviceWorker.register("/sw.js");
-    let subscription = await registration.pushManager.getSubscription();
+    setIsEnablingPush(true);
 
-    if (!subscription) {
-      subscription = await registration.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(publicKey),
+    try {
+      const permission = Notification.permission === "granted" ? "granted" : await Notification.requestPermission();
+      if (permission !== "granted") {
+        setPushState({ status: "error", message: "Notifications were not enabled." });
+        return;
+      }
+
+      const registration = await navigator.serviceWorker.register("/sw.js");
+      let subscription = await registration.pushManager.getSubscription();
+      const alreadySubscribed = Boolean(subscription);
+
+      if (!subscription) {
+        subscription = await registration.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: urlBase64ToUint8Array(publicKey),
+        });
+      }
+
+      const response = await fetch("/api/push/subscribe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(subscription),
       });
+      const result = await response.json() as { status?: string; message?: string };
+
+      if (!response.ok || result.status !== "success") {
+        throw new Error(result.message ?? "Push subscription could not be saved.");
+      }
+
+      setPushState({ status: "success", message: alreadySubscribed ? "Notifications are already enabled on this device." : "Notifications are enabled on this device." });
+    } catch (error) {
+      setPushState({ status: "error", message: error instanceof Error ? error.message : "Push notifications could not be enabled." });
+    } finally {
+      setIsEnablingPush(false);
     }
-
-    await fetch("/api/push/subscribe", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(subscription),
-    });
-
-    setPushMessage("Push notifications are enabled.");
   }
 
   function urlBase64ToUint8Array(value: string) {
@@ -72,10 +93,12 @@ export function HomeNewsletterSection() {
         <div className="newsletter-field">
           <input id="email" name="email" type="email" placeholder="you@example.com" required />
           <Button type="submit">{isPending ? "Subscribing..." : "Subscribe"}</Button>
+          <button className="push-enable-button" type="button" onClick={handleEnablePush} disabled={isEnablingPush} aria-label="Enable notifications" title="Enable notifications">
+            <Bell aria-hidden="true" size={18} />
+          </button>
         </div>
         {newsletterState.message ? <p className={newsletterState.status === "error" ? "form-error" : "form-note"} role={newsletterState.status === "error" ? "alert" : "status"}>{newsletterState.message}</p> : null}
-        <Button type="button" variant="secondary" onClick={handleEnablePush}>Enable web push notifications</Button>
-        {pushMessage ? <p className="form-note" role="status">{pushMessage}</p> : null}
+        {pushState.message ? <p className={pushState.status === "error" ? "form-error" : "form-note"} role={pushState.status === "error" ? "alert" : "status"}>{pushState.message}</p> : null}
       </form>
     </section>
   );

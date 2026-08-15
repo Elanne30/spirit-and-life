@@ -2018,6 +2018,115 @@ html[data-theme="dark"] .admin-brand-logo {
     align-items: flex-start;
     flex-direction: column;
   }
+
+  .admin-record-controls {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .admin-record-controls > :first-child {
+    grid-column: 1 / -1;
+  }
+
+  .admin-recipient-details {
+    grid-template-columns: minmax(7rem, 0.7fr) minmax(9rem, 1fr) minmax(11rem, 1.2fr);
+  }
+}
+
+@media (max-width: 1100px) and (min-width: 861px) {
+  .admin-dashboard > .admin-grid,
+  .admin-content-overview-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .admin-dashboard-lower {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-library-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 600px) {
+  .admin-content {
+    padding: 1.5rem 0.75rem 3rem;
+  }
+
+  .admin-sidebar {
+    padding-inline: 0.75rem;
+  }
+
+  .admin-brand small,
+  .admin-header .quiet-note {
+    display: none;
+  }
+
+  .admin-card {
+    padding: 1rem;
+  }
+
+  .admin-page-introduction h2,
+  .admin-management-heading h2 {
+    font-size: 1.55rem;
+  }
+
+  .admin-card-metrics,
+  .admin-stat-list {
+    gap: 0.75rem;
+  }
+
+  .admin-card-metrics span + span,
+  .admin-stat-list span + span {
+    padding-left: 0.75rem;
+  }
+
+  .admin-header-row,
+  .admin-panel-heading {
+    gap: 0.75rem;
+  }
+
+  .admin-header-row > .button,
+  .admin-header-row > form {
+    flex: 1 1 auto;
+  }
+
+  .admin-tab-row {
+    flex-wrap: wrap;
+  }
+
+  .admin-tab {
+    flex: 1 1 8rem;
+    text-align: center;
+  }
+
+  .admin-image-upload-form .button,
+  .admin-image-upload-form button {
+    flex: 1 1 10rem;
+    text-align: center;
+  }
+
+  .admin-record-controls {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-record-controls > :first-child {
+    grid-column: auto;
+  }
+
+  .admin-recipient-details {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-recipient-row {
+    align-items: flex-start;
+  }
+
+  .admin-library-actions,
+  .admin-selection-toolbar,
+  .admin-recipient-actions,
+  .admin-recipient-toolbar {
+    align-items: flex-start;
+  }
 }
 
 .journals-introduction h1 {
@@ -5113,6 +5222,33 @@ body {
 
 .newsletter-field input {
   padding: 0.75rem 1rem;
+}
+
+.push-enable-button {
+  display: inline-flex;
+  width: 2.85rem;
+  height: 2.85rem;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--accent-strong);
+  cursor: pointer;
+}
+
+.push-enable-button:hover:not(:disabled),
+.push-enable-button:focus-visible {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  outline: 2px solid color-mix(in srgb, var(--accent) 35%, transparent);
+  outline-offset: 2px;
+}
+
+.push-enable-button:disabled {
+  cursor: wait;
+  opacity: 0.6;
 }
 
 .newsletter-field input:focus-visible,
