@@ -1,15 +1,26 @@
 import { Button } from "@/app/components/button";
 import { ContentCard } from "@/app/components/content-card";
 import { SectionHeading } from "@/app/components/section-heading";
-import { getFeaturedBook, getFeaturedReflection } from "@/app/content/featured";
+import { getFeaturedBook } from "@/app/content/featured";
+import { listPublishedJournals, listPublishedReflections } from "@/app/content/repository";
+import { getStudyByDate } from "@/app/data/study-plan";
 import { siteConfig } from "@/app/content/site-config";
 import Link from "next/link";
 import Image from "next/image";
 import { HomeNewsletterSection } from "@/app/home-newsletter-section";
 
 export default async function Home() {
-  const featuredReflection = await getFeaturedReflection();
-  const featuredBook = await getFeaturedBook();
+  const [reflections, journals, featuredBook] = await Promise.all([
+    listPublishedReflections(),
+    listPublishedJournals(),
+    getFeaturedBook(),
+  ]);
+  const homepageReflections = [
+    ...reflections.filter((reflection) => reflection.featured),
+    ...reflections.filter((reflection) => !reflection.featured),
+  ].slice(0, 2);
+  const featuredJournal = journals[0];
+  const todayStudy = getStudyByDate(new Date().toISOString().slice(0, 10));
 
   return (
     <div className="site-frame home-page">
@@ -61,20 +72,56 @@ export default async function Home() {
           </div>
         </section>
 
-        {featuredReflection ? <section className="home-feature page-container" aria-labelledby="featured-reflection-title">
-          <SectionHeading eyebrow="Featured Reflection" title="A place to begin" />
-          <div className="feature-split">
-            <Image src={featuredReflection.image} alt={featuredReflection.title} width={1280} height={853} sizes="(max-width: 760px) 100vw, 50vw" />
-            <div className="feature-copy">
-              <p className="eyebrow">{featuredReflection.category}</p>
-              <h2 id="featured-reflection-title">{featuredReflection.title}</h2>
-              <p className="scripture-reference">{featuredReflection.scripture}</p>
-              <p>{featuredReflection.introduction}</p>
-              <div className="feature-action"><Button href={`/reflections/${featuredReflection.contentSlug}`}>Read More</Button><span>{featuredReflection.readingTime}</span></div>
-            </div>
-          </div>
-          <Link className="quiet-link" href="/reflections">View All Reflections <span aria-hidden="true">→</span></Link>
-        </section> : <section className="home-feature page-container"><SectionHeading eyebrow="Featured Reflection" title="A place to begin" /><p className="empty-state">Featured reflections will appear here when they are published.</p></section>}
+        <section className="home-feature page-container" aria-labelledby="home-reflections-title">
+          <SectionHeading eyebrow="Reflections" title="A place to begin" />
+          {homepageReflections.length ? <><div className="reflection-grid home-reflection-grid">
+            {homepageReflections.map((reflection) => (
+              <article className="reflection-card" key={reflection.contentSlug}>
+                <Link className="reflection-card-image" href={`/reflections/${reflection.contentSlug}`}>
+                  <Image src={reflection.image} alt={reflection.title} width={1280} height={853} sizes="(max-width: 720px) 100vw, 50vw" />
+                </Link>
+                <div className="reflection-card-body">
+                  <p className="content-card-label">{reflection.category}</p>
+                  <h2 id={reflection === homepageReflections[0] ? "home-reflections-title" : undefined}><Link href={`/reflections/${reflection.contentSlug}`}>{reflection.title}</Link></h2>
+                  <p className="scripture-reference">{reflection.scripture}</p>
+                  <p>{reflection.introduction}</p>
+                  <p className="card-reading-time">{reflection.readingTime}</p>
+                  <Link className="content-card-link" href={`/reflections/${reflection.contentSlug}`}>Read More →</Link>
+                </div>
+              </article>
+            ))}
+          </div><Link className="quiet-link" href="/reflections">View All Reflections <span aria-hidden="true">→</span></Link></> : <p className="empty-state">Reflections will appear here when they are published.</p>}
+        </section>
+
+        <section className="home-companion-section page-container" aria-label="Journal and today’s study">
+          <article className="home-companion-panel">
+            <p className="eyebrow">Journal</p>
+            <h2>From the journal</h2>
+            {featuredJournal ? <article className="journal-card">
+              <Link className="journal-card-image" href={`/journals/${featuredJournal.contentSlug}`}>
+                <Image src={featuredJournal.image} alt={featuredJournal.title} width={1280} height={853} sizes="(max-width: 720px) 100vw, 50vw" />
+              </Link>
+              <div className="journal-card-body">
+                <p className="content-card-label">{featuredJournal.date}</p>
+                <h3><Link href={`/journals/${featuredJournal.contentSlug}`}>{featuredJournal.title}</Link></h3>
+                <p>{featuredJournal.introduction}</p>
+                <Link className="content-card-link" href={`/journals/${featuredJournal.contentSlug}`}>Read Entry →</Link>
+              </div>
+            </article> : <p className="empty-state">Journal entries will appear here when they are published.</p>}
+          </article>
+          <article className="home-companion-panel home-study-panel">
+            <p className="eyebrow">Today&apos;s Study</p>
+            <h2>Stay with the text.</h2>
+            {todayStudy ? <div className="home-study-card">
+              <p className="content-card-label">{todayStudy.weekday}</p>
+              <p className="home-study-date">{todayStudy.date}</p>
+              <h3>{todayStudy.weekTitle}</h3>
+              <p className="scripture-reference">{todayStudy.passage}</p>
+              <p>{todayStudy.focus}</p>
+              <Link className="content-card-link" href={`/study-center/${todayStudy.date}`}>Begin Today&apos;s Study →</Link>
+            </div> : <p className="empty-state">Today&apos;s study will appear here when a Study Center entry is available.</p>}
+          </article>
+        </section>
 
         {featuredBook ? <section className="home-feature home-book-feature page-container" aria-labelledby="featured-book-title">
           <SectionHeading eyebrow="Featured Book" title="From the Library" />

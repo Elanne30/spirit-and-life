@@ -4657,14 +4657,14 @@ body {
   border-radius: 0;
 }
 
-.search-button span {
+.search-button > span:first-child {
   width: 0.9rem;
   height: 0.9rem;
   border: 1px solid currentColor;
   border-radius: 50%;
 }
 
-.search-button span::after {
+.search-button > span:first-child::after {
   display: block;
   width: 0.4rem;
   height: 1px;
@@ -4673,6 +4673,10 @@ body {
   content: "";
   transform: rotate(45deg);
   transform-origin: left center;
+}
+
+.search-button-label {
+  display: none;
 }
 
 .eyebrow {
@@ -4910,6 +4914,65 @@ body {
 .home-feature {
   border-bottom: 1px solid var(--line);
   text-align: center;
+}
+
+.home-reflection-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  max-width: 70rem;
+  margin: 3.9rem auto 0;
+  text-align: left;
+}
+
+.home-companion-section {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(2rem, 6vw, 5rem);
+  padding-block: 7rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.home-companion-panel > h2 {
+  margin: 0.75rem 0 2rem;
+  font-size: clamp(2rem, 4vw, 3rem);
+}
+
+.home-companion-panel .journal-card {
+  height: 100%;
+}
+
+.home-study-card {
+  display: flex;
+  min-height: 100%;
+  flex-direction: column;
+  padding: 1.8rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: 0 0.65rem 1.5rem var(--shadow);
+}
+
+.home-study-card h3 {
+  margin: 0.9rem 0 1rem;
+  font-family: var(--font-display), serif;
+  font-size: clamp(1.8rem, 3vw, 2.4rem);
+  font-weight: 500;
+  line-height: 1.05;
+}
+
+.home-study-card > p:not(.content-card-label):not(.scripture-reference):not(.home-study-date) {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.home-study-date {
+  margin-bottom: 0;
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
+.home-study-card .content-card-link {
+  display: inline-block;
+  margin-top: auto;
 }
 
 .feature-split {
@@ -5774,6 +5837,7 @@ body {
   }
 
   .search-button-label {
+    display: inline;
     color: var(--foreground);
     font-size: 0.78rem;
   }
@@ -5827,6 +5891,11 @@ body {
   .book-grid,
   .content-grid {
     grid-template-columns: 1fr;
+  }
+
+  .home-companion-section {
+    grid-template-columns: 1fr;
+    padding-block: 5rem;
   }
 
   .page-intro {
