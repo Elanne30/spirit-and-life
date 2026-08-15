@@ -6858,6 +6858,13 @@ body {
   margin-bottom: 2.5rem;
 }
 
+.search-filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
 .search-form label {
   display: block;
   margin-bottom: 0.55rem;
@@ -6896,6 +6903,13 @@ body {
   list-style: none;
 }
 
+.search-result-meta {
+  margin: -0.35rem 0 0.75rem;
+  color: var(--accent-strong);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
 @media (max-width: 900px) {
   .study-entry,
   .study-feature,
@@ -6927,6 +6941,16 @@ body {
   .search-form-field {
     align-items: stretch;
     flex-direction: column;
+  }
+
+  .search-filter-row {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 0.4rem;
+  }
+
+  .search-filter-row .filter-pill {
+    flex: 0 0 auto;
   }
 
   .study-center-header {

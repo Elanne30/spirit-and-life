@@ -3,13 +3,9 @@
 import { scriptureReferences } from "@/app/content/scripture";
 import { listPublishedBooks, listPublishedJournals, listPublishedReflections } from "@/app/content/repository";
 import { studies } from "@/app/data/study-plan";
+import type { SearchResult, SearchType } from "@/app/content/search-types";
 
-export type SearchResult = {
-  type: "Reflection" | "Journal" | "Book" | "Scripture" | "Study Center";
-  title: string;
-  description: string;
-  href: string;
-};
+export type { SearchResult, SearchType } from "@/app/content/search-types";
 
 type IndexedSearchResult = SearchResult & {
   searchText: string;
@@ -34,6 +30,7 @@ async function buildSearchIndex(): Promise<IndexedSearchResult[]> {
     title: reflection.title,
     description: `${reflection.category} - ${reflection.introduction}`,
     href: `/reflections/${reflection.contentSlug}`,
+    meta: [reflection.date, reflection.readingTime, reflection.scripture].filter(Boolean).join(" · "),
     searchText: [
       reflection.type,
       reflection.title,
@@ -50,6 +47,7 @@ async function buildSearchIndex(): Promise<IndexedSearchResult[]> {
     title: journal.title,
     description: journal.introduction,
     href: `/journals/${journal.contentSlug}`,
+    meta: [journal.date, journal.label].filter(Boolean).join(" · "),
     searchText: [
       journal.type,
       journal.title,
@@ -65,6 +63,7 @@ async function buildSearchIndex(): Promise<IndexedSearchResult[]> {
     title: book.title,
     description: book.description ?? `${book.status} - Spirit & Life digital library`,
     href: `/books/${book.contentSlug}`,
+    meta: [book.category, book.status, book.expectedPublication].filter(Boolean).join(" · "),
     searchText: [
       book.type,
       book.title,
@@ -84,6 +83,7 @@ async function buildSearchIndex(): Promise<IndexedSearchResult[]> {
     title: reference.reference,
     description: reference.summary,
     href: `/scripture/${reference.slug}`,
+    meta: `${reference.book} · Chapter ${reference.chapter}`,
     searchText: [
       "Scripture",
       reference.reference,
@@ -98,6 +98,7 @@ async function buildSearchIndex(): Promise<IndexedSearchResult[]> {
     title: `${study.weekday}, ${study.date}`,
     description: `${study.weekTitle ?? "Study"} - ${study.passage}`,
     href: `/study-center/${study.date}`,
+    meta: study.passage,
     searchText: [
       "Study Center",
       study.kind,
@@ -115,7 +116,7 @@ async function buildSearchIndex(): Promise<IndexedSearchResult[]> {
   ];
 }
 
-export async function searchContent(query: string): Promise<SearchResult[]> {
+export async function searchContent(query: string, type: SearchType = "All"): Promise<SearchResult[]> {
   const normalizedQuery = normalizeSearchText(query);
 
   if (!normalizedQuery) {
@@ -126,6 +127,7 @@ export async function searchContent(query: string): Promise<SearchResult[]> {
   const queryTokens = normalizedQuery.split(" ");
 
   return searchIndex
+    .filter((result) => type === "All" || result.type === type)
     .map((result) => {
       const normalizedTitle = normalizeSearchText(result.title);
       const normalizedType = normalizeSearchText(result.type);
@@ -162,5 +164,7 @@ export async function searchContent(query: string): Promise<SearchResult[]> {
       title: result.title,
       description: result.description,
       href: result.href,
-    }));
+      meta: result.meta,
+    }))
+    .filter((result, index, results) => results.findIndex((candidate) => candidate.href === result.href) === index);
 }
