@@ -158,8 +158,8 @@ export function DraftEditForm({ draft }: { draft: ContentDraft }) {
         Feature this reflection
       </label>
 
-      {draft.content_type === "reflection" ? (
-        <ReflectionBodyEditor initialSections={getInitialSections(draft)} />
+      {draft.content_type === "reflection" || draft.content_type === "journal" ? (
+        <ReflectionBodyEditor initialSections={getInitialSections(draft)} initialRichText={getBodyValue(draft.body, "richText")} />
       ) : null}
 
       <button

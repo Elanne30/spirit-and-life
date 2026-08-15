@@ -120,7 +120,7 @@ export function DraftForm() {
 
       <div className="admin-draft-column admin-structure-column">
         <h3>Content Structure</h3>
-        {contentType === "reflection" ? <ReflectionBodyEditor /> : <p className="quiet-note">Content structure is available when creating a reflection. Other content types retain their existing draft fields.</p>}
+        {contentType === "reflection" || contentType === "journal" ? <ReflectionBodyEditor /> : <p className="quiet-note">Rich body content is available for reflections and journals. Books retain their existing fields.</p>}
       </div>
 
       <div className="admin-draft-actions"><button className="button button-secondary" type="submit" disabled={isPending}>{isPending ? "Saving..." : "Save draft"}</button><button className="button button-primary" type="submit" disabled={isPending}>{isPending ? "Saving..." : "Save & continue editing"}</button></div>

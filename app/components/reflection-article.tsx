@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { RelatedContent } from "@/app/components/related-content";
 import type { Reflection } from "@/app/data/reflections";
+import { ArticleRichTextRenderer } from "@/app/components/article-rich-text-renderer";
 
 // Shared with the admin preview so it never drifts from the public page.
 export function ReflectionArticle({ reflection, showBackLink = true }: { reflection: Reflection; showBackLink?: boolean }) {
@@ -30,7 +31,7 @@ export function ReflectionArticle({ reflection, showBackLink = true }: { reflect
         </div>
         <div className="reflection-reading-column">
           <p className="reflection-introduction">{reflection.introduction}</p>
-          {reflection.sections.map((section) => (
+          {reflection.richText ? <ArticleRichTextRenderer document={reflection.richText} /> : reflection.sections.map((section) => (
             <section className="reading-section" key={section.heading}>
               <h2>{section.heading}</h2>
               {section.paragraphs.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}

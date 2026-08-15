@@ -1,5 +1,6 @@
 import { imageManifest, type ImageManifestEntry } from "@/app/data/image-manifest";
 import type { ContentRelations, ReflectionCategory } from "@/app/content/types";
+import type { RichTextDocument } from "@/app/content/article-rich-text";
 
 export type ContentSection = { heading: string; paragraphs: string[] };
 
@@ -12,6 +13,7 @@ export type Reflection = ImageManifestEntry & ContentRelations & {
   scripture: string;
   introduction: string;
   sections: ContentSection[];
+  richText?: RichTextDocument;
   featured?: boolean;
 };
 

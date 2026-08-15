@@ -97,7 +97,7 @@ export function ContentEditForm({ draft }: { draft: ContentDraft }) {
           <label htmlFor="edit-scripture">Scripture</label>
           <input id="edit-scripture" name="scripture" type="text" defaultValue={scripture} placeholder="Romans 8:28" />
 
-          <ReflectionBodyEditor initialSections={getInitialSections(draft)} />
+          <ReflectionBodyEditor initialSections={getInitialSections(draft)} initialRichText={getBodyValue(draft.body, "richText")} />
         </>
       ) : null}
 
@@ -109,7 +109,7 @@ export function ContentEditForm({ draft }: { draft: ContentDraft }) {
           <label htmlFor="edit-label">Label</label>
           <input id="edit-label" name="label" type="text" defaultValue={label || "JOURNAL ENTRY"} />
 
-          <ReflectionBodyEditor initialSections={getInitialSections(draft)} />
+          <ReflectionBodyEditor initialSections={getInitialSections(draft)} initialRichText={getBodyValue(draft.body, "richText")} />
         </>
       ) : null}
 

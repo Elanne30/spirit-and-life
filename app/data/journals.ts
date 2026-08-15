@@ -1,6 +1,7 @@
 import { imageManifest, type ImageManifestEntry } from "@/app/data/image-manifest";
 import type { ContentSection } from "@/app/data/reflections";
 import type { ContentCategory, ContentRelations } from "@/app/content/types";
+import type { RichTextDocument } from "@/app/content/article-rich-text";
 
 export type Journal = ImageManifestEntry & ContentRelations & {
   image: string;
@@ -10,6 +11,7 @@ export type Journal = ImageManifestEntry & ContentRelations & {
   featured?: boolean;
   introduction: string;
   sections: ContentSection[];
+  richText?: RichTextDocument;
 };
 
 const journalContent: Record<string, Omit<Journal, keyof ImageManifestEntry | "image">> = {

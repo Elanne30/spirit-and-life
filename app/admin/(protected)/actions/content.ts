@@ -18,6 +18,7 @@ import { journals } from "@/app/data/journals";
 import { books } from "@/app/data/books";
 import { revalidatePath } from "next/cache";
 import { put } from "@vercel/blob";
+import { normalizeRichTextDocument, richTextToLegacySections, type RichTextDocument } from "@/app/content/article-rich-text";
 
 export type ContentDraftActionState = {
   status: "idle" | "success" | "error";
@@ -84,6 +85,7 @@ type ParsedDraftInput =
       tags: string[];
       featured: boolean;
       sections: Array<{ heading: string; paragraphs: string[] }>;
+      richText: RichTextDocument | undefined;
       label: string;
       subtitle: string;
       expectedPublication: string;
@@ -126,6 +128,7 @@ function readDraftInput(formData: FormData): ParsedDraftInput {
 
   const featured = String(formData.get("featured") ?? "") === "yes";
   const rawSections = String(formData.get("sections") ?? "[]");
+  const rawRichText = String(formData.get("richText") ?? "").trim();
 
   let sections: Array<{ heading: string; paragraphs: string[] }> = [];
 
@@ -154,8 +157,23 @@ function readDraftInput(formData: FormData): ParsedDraftInput {
     return { error: "The content sections could not be read." };
   }
 
+  let richText: RichTextDocument | undefined;
+  if (rawRichText) {
+    try {
+      richText = normalizeRichTextDocument(JSON.parse(rawRichText)) ?? undefined;
+    } catch {
+      return { error: "The rich text content could not be read." };
+    }
+    if (!richText) return { error: "The rich text content contains unsupported formatting." };
+    sections = richTextToLegacySections(richText);
+  }
+
   if (!(["reflection", "journal", "book"] as DraftContentType[]).includes(contentType)) {
     return { error: "Choose a valid content type." };
+  }
+
+  if (richText && contentType !== "reflection" && contentType !== "journal") {
+    return { error: "Rich text body content is currently available for reflections and journals only." };
   }
 
   if (!title) {
@@ -181,6 +199,7 @@ function readDraftInput(formData: FormData): ParsedDraftInput {
     tags,
     featured,
     sections,
+    richText,
     label,
     subtitle,
     expectedPublication,
@@ -199,6 +218,7 @@ function bodyFromInput(input: Exclude<ParsedDraftInput, { error: string }>) {
     scripture: input.scripture,
     featured: input.featured,
     sections: input.sections,
+    ...(input.richText ? { richText: input.richText } : {}),
     label: input.label,
     subtitle: input.subtitle,
     expectedPublication: input.expectedPublication,

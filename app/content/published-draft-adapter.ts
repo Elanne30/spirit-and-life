@@ -3,6 +3,7 @@ import type { Reflection } from "@/app/data/reflections";
 import type { Journal } from "@/app/data/journals";
 import type { Book } from "@/app/data/books";
 import type { ContentDraft } from "@/app/lib/content-drafts";
+import { normalizeRichTextDocument } from "@/app/content/article-rich-text";
 
 const fallbackContentImage = "/images/study_center_hero.jpg";
 
@@ -16,6 +17,7 @@ type ReflectionBody = {
   relatedJournalSlugs?: unknown;
   relatedBookSlugs?: unknown;
   relatedStudyPlanDates?: unknown;
+  richText?: unknown;
 };
 
 type JournalBody = {
@@ -27,6 +29,7 @@ type JournalBody = {
   relatedJournalSlugs?: unknown;
   relatedBookSlugs?: unknown;
   relatedStudyPlanDates?: unknown;
+  richText?: unknown;
 };
 
 type BookBody = {
@@ -134,6 +137,7 @@ function draftToReflection(draft: ContentDraft): Reflection | null {
     scripture,
     introduction: draft.introduction ?? "",
     sections,
+    richText: normalizeRichTextDocument(body.richText) ?? undefined,
     featured: body.featured === true,
     ...relations,
   };
@@ -172,6 +176,7 @@ function draftToJournal(draft: ContentDraft): Journal | null {
     featured: body.featured === true,
     introduction: draft.introduction ?? "",
     sections: parseSections(body.sections),
+    richText: normalizeRichTextDocument(body.richText) ?? undefined,
     ...relations,
   };
 }
