@@ -2435,6 +2435,13 @@ html[data-theme="dark"] .admin-brand-logo {
   font-size: 0.9rem;
 }
 
+.related-content-card .related-content-meta {
+  margin-bottom: 0.65rem;
+  color: var(--accent-strong);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
 .placeholder-page {
   min-height: 50vh;
   padding-block: 6rem;

@@ -41,7 +41,7 @@ export function ReflectionArticle({ reflection, showBackLink = true }: { reflect
               Back to Reflections
             </Link>
           ) : null}
-          <RelatedContent relations={reflection} />
+          <RelatedContent relations={reflection} scriptureReference={reflection.scripture} />
         </div>
       </article>
     </main>

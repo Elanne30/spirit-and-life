@@ -1,5 +1,8 @@
 import { notFound } from "next/navigation";
 import { getNextStudy, getPreviousStudy, getStudiesByWeek, getStudyByDate, studies } from "@/app/data/study-plan";
+import { scriptureReferences } from "@/app/content/scripture";
+import { studyPlanRelationships } from "@/app/content/relationships";
+import { RelatedContent } from "@/app/components/related-content";
 import { StudyWorkspace } from "@/app/study-center/study-workspace";
 import { WeekProgress } from "@/app/study-center/week-progress";
 
@@ -20,6 +23,9 @@ export default async function StudyDatePage({
   }
 
   const weekStudies = getStudiesByWeek(study.week ?? 1);
+  const relatedScriptureSlugs = scriptureReferences
+    .filter((reference) => reference.relatedStudyPlanDates?.includes(study.date))
+    .map((reference) => reference.slug);
 
   return (
     <main className="study-center-page study-detail-page">
@@ -55,6 +61,7 @@ export default async function StudyDatePage({
             />
           </div>
         </div>
+        <RelatedContent relations={studyPlanRelationships[study.date] ?? {}} scriptureSlugs={relatedScriptureSlugs} />
       </div>
     </main>
   );
