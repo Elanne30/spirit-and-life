@@ -1,27 +1,13 @@
 "use client";
 
-import { FormEvent, useState } from "react";
-import { Button } from "@/app/components/button";
+import { useActionState } from "react";
+import { submitContactFormAction, type ContactFormState } from "@/app/actions/contact";
 import { siteConfig } from "@/app/content/site-config";
 import { socialLinks } from "@/app/content/social";
 
 export default function ContactPage() {
-  const [status, setStatus] = useState<"idle" | "ready" | "error">("idle");
-
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const formData = new FormData(event.currentTarget);
-    const name = String(formData.get("name") ?? "").trim();
-    const email = String(formData.get("email") ?? "").trim();
-    const message = String(formData.get("message") ?? "").trim();
-
-    if (!name || !email || !message) {
-      setStatus("error");
-      return;
-    }
-
-    setStatus("ready");
-  }
+  const initialState: ContactFormState = { status: "idle", message: "" };
+  const [state, formAction, isPending] = useActionState(submitContactFormAction, initialState);
 
   return (
     <main className="contact-main">
@@ -32,17 +18,21 @@ export default function ContactPage() {
       </section>
 
       <section className="contact-layout">
-        <form className="contact-form" onSubmit={handleSubmit}>
+        <form className="contact-form" action={formAction}>
           <h2>Send a message</h2>
           <label htmlFor="contact-name">Name</label>
-          <input id="contact-name" name="name" type="text" placeholder="Your name" required />
+          <input id="contact-name" name="name" type="text" placeholder="Your name" required maxLength={160} />
           <label htmlFor="contact-email">Email</label>
-          <input id="contact-email" name="email" type="email" placeholder="your@email.com" required />
+          <input id="contact-email" name="email" type="email" placeholder="your@email.com" required maxLength={320} />
           <label htmlFor="contact-message">Message</label>
-          <textarea id="contact-message" name="message" placeholder="Your message..." required />
-          <Button type="submit">Send Message</Button>
-          {status === "ready" ? <p role="status">Thank you. Your message is ready to be sent, and I&apos;ll respond as soon as I can.</p> : null}
-          {status === "error" ? <p className="form-error" role="alert">Please complete all fields before preparing your message.</p> : null}
+          <textarea id="contact-message" name="message" placeholder="Your message..." required maxLength={10_000} />
+          <div className="contact-honeypot" aria-hidden="true">
+            <label htmlFor="contact-website">Website</label>
+            <input id="contact-website" name="website" type="text" tabIndex={-1} autoComplete="off" />
+          </div>
+          <button className="button button-primary" type="submit" disabled={isPending}>{isPending ? "Sending..." : "Send Message"}</button>
+          {state.status === "success" ? <p role="status">{state.message}</p> : null}
+          {state.status === "error" ? <p className="form-error" role="alert">{state.message}</p> : null}
         </form>
 
         <div className="contact-stack">
