@@ -1,6 +1,7 @@
 use client
 
 import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import TextAlign from "@tiptap/extension-text-align";
@@ -48,9 +49,21 @@ function ToolbarButton({ active = false, disabled = false, label, onClick, child
 }
 function ToolbarGroup({ children }: { children: ReactNode }) { return <div className={styles.toolbarGroup}>{children}</div>; }
 function Menu({ name, label, value, open, onToggle, children }: { name: string; label: string; value: ReactNode; open: boolean; onToggle: () => void; children: ReactNode }) {
+  const triggerRef = useRef<HTMLButtonElement | null>(null);
+  const [position, setPosition] = useState({ left: 0, top: 0 });
+  useEffect(() => {
+    if (!open) return;
+    const updatePosition = () => {
+      const rect = triggerRef.current?.getBoundingClientRect(); if (!rect) return;
+      const menuWidth = 205; const left = Math.max(6, Math.min(rect.left, window.innerWidth - menuWidth - 6));
+      setPosition({ left, top: rect.bottom + 5 });
+    };
+    updatePosition(); window.addEventListener("resize", updatePosition); document.addEventListener("scroll", updatePosition, true);
+    return () => { window.removeEventListener("resize", updatePosition); document.removeEventListener("scroll", updatePosition, true); };
+  }, [open]);
   return <div className={styles.dropdown} data-menu={name}>
-    <button type="button" className={styles.dropdownTrigger} aria-haspopup="menu" aria-expanded={open} title={label} onMouseDown={event => event.preventDefault()} onClick={onToggle}><span className={styles.dropdownValue}>{value}</span><ChevronDown size={14} /></button>
-    {open ? <div className={styles.dropdownMenu} role="menu">{children}</div> : null}
+    <button ref={triggerRef} type="button" className={styles.dropdownTrigger} aria-haspopup="menu" aria-expanded={open} title={label} onMouseDown={event => event.preventDefault()} onClick={onToggle}><span className={styles.dropdownValue}>{value}</span><ChevronDown size={14} /></button>
+    {open && typeof document !== "undefined" ? createPortal(<div className={styles.dropdownMenu} data-portal-menu={name} role="menu" style={{ left: position.left, top: position.top }}>{children}</div>, document.body) : null}
   </div>;
 }
 function MenuItem({ active, label, onClick, children }: { active?: boolean; label: string; onClick: () => void; children?: ReactNode }) {
@@ -60,8 +73,7 @@ function RulerHandle({ label, left, onMove, kind }: { label: string; left: numbe
   const dragging = useRef(false);
   return <button type="button" aria-label={label} title={label} className={`${styles.rulerHandle} ${styles[`rulerHandle${kind}`]}`} style={{ left: `${left}px` }}
     onPointerDown={event => { event.preventDefault(); event.currentTarget.setPointerCapture(event.pointerId); dragging.current = true; }}
-    onPointerMove={event => { if (dragging.current) onMove(event.clientX); }}
-    onPointerUp={() => { dragging.current = false; }} onPointerCancel={() => { dragging.current = false; }} />;
+    onPointerMove={event => { if (dragging.current) onMove(event.clientX); }} onPointerUp={() => { dragging.current = false; }} onPointerCancel={() => { dragging.current = false; }} />;
 }
 
 export function AdminRichTextEditor({ initialValue, onChange, labelledBy }: AdminRichTextEditorProps) {
@@ -77,23 +89,16 @@ export function AdminRichTextEditor({ initialValue, onChange, labelledBy }: Admi
     editorProps: { attributes: { class: styles.prose, role: "textbox", "aria-multiline": "true", spellCheck: "true", ...(labelledBy ? { "aria-labelledby": labelledBy } : {}) } },
     onUpdate: ({ editor: instance }) => onChange({ format: "spirit-and-life-rich-text", version: 1, content: instance.getJSON() as RichTextDocument["content"] }),
   });
-
-  useEffect(() => {
-    if (!editor) return;
-    const update = () => forceUpdate(value => value + 1);
-    editor.on("selectionUpdate", update); editor.on("transaction", update); editor.on("focus", update); editor.on("blur", update);
-    return () => { editor.off("selectionUpdate", update); editor.off("transaction", update); editor.off("focus", update); editor.off("blur", update); };
-  }, [editor]);
+  useEffect(() => { if (!editor) return; const update = () => forceUpdate(value => value + 1); editor.on("selectionUpdate", update); editor.on("transaction", update); editor.on("focus", update); editor.on("blur", update); return () => { editor.off("selectionUpdate", update); editor.off("transaction", update); editor.off("focus", update); editor.off("blur", update); }; }, [editor]);
   useEffect(() => { if (!editor) return; const current = JSON.stringify(editor.getJSON()); const next = JSON.stringify(initialValue.content); if (current !== next) editor.commands.setContent(initialValue.content, { emitUpdate: false }); }, [editor, initialValue]);
   useEffect(() => {
     if (!openMenu) return;
-    const close = (event: MouseEvent) => { if (event.target instanceof Node && !(event.target as Element).closest(`[data-menu="${openMenu}"]`)) setOpenMenu(null); };
+    const close = (event: MouseEvent) => { if (event.target instanceof Node && !(event.target as Element).closest(`[data-menu="${openMenu}"]`) && !(event.target as Element).closest(`[data-portal-menu="${openMenu}"]`)) setOpenMenu(null); };
     const onKey = (event: KeyboardEvent) => { if (event.key === "Escape") setOpenMenu(null); };
-    document.addEventListener("mousedown", close); document.addEventListener("keydown", onKey);
-    return () => { document.removeEventListener("mousedown", close); document.removeEventListener("keydown", onKey); };
+    document.addEventListener("mousedown", close); document.addEventListener("keydown", onKey); return () => { document.removeEventListener("mousedown", close); document.removeEventListener("keydown", onKey); };
   }, [openMenu]);
-
   if (!editor) return <div className={styles.loading}>Loading editor…</div>;
+
   const blockType = editor.isActive("heading") ? "heading" : "paragraph";
   const attrs = editor.getAttributes(blockType) as { level?: number; indent?: number; firstLineIndent?: number; rightIndent?: number; lineSpacing?: number };
   const currentIndent = Math.max(0, Math.min(MAX_INDENT, Number(attrs.indent ?? 0)));
@@ -109,24 +114,15 @@ export function AdminRichTextEditor({ initialValue, onChange, labelledBy }: Admi
   const setBlockAttribute = (name: string, value: number) => editor.chain().focus().updateAttributes(blockType, { [name]: value }).run();
   const setHeading = (value: HeadingLevel | "paragraph") => { if (value === "paragraph") editor.chain().focus().setParagraph().run(); else editor.chain().focus().setHeading({ level: value }).run(); setOpenMenu(null); };
   const setSpacing = (value: number) => { setBlockAttribute("lineSpacing", value); setOpenMenu(null); };
-  const setIndent = (delta: number) => {
-    if (inList) { const chain = editor.chain().focus(); if (delta > 0) chain.sinkListItem("listItem").run(); else chain.liftListItem("listItem").run(); return; }
-    setBlockAttribute("indent", Math.max(0, Math.min(MAX_INDENT, currentIndent + delta)));
-  };
+  const setIndent = (delta: number) => { if (inList) { const chain = editor.chain().focus(); if (delta > 0) chain.sinkListItem("listItem").run(); else chain.liftListItem("listItem").run(); return; } setBlockAttribute("indent", Math.max(0, Math.min(MAX_INDENT, currentIndent + delta))); };
   const setRulerIndent = (kind: "first" | "body" | "right", clientX: number) => {
     const ruler = document.getElementById("spirit-life-horizontal-ruler"); if (!ruler) return;
-    const rect = ruler.getBoundingClientRect(); const inches = Math.max(0, Math.min(PAGE_WIDTH_IN, ((clientX - rect.left + scrollLeft) / (96 * zoom / 100))));
-    if (kind === "right") setBlockAttribute("rightIndent", Math.max(0, Math.min(MAX_INDENT, Math.round((PAGE_WIDTH_IN - DEFAULT_MARGIN_IN - inches) / INDENT_STEP_IN))));
-    else setBlockAttribute(kind === "first" ? "firstLineIndent" : "indent", Math.max(0, Math.min(MAX_INDENT, Math.round((inches - DEFAULT_MARGIN_IN) / INDENT_STEP_IN))));
+    const rect = ruler.getBoundingClientRect(); const inches = Math.max(0, Math.min(PAGE_WIDTH_IN, (clientX - rect.left + scrollLeft) / (96 * zoom / 100)));
+    if (kind === "right") setBlockAttribute("rightIndent", Math.max(0, Math.min(MAX_INDENT, Math.round((PAGE_WIDTH_IN - DEFAULT_MARGIN_IN - inches) / INDENT_STEP_IN)))); else setBlockAttribute(kind === "first" ? "firstLineIndent" : "indent", Math.max(0, Math.min(MAX_INDENT, Math.round((inches - DEFAULT_MARGIN_IN) / INDENT_STEP_IN))));
   };
   const rulerLeft = (indent: number) => (DEFAULT_MARGIN_IN + indent * INDENT_STEP_IN) * 96 * zoom / 100;
   const rulerRight = (indent: number) => (PAGE_WIDTH_IN - DEFAULT_MARGIN_IN - indent * INDENT_STEP_IN) * 96 * zoom / 100;
-  const setLink = () => {
-    const previous = editor.getAttributes("link").href as string | undefined; const href = window.prompt("Link URL", previous ?? ""); if (href === null) return;
-    if (!href.trim()) { editor.chain().focus().unsetLink().run(); return; }
-    if (!(/^(https?:|mailto:)/i.test(href.trim()) || /^\/(?!\/)/.test(href.trim()))) { window.alert("Use an http(s), mailto, or site-relative link."); return; }
-    editor.chain().focus().extendMarkRange("link").setLink({ href: href.trim() }).run();
-  };
+  const setLink = () => { const previous = editor.getAttributes("link").href as string | undefined; const href = window.prompt("Link URL", previous ?? ""); if (href === null) return; if (!href.trim()) { editor.chain().focus().unsetLink().run(); return; } if (!(/^(https?:|mailto:)/i.test(href.trim()) || /^\/(?!\/)/.test(href.trim()))) { window.alert("Use an http(s), mailto, or site-relative link."); return; } editor.chain().focus().extendMarkRange("link").setLink({ href: href.trim() }).run(); };
   const pageOuterWidth = PAGE_WIDTH_IN * 96 * zoom / 100;
   const pageOuterHeight = PAGE_HEIGHT_IN * 96 * zoom / 100;
   const pageStyle = { transform: `scale(${zoom / 100})`, transformOrigin: "top left" } as CSSProperties;
@@ -142,33 +138,12 @@ export function AdminRichTextEditor({ initialValue, onChange, labelledBy }: Admi
       </Menu></ToolbarGroup>
       <ToolbarGroup>{[["left", AlignLeft, "Align left"], ["center", AlignCenter, "Align center"], ["right", AlignRight, "Align right"], ["justify", AlignJustify, "Justify"]].map(([alignment, Icon, label]) => <ToolbarButton key={alignment as string} label={label as string} active={alignment !== "left" && editor.isActive({ textAlign: alignment as string })} onClick={() => editor.chain().focus().setTextAlign(alignment as "left" | "center" | "right" | "justify").run()}><Icon size={18} /></ToolbarButton>)}</ToolbarGroup>
       <ToolbarGroup><ToolbarButton label="Bulleted list" active={editor.isActive("bulletList")} onClick={() => editor.chain().focus().toggleBulletList().run()}><List size={18} /></ToolbarButton><ToolbarButton label="Numbered list" active={editor.isActive("orderedList")} onClick={() => editor.chain().focus().toggleOrderedList().run()}><ListOrdered size={18} /></ToolbarButton><ToolbarButton label="Decrease indent" disabled={!inList && currentIndent === 0} onClick={() => setIndent(-1)}><IndentDecrease size={18} /></ToolbarButton><ToolbarButton label="Increase indent" disabled={!inList && currentIndent >= MAX_INDENT} onClick={() => setIndent(1)}><IndentIncrease size={18} /></ToolbarButton></ToolbarGroup>
-      <ToolbarGroup><Menu name="paragraph" label="Paragraph options" value={<Pilcrow size={18} />} open={openMenu === "paragraph"} onToggle={() => setOpenMenu(openMenu === "paragraph" ? null : "paragraph")}>
-        <MenuItem label="Decrease indent" onClick={() => { setIndent(-1); setOpenMenu(null); }}>Decrease indent</MenuItem><MenuItem label="Increase indent" onClick={() => { setIndent(1); setOpenMenu(null); }}>Increase indent</MenuItem><MenuItem label="First-line indent" onClick={() => { setBlockAttribute("firstLineIndent", Math.min(MAX_INDENT, currentFirstLineIndent + 1)); setOpenMenu(null); }}>First-line indent</MenuItem><MenuItem label="Right indent" onClick={() => { setBlockAttribute("rightIndent", Math.min(MAX_INDENT, currentRightIndent + 1)); setOpenMenu(null); }}>Right indent</MenuItem>
-      </Menu><Menu name="spacing" label="Line spacing" value={<span className={styles.spacingLabel}>↕</span>} open={openMenu === "spacing"} onToggle={() => setOpenMenu(openMenu === "spacing" ? null : "spacing")}>
+      <ToolbarGroup><Menu name="paragraph" label="Paragraph options" value={<Pilcrow size={18} />} open={openMenu === "paragraph"} onToggle={() => setOpenMenu(openMenu === "paragraph" ? null : "paragraph")}><MenuItem label="Decrease indent" onClick={() => { setIndent(-1); setOpenMenu(null); }}>Decrease indent</MenuItem><MenuItem label="Increase indent" onClick={() => { setIndent(1); setOpenMenu(null); }}>Increase indent</MenuItem><MenuItem label="First-line indent" onClick={() => { setBlockAttribute("firstLineIndent", Math.min(MAX_INDENT, currentFirstLineIndent + 1)); setOpenMenu(null); }}>First-line indent</MenuItem><MenuItem label="Right indent" onClick={() => { setBlockAttribute("rightIndent", Math.min(MAX_INDENT, currentRightIndent + 1)); setOpenMenu(null); }}>Right indent</MenuItem></Menu><Menu name="spacing" label="Line spacing" value={<span className={styles.spacingLabel}>↕</span>} open={openMenu === "spacing"} onToggle={() => setOpenMenu(openMenu === "spacing" ? null : "spacing")}>
         {spacingOptions.map(option => <MenuItem key={option.label} label={`${option.label} line spacing`} active={currentSpacing === option.value} onClick={() => setSpacing(option.value)}>{option.label} line spacing</MenuItem>)}
       </Menu><ToolbarButton label="Add or edit link" active={editor.isActive("link")} onClick={setLink}><Link2 size={18} /></ToolbarButton></ToolbarGroup>
     </div>
-
-    <div className={styles.rulerHeader} aria-hidden="true">
-      <div className={styles.rulerHeaderViewport}>
-        <div className={styles.rulerHeaderTrack} style={rulerTrackStyle}>
-          <div id="spirit-life-horizontal-ruler" className={styles.horizontalRuler} style={{ width: `${pageOuterWidth}px` }}>
-            {Array.from({ length: 18 }, (_, index) => <span key={index} className={styles.rulerNumber} style={{ left: `${index * 48 * zoom / 100}px` }}>{index / 2}</span>)}
-            <span className={`${styles.marginZone} ${styles.marginZoneLeft}`} style={{ width: `${96 * zoom / 100}px` }} /><span className={`${styles.marginZone} ${styles.marginZoneRight}`} style={{ width: `${96 * zoom / 100}px` }} />
-            <span className={styles.marginLabel} style={{ left: `${96 * zoom / 100}px` }}>1</span><span className={styles.marginLabel} style={{ left: `${7.5 * 96 * zoom / 100}px` }}>7.5</span>
-            <RulerHandle kind="first" label="First-line indent" left={rulerLeft(currentFirstLineIndent)} onMove={clientX => setRulerIndent("first", clientX)} /><RulerHandle kind="body" label="Left indent" left={rulerLeft(currentIndent)} onMove={clientX => setRulerIndent("body", clientX)} /><RulerHandle kind="right" label="Right indent" left={rulerRight(currentRightIndent)} onMove={clientX => setRulerIndent("right", clientX)} />
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div className={styles.workspace}>
-      <div className={styles.verticalRulerViewport} aria-hidden="true"><div className={styles.verticalRuler} style={{ height: `${pageOuterHeight}px`, transform: `translateY(${-scrollTop}px)` }}>{Array.from({ length: 23 }, (_, index) => <span key={index} className={styles.verticalRulerMark} style={{ top: `${index * 48 * zoom / 100}px` }}>{index / 2}</span>)}</div></div>
-      <div className={styles.pageViewport} onScroll={event => { setScrollLeft(event.currentTarget.scrollLeft); setScrollTop(event.currentTarget.scrollTop); }}>
-        <div className={styles.pageStage} style={{ width: `${pageOuterWidth + 48}px`, minHeight: `${pageOuterHeight + 48}px` }}><div className={styles.page} style={pageStyle}><EditorContent editor={editor} /></div></div>
-      </div>
-    </div>
-
+    <div className={styles.rulerHeader} aria-hidden="true"><div className={styles.rulerHeaderViewport}><div className={styles.rulerHeaderTrack} style={rulerTrackStyle}><div id="spirit-life-horizontal-ruler" className={styles.horizontalRuler} style={{ width: `${pageOuterWidth}px` }}>{Array.from({ length: 18 }, (_, index) => <span key={index} className={styles.rulerNumber} style={{ left: `${index * 48 * zoom / 100}px` }}>{index / 2}</span>)}<span className={`${styles.marginZone} ${styles.marginZoneLeft}`} style={{ width: `${96 * zoom / 100}px` }} /><span className={`${styles.marginZone} ${styles.marginZoneRight}`} style={{ width: `${96 * zoom / 100}px` }} /><span className={styles.marginLabel} style={{ left: `${96 * zoom / 100}px` }}>1</span><span className={styles.marginLabel} style={{ left: `${7.5 * 96 * zoom / 100}px` }}>7.5</span><RulerHandle kind="first" label="First-line indent" left={rulerLeft(currentFirstLineIndent)} onMove={clientX => setRulerIndent("first", clientX)} /><RulerHandle kind="body" label="Left indent" left={rulerLeft(currentIndent)} onMove={clientX => setRulerIndent("body", clientX)} /><RulerHandle kind="right" label="Right indent" left={rulerRight(currentRightIndent)} onMove={clientX => setRulerIndent("right", clientX)} /></div></div></div>
+    <div className={styles.workspace}><div className={styles.verticalRulerViewport} aria-hidden="true"><div className={styles.verticalRuler} style={{ height: `${pageOuterHeight}px`, transform: `translateY(${-scrollTop}px)` }}>{Array.from({ length: 23 }, (_, index) => <span key={index} className={styles.verticalRulerMark} style={{ top: `${index * 48 * zoom / 100}px` }}>{index / 2}</span>)}</div></div><div className={styles.pageViewport} onScroll={event => { setScrollLeft(event.currentTarget.scrollLeft); setScrollTop(event.currentTarget.scrollTop); }}><div className={styles.pageStage} style={{ width: `${pageOuterWidth + 48}px`, minHeight: `${pageOuterHeight + 48}px` }}><div className={styles.page} style={pageStyle}><EditorContent editor={editor} /></div></div></div></div>
     <div className={styles.statusBar}><div className={styles.statusLeft}><span>{wordCount} words</span><span>English (United States)</span></div><div className={styles.zoomControl}><button type="button" aria-label="Zoom out" title="Zoom out" disabled={zoom <= ZOOM_MIN} onClick={() => setZoom(value => Math.max(ZOOM_MIN, value - 5))}><Minus size={16} /></button><input aria-label="Zoom" type="range" min={ZOOM_MIN} max={ZOOM_MAX} step="5" value={zoom} onChange={event => setZoom(Number(event.target.value))} /><button type="button" aria-label="Zoom in" title="Zoom in" disabled={zoom >= ZOOM_MAX} onClick={() => setZoom(value => Math.min(ZOOM_MAX, value + 5))}><Plus size={16} /></button><span>{zoom}%</span></div></div>
   </div>;
 }
