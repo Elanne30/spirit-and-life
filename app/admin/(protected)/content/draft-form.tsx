@@ -245,17 +245,6 @@ export function DraftForm({ initialContentType = "reflection" }: DraftFormProps)
         </div>
       )}
 
-      {isBook && (
-        <div className="admin-draft-column admin-structure-column">
-          <h3>Book Notes</h3>
-          <textarea
-            name="bookNotes"
-            rows={12}
-            placeholder="Write your notes or summary..."
-          />
-        </div>
-      )}
-
       <div className="admin-draft-actions">
         <button
           className="button button-secondary"
