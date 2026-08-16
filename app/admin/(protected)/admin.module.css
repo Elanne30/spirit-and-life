@@ -1,0 +1,301 @@
+.adminRoot {
+  --admin-sidebar-width: 15.5rem;
+  --admin-page-width: 92rem;
+  --admin-panel-radius: 0.8rem;
+  --admin-soft-border: color-mix(in srgb, var(--line) 78%, transparent);
+  min-height: 100vh;
+}
+
+.adminRoot :global(.admin-shell) {
+  display: grid;
+  grid-template-columns: var(--admin-sidebar-width) minmax(0, 1fr);
+  min-height: 100vh;
+  border-bottom: 0;
+  background: var(--background);
+}
+
+.adminRoot :global(.admin-sidebar) {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  height: 100vh;
+  min-height: 0;
+  flex-direction: column;
+  padding: 1.1rem 0.85rem 0.9rem;
+  overflow-y: auto;
+  border-right: 1px solid var(--admin-soft-border);
+  background: color-mix(in srgb, var(--surface) 94%, var(--background));
+}
+
+.adminRoot :global(.admin-brand) {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  min-height: 4.5rem;
+  padding: 0.25rem 0.45rem 1rem;
+  border-bottom: 1px solid var(--admin-soft-border);
+}
+
+.adminRoot :global(.admin-brand-logo) {
+  width: 3rem;
+  height: 3rem;
+  flex: 0 0 auto;
+  object-fit: cover;
+  border-radius: 0.55rem;
+  opacity: 1;
+}
+
+.adminRoot :global(.admin-brand strong) {
+  font-family: var(--font-body), sans-serif;
+  font-size: 0.92rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  line-height: 1.1;
+  text-transform: uppercase;
+}
+
+.adminRoot :global(.admin-brand small) {
+  margin-top: 0.25rem;
+  font-size: 0.62rem;
+  letter-spacing: 0.06em;
+}
+
+.adminRoot :global(.admin-sidebar-label) {
+  margin: 1rem 0 0.45rem 0.55rem;
+  color: var(--muted);
+  font-size: 0.59rem;
+  letter-spacing: 0.14em;
+}
+
+.adminRoot :global(.admin-sidebar .admin-nav) {
+  display: grid;
+  gap: 0.2rem;
+  margin: 0;
+}
+
+.adminRoot :global(.admin-nav-link) {
+  min-height: 2.45rem;
+  gap: 0.65rem;
+  padding: 0.6rem 0.7rem;
+  border: 1px solid transparent;
+  border-radius: 0.55rem;
+  color: var(--muted);
+  font-size: 0.76rem;
+  font-weight: 650;
+}
+
+.adminRoot :global(.admin-nav-link:hover) {
+  background: color-mix(in srgb, var(--surface-muted) 72%, transparent);
+  color: var(--foreground);
+}
+
+.adminRoot :global(.admin-nav-link.is-active) {
+  border-color: color-mix(in srgb, var(--accent) 24%, var(--line));
+  background: color-mix(in srgb, var(--accent) 11%, var(--surface));
+  color: var(--accent-strong);
+  box-shadow: inset 3px 0 0 var(--accent);
+}
+
+.adminRoot :global(.admin-sidebar-footer) {
+  gap: 0.55rem;
+  padding-top: 1rem;
+}
+
+.adminRoot :global(.admin-signout) {
+  min-height: 2.4rem;
+  padding: 0.55rem 0.7rem;
+  border-radius: 0.55rem;
+  font-size: 0.74rem;
+}
+
+.adminRoot :global(.admin-content) {
+  min-width: 0;
+  width: 100%;
+  padding: 0 2.2rem 4rem;
+}
+
+.adminRoot :global(.admin-header) {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  min-height: 4.1rem;
+  align-items: center;
+  margin-inline: -2.2rem;
+  padding: 0.75rem 2.2rem;
+  border-bottom: 1px solid var(--admin-soft-border);
+  background: color-mix(in srgb, var(--background) 92%, transparent);
+  backdrop-filter: blur(14px);
+}
+
+.adminRoot :global(.admin-header h1) {
+  margin: 0;
+  font-family: var(--font-body), sans-serif;
+  font-size: 0.82rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
+.adminRoot :global(.admin-header .eyebrow) { display: none; }
+.adminRoot :global(.admin-header .quiet-note) { margin: 0.15rem 0 0; font-size: 0.64rem; }
+.adminRoot :global(.admin-header) > div:first-child { min-width: 0; }
+.adminRoot :global(.admin-header) > div:first-child p:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.adminRoot :global(.admin-header-actions) {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.adminRoot :global(.admin-header-link) {
+  display: inline-flex;
+  min-height: 2.2rem;
+  align-items: center;
+  padding: 0.45rem 0.7rem;
+  border: 1px solid var(--line);
+  border-radius: 0.5rem;
+  color: var(--muted);
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.adminRoot :global(.admin-header-link:hover) { border-color: var(--accent); color: var(--accent-strong); }
+
+.adminRoot :global(.admin-dashboard),
+.adminRoot :global(.admin-content-page),
+.adminRoot :global(.admin-management-page),
+.adminRoot :global(.admin-library-page),
+.adminRoot :global(.admin-editor-page) {
+  width: min(100%, var(--admin-page-width));
+  margin-inline: auto;
+}
+
+.adminRoot :global(.admin-dashboard) { margin-top: 1.6rem; }
+.adminRoot :global(.admin-page-introduction) { margin-bottom: 1.2rem; align-items: flex-end; }
+.adminRoot :global(.admin-page-introduction h2) { margin-bottom: 0.25rem; font-family: var(--font-display), serif; font-size: clamp(1.9rem, 3vw, 2.55rem); letter-spacing: -0.035em; }
+.adminRoot :global(.admin-page-introduction p) { font-size: 0.8rem; }
+.adminRoot :global(.admin-date) { padding: 0.45rem 0.65rem; border-radius: 0.45rem; background: var(--surface); font-size: 0.68rem; }
+.adminRoot :global(.admin-grid) { gap: 0.8rem; }
+.adminRoot :global(.admin-dashboard > .admin-grid) { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+
+.adminRoot :global(.admin-card) {
+  padding: 1.05rem;
+  border: 1px solid var(--admin-soft-border);
+  border-radius: var(--admin-panel-radius);
+  background: color-mix(in srgb, var(--surface) 96%, transparent);
+  box-shadow: 0 0.5rem 1.5rem var(--shadow);
+}
+
+.adminRoot :global(.admin-summary-card) { min-height: 11.5rem; }
+.adminRoot :global(.admin-card-heading) { margin-bottom: 0.8rem; }
+.adminRoot :global(.admin-icon) { width: 2.15rem; height: 2.15rem; border-radius: 0.55rem; background: color-mix(in srgb, var(--accent) 10%, var(--surface-muted)); }
+.adminRoot :global(.admin-summary-card > p) { min-height: 2.7rem; margin-bottom: 0.75rem; font-size: 0.76rem; }
+.adminRoot :global(.admin-card-detail) { padding-top: 0.7rem; }
+.adminRoot :global(.admin-card-metrics strong) { font-size: 1.45rem; }
+.adminRoot :global(.admin-card-link) { padding-top: 0.85rem; font-size: 0.7rem; }
+
+.adminRoot :global(.admin-dashboard-lower) { grid-template-columns: minmax(0, 1.2fr) minmax(20rem, 0.8fr); gap: 0.8rem; margin-top: 0.8rem; }
+.adminRoot :global(.admin-panel-heading) { margin-bottom: 0.8rem; }
+.adminRoot :global(.admin-panel-heading h2),
+.adminRoot :global(.admin-panel-heading h3) { font-size: 0.98rem; }
+.adminRoot :global(.admin-panel-heading p) { font-size: 0.68rem; }
+.adminRoot :global(.admin-outline-link) { min-height: 2rem; padding: 0.4rem 0.6rem; border-radius: 0.45rem; font-size: 0.66rem; }
+.adminRoot :global(.admin-overview-row) { padding-block: 0.7rem; gap: 0.65rem; }
+.adminRoot :global(.admin-overview-row b) { font-size: 1.15rem; }
+
+.adminRoot :global(.admin-content-page) { margin-top: 1.6rem; gap: 0.8rem; }
+.adminRoot :global(.admin-page-intro-card) { padding: 1.2rem; }
+.adminRoot :global(.admin-page-intro-card > h2) { margin-bottom: 0.25rem; font-size: 1.2rem; }
+.adminRoot :global(.admin-page-intro-card > p) { font-size: 0.72rem; }
+.adminRoot :global(.admin-content-overview-grid) { gap: 0.65rem; }
+.adminRoot :global(.admin-content-overview-card) { min-height: 10rem; padding: 0.9rem; border-radius: 0.65rem; }
+.adminRoot :global(.admin-content-overview-card h3) { font-size: 1rem; }
+.adminRoot :global(.admin-content-overview-card p) { font-size: 0.7rem; }
+.adminRoot :global(.admin-content-overview-card > strong) { font-size: 1.45rem; }
+.adminRoot :global(.admin-recent-content) { padding: 1.2rem; }
+.adminRoot :global(.admin-recent-columns) { gap: 0; }
+.adminRoot :global(.admin-recent-columns > div) { padding: 0 1rem; }
+.adminRoot :global(.admin-recent-columns > div:first-child) { padding-left: 0; }
+.adminRoot :global(.admin-recent-columns > div:last-child) { padding-right: 0; }
+.adminRoot :global(.admin-recent-columns > div + div) { border-left: 1px solid var(--line); }
+.adminRoot :global(.admin-content-list) { max-height: 21rem; }
+.adminRoot :global(.admin-content-list a) { padding: 0.7rem 0; }
+.adminRoot :global(.admin-content-list strong) { white-space: normal; overflow: visible; text-overflow: clip; line-height: 1.35; }
+
+.adminRoot :global(.admin-library-page) { margin-top: 1.6rem; gap: 1rem; }
+.adminRoot :global(.admin-library-heading) { padding: 0 0 1rem; border-bottom: 1px solid var(--line); }
+.adminRoot :global(.admin-library-heading h2) { font-size: clamp(1.8rem, 3vw, 2.8rem); }
+.adminRoot :global(.admin-library-grid) { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.8rem; }
+.adminRoot :global(.admin-library-card) { border-radius: 0.75rem; box-shadow: 0 0.45rem 1.3rem var(--shadow); }
+.adminRoot :global(.admin-library-card-title) { gap: 0.5rem; }
+.adminRoot :global(.admin-library-card h3) { font-size: 1rem; line-height: 1.2; }
+.adminRoot :global(.admin-library-card-body) { padding: 0.9rem; }
+.adminRoot :global(.admin-status) { max-width: 12rem; }
+
+.adminRoot :global(.admin-editor-page) { margin-top: 1.25rem; padding-block: 0 4rem !important; }
+.adminRoot :global(.admin-editor-header) { margin-bottom: 0.8rem !important; }
+.adminRoot :global(.admin-heading-with-icon) { display: flex; align-items: flex-start; gap: 0.8rem; margin-top: 0.8rem; }
+.adminRoot :global(.admin-heading-with-icon h1) { margin: 0 0 0.25rem; font-family: var(--font-display), serif; font-size: clamp(1.8rem, 3vw, 2.7rem); letter-spacing: -0.035em; }
+.adminRoot :global(.admin-heading-with-icon p:last-child) { margin: 0; color: var(--muted); font-size: 0.75rem; }
+.adminRoot :global(.admin-editor-card) { padding: clamp(1rem, 2vw, 1.5rem) !important; border: 1px solid var(--admin-soft-border) !important; border-radius: 0.85rem; box-shadow: 0 0.75rem 2rem var(--shadow) !important; }
+.adminRoot :global(.admin-draft-form) { grid-template-columns: minmax(0, 1.15fr) minmax(18rem, 0.85fr); gap: 1rem; }
+.adminRoot :global(.admin-draft-column) { padding: 1rem; border-radius: 0.65rem; background: color-mix(in srgb, var(--surface-muted) 24%, var(--surface)); }
+.adminRoot :global(.admin-draft-actions) { gap: 0.6rem; }
+.adminRoot :global(.admin-rich-text-editor) { border-radius: 0.7rem; box-shadow: 0 0.25rem 0.8rem var(--shadow); }
+.adminRoot :global(.admin-rich-text-toolbar) { position: sticky; top: 4.1rem; z-index: 5; align-items: center; gap: 0.35rem; padding: 0.5rem; background: var(--surface-muted); }
+.adminRoot :global(.admin-rich-text-group) { gap: 0.15rem; padding-right: 0.35rem; }
+.adminRoot :global(.admin-rich-text-button),
+.adminRoot :global(.admin-rich-text-group select) { min-height: 2rem; }
+.adminRoot :global(.admin-rich-text-button) { width: 2rem; }
+.adminRoot :global(.admin-rich-text-surface) { min-height: 34rem; max-width: 62rem; margin-inline: auto; padding: clamp(1.5rem, 4vw, 3.25rem); background: var(--surface); font-size: 1.06rem; }
+.adminRoot :global(.admin-form) { gap: 0.9rem; }
+.adminRoot :global(.admin-form input),
+.adminRoot :global(.admin-form textarea),
+.adminRoot :global(.admin-record-controls select),
+.adminRoot :global(.admin-search-control) { border-radius: 0.5rem; }
+.adminRoot :global(.admin-image-control) { border-radius: 0.65rem; }
+.adminRoot :global(.admin-management-page) { margin-top: 1.6rem; }
+.adminRoot :global(.admin-management-heading h2) { font-size: clamp(1.8rem, 3vw, 2.5rem); }
+.adminRoot :global(.admin-stat-list) { gap: 0.75rem; }
+.adminRoot :global(.admin-stat-list strong) { font-size: 1.45rem; }
+
+@media (max-width: 1100px) {
+  .adminRoot :global(.admin-dashboard > .admin-grid) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .adminRoot :global(.admin-dashboard-lower) { grid-template-columns: 1fr; }
+  .adminRoot :global(.admin-library-grid) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 860px) {
+  .adminRoot :global(.admin-shell) { display: block; }
+  .adminRoot :global(.admin-sidebar) { position: sticky; top: 0; height: auto; min-height: 0; padding: 0.65rem 0.75rem; border-right: 0; border-bottom: 1px solid var(--line); }
+  .adminRoot :global(.admin-brand) { min-height: 3.6rem; padding: 0.1rem 0.2rem 0.55rem; border-bottom: 0; }
+  .adminRoot :global(.admin-brand-logo) { width: 2.45rem; height: 2.45rem; }
+  .adminRoot :global(.admin-sidebar-label) { display: none; }
+  .adminRoot :global(.admin-sidebar .admin-nav) { display: flex; overflow-x: auto; margin: 0; padding: 0.35rem 0 0.05rem; }
+  .adminRoot :global(.admin-nav-link) { flex: 0 0 auto; min-height: 2.2rem; padding: 0.5rem 0.65rem; }
+  .adminRoot :global(.admin-sidebar-footer) { display: none; }
+  .adminRoot :global(.admin-content) { padding: 0 1rem 3rem; }
+  .adminRoot :global(.admin-header) { position: static; margin-inline: -1rem; padding-inline: 1rem; }
+  .adminRoot :global(.admin-rich-text-toolbar) { top: 0; }
+  .adminRoot :global(.admin-draft-form) { grid-template-columns: 1fr; }
+  .adminRoot :global(.admin-recent-columns) { grid-template-columns: 1fr; gap: 0; }
+  .adminRoot :global(.admin-recent-columns > div) { padding: 0; }
+  .adminRoot :global(.admin-recent-columns > div + div) { padding-top: 1rem; margin-top: 1rem; border-top: 1px solid var(--line); border-left: 0; }
+}
+
+@media (max-width: 640px) {
+  .adminRoot :global(.admin-dashboard > .admin-grid),
+  .adminRoot :global(.admin-content-overview-grid),
+  .adminRoot :global(.admin-library-grid) { grid-template-columns: 1fr; }
+  .adminRoot :global(.admin-content) { padding-inline: 0.75rem; }
+  .adminRoot :global(.admin-header) { margin-inline: -0.75rem; padding-inline: 0.75rem; }
+  .adminRoot :global(.admin-page-introduction),
+  .adminRoot :global(.admin-management-heading),
+  .adminRoot :global(.admin-library-heading) { align-items: flex-start; flex-direction: column; }
+  .adminRoot :global(.admin-editor-header) { align-items: flex-start !important; }
+  .adminRoot :global(.admin-editor-actions) { width: 100%; }
+  .adminRoot :global(.admin-editor-actions form) { width: 100%; }
+  .adminRoot :global(.admin-editor-actions .button) { width: 100%; }
+  .adminRoot :global(.admin-card) { padding: 0.9rem; }
+  .adminRoot :global(.admin-rich-text-surface) { min-height: 24rem; padding: 1.15rem; }
+}
