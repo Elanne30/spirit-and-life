@@ -1,41 +1,42 @@
 import Link from "next/link";
-import { ArrowLeft, Plus, FilePenLine, FileText, BookOpen } from "lucide-react";
+import { CalendarDays, Clock3, Eye, MoreVertical, Plus, Search } from "lucide-react";
 import { listAdminContentItems, type AdminContentItem } from "@/app/admin/(protected)/content/admin-content";
 import type { DraftContentType } from "@/app/lib/content-drafts";
+import styles from "../admin-library-reference.module.css";
 
 const config: Record<DraftContentType, {
   label: string;
   singular: string;
   description: string;
-  icon: typeof FilePenLine;
 }> = {
   reflection: {
     label: "Reflections",
     singular: "Reflection",
     description: "Write and manage reflections on faith, Scripture, life, and eternal things.",
-    icon: FilePenLine,
   },
   journal: {
     label: "Journals",
     singular: "Journal",
     description: "Write and manage personal journal entries and thoughtful observations.",
-    icon: FileText,
   },
   book: {
     label: "Books",
     singular: "Book",
     description: "Manage your books, previews, and reading records.",
-    icon: BookOpen,
   },
 };
 
 function statusLabel(item: AdminContentItem) {
-  if (item.status === "published") {
-    if (item.isStaticSource && !item.hasDraft) return "Published";
-    return item.hasUnpublishedChanges ? "Published · unpublished changes" : "Published";
-  }
+  if (item.status === "published") return "Published";
+  return "Draft";
+}
 
-  return item.isStaticSource ? "Draft · unpublished changes" : "Draft";
+function statusClass(item: AdminContentItem) {
+  return item.status === "published" ? styles.statusPublished : styles.statusDraft;
+}
+
+function imageFor(item: AdminContentItem) {
+  return item.image ?? "";
 }
 
 export default async function ContentTypeWorkspace({
@@ -45,128 +46,98 @@ export default async function ContentTypeWorkspace({
 }) {
   const { type } = await params;
 
-  if (type !== "reflection" && type !== "journal" && type !== "book") {
-    return null;
-  }
+  if (type !== "reflection" && type !== "journal" && type !== "book") return null;
 
   const contentType = type as DraftContentType;
   const current = config[contentType];
-  const Icon = current.icon;
   const items = await listAdminContentItems(contentType);
-  const publishedCount = items.filter((item) => item.status !== "draft").length;
+  const publishedCount = items.filter((item) => item.status === "published").length;
   const draftCount = items.filter((item) => item.status === "draft").length;
-  const pendingChangesCount = items.filter((item) => item.hasUnpublishedChanges).length;
 
   return (
-    <section className="admin-library-page admin-content-workspace">
-      <div className="admin-library-heading" style={{ alignItems: "flex-end" }}>
-        <div>
-          <Link className="admin-outline-link" href="/admin/content">
-            <ArrowLeft size={14} /> Back to content
-          </Link>
-          <div className="admin-heading-with-icon">
-            <span className="admin-icon"><Icon size={22} /></span>
-            <div>
-              <p className="eyebrow">Content workspace</p>
-              <h1>{current.label}</h1>
-              <p>{current.description}</p>
-            </div>
-          </div>
-        </div>
+    <section className={`${styles.library} admin-library-page`}>
+      <div className={styles.heading}>
+        <h1>{current.label}</h1>
+        <p>{current.description}</p>
+      </div>
+
+      <div className={styles.toolbar}>
+        <nav className={styles.tabs} aria-label={`${current.label} filters`}>
+          <span className={`${styles.tab} ${styles.tabActive}`}>All ({items.length})</span>
+          <span className={styles.tab}>Published ({publishedCount})</span>
+          <span className={styles.tab}>Drafts ({draftCount})</span>
+          <span className={styles.tab}>Archived (0)</span>
+        </nav>
+
+        <label className={styles.search}>
+          <Search size={15} aria-hidden="true" />
+          <input aria-label={`Search ${current.label.toLowerCase()}`} placeholder={`Search ${current.label.toLowerCase()}...`} readOnly />
+        </label>
 
         <Link
-          className="button button-primary"
+          className={`button button-primary ${styles.addButton}`}
           href={`/admin/content/${contentType}/new`}
           aria-label={`Add ${current.singular}`}
-          title={`Add ${current.singular}`}
-          style={{
-            minHeight: "2rem",
-            padding: "0.35rem 0.65rem",
-            fontSize: "0.68rem",
-            gap: "0.3rem",
-            marginLeft: "auto",
-            alignSelf: "flex-end",
-            whiteSpace: "nowrap",
-          }}
         >
-          <Plus size={13} />
-          <span>Add</span>
+          <Plus size={15} />
+          Add {current.singular}
         </Link>
       </div>
 
-      <div className="admin-stat-list admin-card" style={{ display: "flex", marginTop: "0.8rem", padding: "0.85rem 1rem" }}>
-        <span><strong>{items.length}</strong><small>Total</small></span>
-        <span><strong>{publishedCount}</strong><small>Published</small></span>
-        <span><strong>{draftCount}</strong><small>Drafts</small></span>
-        <span><strong>{pendingChangesCount}</strong><small>Pending changes</small></span>
-      </div>
-
-      <div className="admin-card" style={{ marginTop: "0.8rem" }}>
-        <div className="admin-panel-heading">
-          <div>
-            <h2>{current.label}</h2>
-            <p className="quiet-note">All available records. Nothing is limited to the sample count shown in the design reference.</p>
-          </div>
-        </div>
-
-        {items.length ? (
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))",
-              gap: "0.85rem",
-            }}
-          >
-            {items.map((item) => (
-              <Link
-                href={`/admin/content/${item.contentType}/${item.slug}`}
-                key={`${item.contentType}-${item.slug}`}
-                style={{
-                  display: "block",
-                  overflow: "hidden",
-                  border: "1px solid var(--line)",
-                  borderRadius: "0.75rem",
-                  background: "var(--surface)",
-                  boxShadow: "0 0.35rem 1rem var(--shadow)",
-                  transition: "transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease",
-                }}
-              >
-                <div style={{ position: "relative", aspectRatio: "16 / 9", overflow: "hidden", background: "var(--surface-muted)" }}>
-                  {item.image ? (
-                    <img src={item.image} alt="" loading="lazy" style={{ width: "100%", height: "100%", display: "block", objectFit: "cover" }} />
-                  ) : (
-                    <div aria-hidden="true" style={{ width: "100%", height: "100%", display: "grid", placeItems: "center", color: "var(--muted)" }}>
-                      <Icon size={28} />
-                    </div>
-                  )}
-                  <span style={{ position: "absolute", top: "0.55rem", left: "0.55rem", maxWidth: "calc(100% - 1.1rem)", padding: "0.24rem 0.4rem", borderRadius: "999px", background: "color-mix(in srgb, var(--surface) 92%, transparent)", color: "var(--foreground)", fontSize: "0.58rem", fontWeight: 700, letterSpacing: "0.05em", textTransform: "uppercase" }}>
+      {items.length ? (
+        <div className={styles.grid}>
+          {items.map((item) => {
+            const image = imageFor(item);
+            const isBook = contentType === "book";
+            return (
+              <article className={styles.card} key={`${item.contentType}-${item.slug}`}>
+                <Link
+                  className={`${styles.imageWrap} ${isBook ? styles.bookImageWrap : ""}`}
+                  href={`/admin/content/${item.contentType}/${item.slug}`}
+                  aria-label={`Open ${item.title}`}
+                >
+                  {image ? (
+                    <img
+                      className={`${styles.image} ${isBook ? styles.bookImage : ""}`}
+                      src={image}
+                      alt=""
+                      loading="lazy"
+                    />
+                  ) : null}
+                  <span className={`${styles.status} ${statusClass(item)}`}>
                     {statusLabel(item)}
                   </span>
-                </div>
+                </Link>
 
-                <div style={{ padding: "0.85rem 0.9rem 0.95rem" }}>
-                  <p className="eyebrow" style={{ marginBottom: "0.35rem", fontSize: "0.58rem" }}>{item.category ?? current.singular}</p>
-                  <h3 style={{ marginBottom: "0.5rem", fontSize: "1.05rem", lineHeight: 1.15 }}>{item.title}</h3>
-                  <div style={{ display: "flex", flexWrap: "wrap", gap: "0.4rem 0.7rem", color: "var(--muted)", fontSize: "0.68rem" }}>
-                    {item.date ? <span>{item.date}</span> : null}
-                    {item.readingTime ? <span>{item.readingTime}</span> : null}
+                <div className={styles.body}>
+                  <p className={styles.category}>{item.category ?? current.singular}</p>
+                  <h2 className={styles.title}>{item.title}</h2>
+                  <div className={styles.meta}>
+                    {item.date ? <span><CalendarDays size={12} />{item.date}</span> : null}
+                    {item.readingTime ? <span><Clock3 size={12} />{item.readingTime}</span> : null}
                   </div>
                 </div>
-              </Link>
-            ))}
-          </div>
-        ) : (
-          <div className="admin-empty-state">
-            <Icon size={28} />
-            <h3>No {current.label.toLowerCase()} yet</h3>
-            <p>Create your first {current.singular.toLowerCase()} from this workspace.</p>
-            <Link className="button button-primary" href={`/admin/content/${contentType}/new`} style={{ minHeight: "2.5rem", padding: "0.55rem 0.9rem", fontSize: "0.76rem" }}>
-              <Plus size={16} />
-              Add {current.singular}
-            </Link>
-          </div>
-        )}
-      </div>
+
+                <div className={styles.actions}>
+                  <Link className={styles.action} href={`/admin/content/${item.contentType}/${item.slug}?view=edit`}>
+                    Edit
+                  </Link>
+                  <Link className={styles.action} href={`/admin/content/${item.contentType}/${item.slug}`} aria-label={`Preview ${item.title}`} title="Open">
+                    <Eye size={15} />
+                  </Link>
+                  <span className={styles.more} aria-hidden="true" title="More options">
+                    <MoreVertical size={15} />
+                  </span>
+                </div>
+              </article>
+            );
+          })}
+        </div>
+      ) : (
+        <div className={styles.empty}>
+          No {current.label.toLowerCase()} yet. Add your first {current.singular.toLowerCase()} to begin.
+        </div>
+      )}
     </section>
   );
 }
