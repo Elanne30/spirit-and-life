@@ -6,6 +6,7 @@ import { ensurePublishingIntegrity } from "@/app/content/publishing-validation";
 import { socialPreviewImage } from "@/app/content/seo";
 import { siteConfig } from "@/app/content/site-config";
 import "./globals.css";
+import "./site-polish.css";
 
 const displayFont = Cormorant_Garamond({
   variable: "--font-display",
@@ -27,8 +28,8 @@ export const metadata: Metadata = {
   },
   description: siteConfig.description,
   verification: {
-  google: "6ctWZ9OfGvQWfPiPNwSedZE_UQqyq7jToJexeNyjz1U",
-},
+    google: "6ctWZ9OfGvQWfPiPNwSedZE_UQqyq7jToJexeNyjz1U",
+  },
   alternates: { canonical: "/" },
   openGraph: {
     title: siteConfig.name,
