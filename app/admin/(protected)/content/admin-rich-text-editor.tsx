@@ -88,7 +88,7 @@ export function AdminRichTextEditor({ initialValue, onChange, labelledBy }: Admi
     immediatelyRender: false,
     extensions: [StarterKit.configure({ heading: { levels: [1, 2, 3, 4, 5, 6] }, link: { openOnClick: false, autolink: false, linkOnPaste: true, protocols: ["http", "https", "mailto"] } }), UnderlineMark, TextAlign.configure({ types: ["heading", "paragraph"], alignments: [...textAlignments], defaultAlignment: "left" }), TextStyleKit, DocumentLayout],
     content: initialValue.content,
-    editorProps: { attributes: { class: styles.prose, role: "textbox", "aria-multiline": "true", spellCheck: "true", ...(labelledBy ? { "aria-labelledby": labelledBy } : {}) },
+    editorProps: { attributes: { class: styles.prose, role: "textbox", "aria-multiline": "true", spellCheck: "true", ...(labelledBy ? { "aria-labelledby": labelledBy } : {}) } },
     onUpdate: ({ editor: instance }) => onChange({ format: "spirit-and-life-rich-text", version: 1, content: instance.getJSON() as RichTextDocument["content"] }),
   });
   useEffect(() => { if (!editor) return; const update = () => forceUpdate((value) => value + 1); editor.on("selectionUpdate", update); editor.on("transaction", update); editor.on("focus", update); editor.on("blur", update); return () => { editor.off("selectionUpdate", update); editor.off("transaction", update); editor.off("focus", update); editor.off("blur", update); }; }, [editor]);
