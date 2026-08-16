@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { findUnsupportedText } from "./content-save-validation.ts";
+import { findUnsupportedText } from "./content-save-validation";
 
 test("normal writing characters are accepted", () => {
   const result = findUnsupportedText({
