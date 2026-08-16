@@ -1,9 +1,23 @@
 import Link from "next/link";
 import { ArrowRight, BarChart3, BookOpen, CalendarDays, FileText, Mail, PenLine, Send, Users } from "lucide-react";
-import { listAdminContentItems } from "@/app/admin/(protected)/content/admin-content";
+import { listAdminContentItems, type AdminContentItem } from "@/app/admin/(protected)/content/admin-content";
 import type { DraftContentType } from "@/app/lib/content-drafts";
 import { getNewsletterSubscriberSummary } from "@/app/lib/newsletter";
 import { getPushSubscriberSummary } from "@/app/lib/push";
+
+function sortRecent(items: AdminContentItem[]) {
+  return [...items].sort((left, right) => {
+    const leftDate = Date.parse(left.updatedAt ?? left.date ?? "") || 0;
+    const rightDate = Date.parse(right.updatedAt ?? right.date ?? "") || 0;
+    return rightDate - leftDate;
+  });
+}
+
+function statusLabel(item: AdminContentItem) {
+  if (item.status === "draft") return item.hasUnpublishedChanges ? "Draft · unpublished changes" : "Draft";
+  if (item.hasUnpublishedChanges) return "Published · unpublished changes";
+  return "Published";
+}
 
 export default async function AdminDashboardPage() {
   const [newsletterSummary, pushSummary, reflectionItems, journalItems, bookItems] = await Promise.all([
@@ -13,53 +27,139 @@ export default async function AdminDashboardPage() {
     listAdminContentItems("journal"),
     listAdminContentItems("book"),
   ]);
-  const contentGroups: Array<{ type: DraftContentType; label: string; description: string; icon: typeof FileText; items: Awaited<ReturnType<typeof listAdminContentItems>> }> = [
-    { type: "reflection", label: "Reflections", description: "Published reflections and devotionals", icon: PenLine, items: reflectionItems },
-    { type: "journal", label: "Journals", description: "Published journal articles", icon: FileText, items: journalItems },
-    { type: "book", label: "Books", description: "Published book summaries", icon: BookOpen, items: bookItems },
-  ];
-  const publishedCount = (items: typeof reflectionItems) => items.filter((item) => item.status !== "draft").length;
+
+  const allContent = [...reflectionItems, ...journalItems, ...bookItems];
+  const recentContent = sortRecent(allContent).slice(0, 8);
+  const attentionItems = sortRecent(allContent).filter((item) => item.status === "draft" || item.hasUnpublishedChanges).slice(0, 8);
+  const draftCount = allContent.filter((item) => item.status === "draft").length;
+  const publishedCount = allContent.filter((item) => item.status !== "draft").length;
   const today = new Intl.DateTimeFormat("en-US", { month: "long", day: "numeric", year: "numeric" }).format(new Date());
 
-  const cards = [
-    { title: "Content", description: "Manage reflections, journals, and books", icon: FileText, href: "/admin/content", action: "Open content planning", detail: `${reflectionItems.length + journalItems.length + bookItems.length}`, label: "Total items" },
-    { title: "Newsletter", description: "Manage email campaigns and subscribers", icon: Mail, href: "/admin/newsletter", action: "Manage newsletter", detail: `${newsletterSummary.subscribed}|${newsletterSummary.pending}`, label: "Active subscribers|Pending" },
-    { title: "Push notifications", description: "Send updates and manage push subscribers", icon: Send, href: "/admin/notifications", action: "Send push update", detail: `${pushSummary.active}|${pushSummary.inactive}`, label: "Active subscribers|Inactive" },
-    { title: "Subscribers", description: "View and manage all subscribers", icon: Users, href: "/admin/subscribers", action: "View subscriber summary", detail: `${newsletterSummary.subscribed}|${pushSummary.active}`, label: "Email subscribers|Push subscribers" },
+  const contentStats: Array<{ title: string; description: string; icon: typeof FileText; href: string; count: number; secondary: string }> = [
+    { title: "Reflections", description: "Faith, Scripture, life, and eternal things", icon: PenLine, href: "/admin/content/reflection", count: reflectionItems.length, secondary: `${reflectionItems.filter((item) => item.status !== "draft").length} published` },
+    { title: "Journals", description: "Personal entries and thoughtful observations", icon: FileText, href: "/admin/content/journal", count: journalItems.length, secondary: `${journalItems.filter((item) => item.status !== "draft").length} published` },
+    { title: "Books", description: "Books, previews, and reading records", icon: BookOpen, href: "/admin/content/book", count: bookItems.length, secondary: `${bookItems.filter((item) => item.status !== "draft").length} published` },
+    { title: "Drafts", description: "Content that still needs attention", icon: FileText, href: "/admin/content?type=draft", count: draftCount, secondary: `${publishedCount} published items` },
+  ];
+
+  const operations = [
+    { title: "Newsletter", description: "Email subscribers and campaigns", icon: Mail, href: "/admin/newsletter", detail: `${newsletterSummary.subscribed} active` },
+    { title: "Push", description: "Website push subscribers and updates", icon: Send, href: "/admin/notifications", detail: `${pushSummary.active} active` },
+    { title: "Subscribers", description: "Review email and push subscribers", icon: Users, href: "/admin/subscribers", detail: `${newsletterSummary.subscribed + pushSummary.active} active subscriptions` },
   ];
 
   return (
     <section className="admin-dashboard">
       <div className="admin-page-introduction">
         <div>
+          <p className="eyebrow">Overview</p>
           <h2>Welcome back</h2>
-          <p>Here&apos;s what&apos;s happening with Spirit &amp; Life.</p>
+          <p>Here&apos;s what&apos;s happening across Spirit &amp; Life Eternal.</p>
         </div>
-        <span className="admin-date"><CalendarDays aria-hidden="true" size={16} />{today}</span>
+        <span className="admin-date"><CalendarDays aria-hidden="true" size={15} />{today}</span>
       </div>
+
       <div className="admin-grid">
-        {cards.map((card) => {
+        {contentStats.map((card) => {
           const Icon = card.icon;
-          return <article className="admin-card admin-summary-card" key={card.title}>
-            <div className="admin-card-heading">
-              <span className="admin-icon"><Icon aria-hidden="true" size={19} strokeWidth={1.8} /></span>
-              <h3>{card.title}</h3>
-            </div>
-            <p>{card.description}</p>
-            <div className="admin-card-detail admin-card-metrics">{card.detail.split("|").map((value, index) => <span key={`${card.title}-${index}`}><strong>{value}</strong><small>{card.label.split("|")[index]}</small></span>)}</div>
-            <Link className="admin-card-link" href={card.href}>{card.action}<ArrowRight aria-hidden="true" size={15} /></Link>
-          </article>;
+          return (
+            <article className="admin-card admin-summary-card" key={card.title}>
+              <div className="admin-card-heading">
+                <span className="admin-icon"><Icon aria-hidden="true" size={18} strokeWidth={1.8} /></span>
+                <h3>{card.title}</h3>
+              </div>
+              <p>{card.description}</p>
+              <div className="admin-card-detail admin-card-metrics">
+                <span><strong>{card.count}</strong><small>Total</small></span>
+                <span><strong>{card.secondary.split(" ")[0]}</strong><small>{card.secondary.substring(card.secondary.indexOf(" ") + 1)}</small></span>
+              </div>
+              <Link className="admin-card-link" href={card.href}>Open workspace <ArrowRight aria-hidden="true" size={14} /></Link>
+            </article>
+          );
         })}
       </div>
+
       <div className="admin-dashboard-lower">
         <article className="admin-card admin-overview-panel">
-          <div className="admin-panel-heading"><div><h3><BarChart3 aria-hidden="true" size={17} />Content Overview</h3><p>A quick look at your published content.</p></div><Link className="admin-outline-link" href="/admin/content">View all content <ArrowRight size={14} /></Link></div>
-          {contentGroups.map((group) => { const Icon = group.icon; return <div className="admin-overview-row" key={group.type}><span className="admin-icon"><Icon size={16} /></span><div><strong>{group.label}</strong><small>{group.description}</small></div><b>{publishedCount(group.items)}<small>Published</small></b></div>; })}
+          <div className="admin-panel-heading">
+            <div>
+              <h3><BarChart3 aria-hidden="true" size={17} />Recent Content</h3>
+              <p>Latest records from all three content libraries.</p>
+            </div>
+            <Link className="admin-outline-link" href="/admin/content">View all <ArrowRight size={13} /></Link>
+          </div>
+          <ul className="admin-content-list">
+            {recentContent.map((item) => (
+              <li key={`${item.contentType}-${item.slug}`}>
+                <Link href={`/admin/content/${item.contentType}/${item.slug}`}>
+                  <strong>{item.title}</strong>
+                  <small>{item.contentType} · {statusLabel(item)}{item.updatedAt ? ` · ${item.updatedAt}` : item.date ? ` · ${item.date}` : ""}</small>
+                </Link>
+              </li>
+            ))}
+            {!recentContent.length ? <li><span className="quiet-note">No content records are available yet.</span></li> : null}
+          </ul>
         </article>
+
         <article className="admin-card admin-overview-panel">
-          <div className="admin-panel-heading"><div><h3><CalendarDays aria-hidden="true" size={17} />Recent Activity</h3><p>Latest actions across your admin panel.</p></div></div>
-          <div className="admin-empty-activity"><span className="admin-icon"><CalendarDays size={16} /></span><p>No activity history is available yet.</p></div>
+          <div className="admin-panel-heading">
+            <div>
+              <h3>Drafts needing attention</h3>
+              <p>Drafts and published records with pending changes.</p>
+            </div>
+            <Link className="admin-outline-link" href="/admin/content?type=draft">View drafts <ArrowRight size={13} /></Link>
+          </div>
+          <ul className="admin-content-list">
+            {attentionItems.map((item) => (
+              <li key={`attention-${item.contentType}-${item.slug}`}>
+                <Link href={`/admin/content/${item.contentType}/${item.slug}`}>
+                  <strong>{item.title}</strong>
+                  <small>{item.contentType} · {statusLabel(item)}</small>
+                </Link>
+              </li>
+            ))}
+            {!attentionItems.length ? <li><span className="quiet-note">Nothing needs attention right now.</span></li> : null}
+          </ul>
         </article>
+      </div>
+
+      <article className="admin-card" style={{ marginTop: "0.8rem" }}>
+        <div className="admin-panel-heading">
+          <div>
+            <h3>Quick actions</h3>
+            <p>Start common Admin tasks using the existing routes.</p>
+          </div>
+        </div>
+        <div className="admin-content-overview-grid">
+          {[
+            { label: "New Reflection", href: "/admin/content/reflection/new", icon: PenLine },
+            { label: "New Journal", href: "/admin/content/journal/new", icon: FileText },
+            { label: "New Book", href: "/admin/content/book/new", icon: BookOpen },
+            { label: "Content Library", href: "/admin/content", icon: FileText },
+          ].map((action) => {
+            const Icon = action.icon;
+            return (
+              <Link className="admin-content-overview-card" href={action.href} key={action.label} style={{ minHeight: "7rem", textDecoration: "none" }}>
+                <span className="admin-icon"><Icon size={17} /></span>
+                <h3 style={{ marginBottom: 0 }}>{action.label}</h3>
+                <span className="admin-card-link" style={{ marginTop: "auto", paddingTop: "0.5rem" }}>Open <ArrowRight size={13} /></span>
+              </Link>
+            );
+          })}
+        </div>
+      </article>
+
+      <div className="admin-grid" style={{ marginTop: "0.8rem", gridTemplateColumns: "repeat(3, minmax(0, 1fr))" }}>
+        {operations.map((card) => {
+          const Icon = card.icon;
+          return (
+            <Link className="admin-card admin-summary-card" href={card.href} key={card.title} style={{ textDecoration: "none" }}>
+              <div className="admin-card-heading"><span className="admin-icon"><Icon size={18} /></span><h3>{card.title}</h3></div>
+              <p>{card.description}</p>
+              <div className="admin-card-detail"><strong>{card.detail}</strong></div>
+            </Link>
+          );
+        })}
       </div>
     </section>
   );
