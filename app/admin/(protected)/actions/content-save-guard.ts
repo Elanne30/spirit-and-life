@@ -3,8 +3,8 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { sql } from "@vercel/postgres";
-import { createDraft, updateDraftAction, type ContentDraftActionState } from "@/app/admin/(protected)/actions/content";
-import { getDraftByTypeAndSlug, isValidDraftSlug, normalizeDraftSlug, type DraftContentType } from "@/app/lib/content-drafts";
+import { updateDraftAction, type ContentDraftActionState } from "@/app/admin/(protected)/actions/content";
+import { createDraft, getDraftByTypeAndSlug, isValidDraftSlug, normalizeDraftSlug, type DraftContentType } from "@/app/lib/content-drafts";
 import { normalizeRichTextDocument, richTextToLegacySections, type RichTextDocument } from "@/app/content/article-rich-text";
 import { findUnsupportedText, getPostgresErrorDetails } from "@/app/lib/content-save-validation";
 import { requireAdminActionAccess } from "@/app/lib/admin-session";
@@ -113,9 +113,9 @@ async function validateDraftBeforeSave(formData: FormData, mode: "create" | "upd
     return { error: `The ${friendlyField} contains an unsupported character (${unsupported.codePoint}). The text was not changed.` };
   }
 
-  // New content may request an existing slug. createDraft() resolves that
-  // collision to the next available slug. Existing drafts must not silently
-  // change their URL while being edited.
+  // A new draft is allowed to request a slug that is already used. The
+  // repository's createDraft() function resolves that collision to the next
+  // available slug. Existing drafts, however, must not steal another draft's slug.
   if (mode === "update") {
     const existing = await getDraftByTypeAndSlug(input.contentType, input.slug);
     if (existing && existing.id !== input.draftId) {
@@ -174,9 +174,9 @@ export async function createDraftActionSafe(previousState: ContentDraftActionSta
   revalidatePath(`/admin/content/${draft.content_type}`);
   revalidatePath(`/admin/content/${draft.content_type}/${draft.slug}`);
 
-  // redirect() intentionally lives outside the try/catch. Next.js implements
-  // redirect as a control-flow exception; catching it turns a successful save
-  // into the misleading "slug is already in use" error.
+  // redirect() is intentionally outside the try/catch. Next.js implements
+  // redirect as a control-flow exception; catching it makes a successful save
+  // look like a failed save.
   if (saveMode === "continue") redirect(`/admin/content/${draft.content_type}/${draft.slug}?view=edit`);
   redirect(`/admin/content/${draft.content_type}`);
 }
