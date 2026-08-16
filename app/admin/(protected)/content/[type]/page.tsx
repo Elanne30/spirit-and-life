@@ -71,12 +71,13 @@ export default async function ContentTypeWorkspace({
         </div>
 
         <Link
-          className="button button-primary admin-content-add-button"
+          className="button button-primary"
           href={`/admin/content/${contentType}/new`}
           aria-label={`Add ${current.singular}`}
           title={`Add ${current.singular}`}
+          style={{ minHeight: "2.5rem", padding: "0.55rem 0.9rem", fontSize: "0.76rem", gap: "0.4rem" }}
         >
-          <Plus size={18} />
+          <Plus size={16} />
           <span>Add</span>
         </Link>
       </div>
@@ -90,27 +91,70 @@ export default async function ContentTypeWorkspace({
         </div>
 
         {items.length ? (
-          <div className="admin-content-grid">
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))",
+              gap: "1rem",
+            }}
+          >
             {items.map((item) => (
               <Link
-                className="admin-content-card"
                 href={`/admin/content/${item.contentType}/${item.slug}`}
                 key={`${item.contentType}-${item.slug}`}
+                style={{
+                  display: "block",
+                  overflow: "hidden",
+                  border: "1px solid var(--line)",
+                  borderRadius: "0.8rem",
+                  background: "var(--surface)",
+                  boxShadow: "0 0.45rem 1.25rem var(--shadow)",
+                  transition: "transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease",
+                }}
               >
-                <div className="admin-content-card-media">
+                <div style={{ position: "relative", aspectRatio: "16 / 9", overflow: "hidden", background: "var(--surface-muted)" }}>
                   {item.image ? (
-                    <img src={item.image} alt="" loading="lazy" />
+                    <img
+                      src={item.image}
+                      alt=""
+                      loading="lazy"
+                      style={{ width: "100%", height: "100%", display: "block", objectFit: "cover" }}
+                    />
                   ) : (
-                    <div className="admin-content-card-media-placeholder" aria-hidden="true">
+                    <div
+                      aria-hidden="true"
+                      style={{ width: "100%", height: "100%", display: "grid", placeItems: "center", color: "var(--muted)" }}
+                    >
                       <Icon size={28} />
                     </div>
                   )}
-                  <span className="admin-content-card-status">{statusLabel(item)}</span>
+                  <span
+                    style={{
+                      position: "absolute",
+                      top: "0.65rem",
+                      left: "0.65rem",
+                      padding: "0.25rem 0.45rem",
+                      borderRadius: "999px",
+                      background: "color-mix(in srgb, var(--surface) 90%, transparent)",
+                      color: "var(--foreground)",
+                      fontSize: "0.64rem",
+                      fontWeight: 700,
+                      letterSpacing: "0.06em",
+                      textTransform: "uppercase",
+                    }}
+                  >
+                    {statusLabel(item)}
+                  </span>
                 </div>
-                <div className="admin-content-card-body">
-                  <p className="eyebrow">{item.category ?? current.singular}</p>
-                  <h3>{item.title}</h3>
-                  <div className="admin-content-card-meta">
+
+                <div style={{ padding: "0.9rem 0.95rem 1rem" }}>
+                  <p className="eyebrow" style={{ marginBottom: "0.45rem", fontSize: "0.62rem" }}>
+                    {item.category ?? current.singular}
+                  </p>
+                  <h3 style={{ marginBottom: "0.55rem", fontSize: "1.2rem", lineHeight: 1.05 }}>
+                    {item.title}
+                  </h3>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: "0.45rem 0.8rem", color: "var(--muted)", fontSize: "0.72rem" }}>
                     {item.date ? <span>{item.date}</span> : null}
                     {item.readingTime ? <span>{item.readingTime}</span> : null}
                   </div>
@@ -126,8 +170,9 @@ export default async function ContentTypeWorkspace({
             <Link
               className="button button-primary"
               href={`/admin/content/${contentType}/new`}
+              style={{ minHeight: "2.5rem", padding: "0.55rem 0.9rem", fontSize: "0.76rem" }}
             >
-              <Plus size={17} />
+              <Plus size={16} />
               Add {current.singular}
             </Link>
           </div>
