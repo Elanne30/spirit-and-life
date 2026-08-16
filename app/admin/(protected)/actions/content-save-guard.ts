@@ -5,6 +5,7 @@ import { createDraftAction, updateDraftAction, type ContentDraftActionState } fr
 import { getDraftByTypeAndSlug, isValidDraftSlug, normalizeDraftSlug, type DraftContentType } from "@/app/lib/content-drafts";
 import { normalizeRichTextDocument, richTextToLegacySections, type RichTextDocument } from "@/app/content/article-rich-text";
 import { findUnsupportedText, getPostgresErrorDetails } from "@/app/lib/content-save-validation";
+import { requireAdminActionAccess } from "@/app/lib/admin-session";
 
 const contentTypes: DraftContentType[] = ["reflection", "journal", "book"];
 
@@ -190,12 +191,20 @@ async function validateDraftBeforeSave(formData: FormData, mode: "create" | "upd
 }
 
 export async function createDraftActionSafe(previousState: ContentDraftActionState, formData: FormData) {
+  if (!(await requireAdminActionAccess())) {
+    return { status: "error" as const, message: "Unauthorized." };
+  }
+
   const validation = await validateDraftBeforeSave(formData, "create");
   if ("error" in validation) return { status: "error" as const, message: validation.error };
   return createDraftAction(previousState, formData);
 }
 
 export async function updateDraftActionSafe(previousState: ContentDraftActionState, formData: FormData) {
+  if (!(await requireAdminActionAccess())) {
+    return { status: "error" as const, message: "Unauthorized." };
+  }
+
   const validation = await validateDraftBeforeSave(formData, "update");
   if ("error" in validation) return { status: "error" as const, message: validation.error };
   return updateDraftAction(previousState, formData);
