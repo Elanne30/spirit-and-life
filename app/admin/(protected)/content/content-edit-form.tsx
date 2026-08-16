@@ -3,7 +3,8 @@
 
 import { useActionState, useState } from "react";
 import type { ContentDraft } from "@/app/lib/content-drafts";
-import { updateDraftAction, uploadContentImageAction, type ContentDraftActionState } from "@/app/admin/(protected)/actions/content";
+import { updateDraftActionSafe } from "@/app/admin/(protected)/actions/content-save-guard";
+import { uploadContentImageAction, type ContentDraftActionState } from "@/app/admin/(protected)/actions/content";
 import { ReflectionBodyEditor, type ReflectionSection } from "@/app/admin/(protected)/content/reflection-body-editor";
 
 const initialState: ContentDraftActionState = { status: "idle", message: "" };
@@ -32,7 +33,7 @@ function getInitialSections(draft: ContentDraft): ReflectionSection[] {
 }
 
 export function ContentEditForm({ draft }: { draft: ContentDraft }) {
-  const [state, formAction, isPending] = useActionState(updateDraftAction, initialState);
+  const [state, formAction, isPending] = useActionState(updateDraftActionSafe, initialState);
   const [uploadState, uploadAction, isUploading] = useActionState(uploadContentImageAction, initialState);
   const [preview, setPreview] = useState(draft.image_reference ?? "");
 
