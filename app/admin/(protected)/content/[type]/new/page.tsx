@@ -38,24 +38,28 @@ export default async function NewContentPage({
   const backLabel = contentType === "reflection" ? "Reflections" : contentType === "journal" ? "Journals" : "Books";
 
   return (
-    <section className="admin-editor-page">
-      <div className="admin-editor-header">
-        <div>
-          <Link className="admin-outline-link" href={`/admin/content/${contentType}`}>
-            <ArrowLeft size={14} /> Back to {backLabel}
-          </Link>
-          <div className="admin-heading-with-icon">
-            <span className="admin-icon"><Icon size={22} /></span>
-            <div>
-              <p className="eyebrow">Create</p>
-              <h1>{current.label}</h1>
-              <p>{current.description}</p>
-            </div>
+    <section
+      className="admin-editor-page"
+      style={{ width: "100%", maxWidth: "none", paddingBlock: "1rem 4rem" }}
+    >
+      <div style={{ marginBottom: "1rem" }}>
+        <Link className="admin-outline-link" href={`/admin/content/${contentType}`}>
+          <ArrowLeft size={14} /> Back to {backLabel}
+        </Link>
+        <div className="admin-heading-with-icon">
+          <span className="admin-icon"><Icon size={22} /></span>
+          <div>
+            <p className="eyebrow">Create</p>
+            <h1>{current.label}</h1>
+            <p>{current.description}</p>
           </div>
         </div>
       </div>
 
-      <article className="admin-editor-card">
+      <article
+        className="admin-editor-card"
+        style={{ width: "100%", maxWidth: "none", padding: "clamp(1rem, 2vw, 2rem)", border: "1px solid var(--line)", background: "var(--surface)", boxShadow: "0 0.45rem 1.25rem var(--shadow)" }}
+      >
         <DraftForm initialContentType={contentType} />
       </article>
     </section>
