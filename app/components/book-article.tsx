@@ -28,23 +28,26 @@ export function BookArticle({ book, showBackLink = true }: { book: Book; showBac
         </div>
       </article>
       <style>{`
-        .book-detail-page { background: var(--background); }
+        .book-detail-page { position: relative; isolation: isolate; background: var(--background); overflow: hidden; }
+        .book-detail-page::before { position: absolute; z-index: -2; inset: 0 0 auto; height: 31rem; content: ""; background: linear-gradient(90deg, color-mix(in srgb, var(--background) 98%, transparent), color-mix(in srgb, var(--background) 87%, transparent) 42%, color-mix(in srgb, var(--background) 48%, transparent)), url("/images/books/books-hero-library.svg") center / cover no-repeat; opacity: .58; pointer-events: none; }
+        .book-detail-page::after { position: absolute; z-index: -1; inset: 0 0 auto; height: 31rem; content: ""; background: linear-gradient(180deg, transparent 30%, var(--background) 100%); pointer-events: none; }
         .book-detail-page .book-detail { display: grid; grid-template-columns: minmax(15rem, 27rem) minmax(0, 1fr); align-items: start; gap: clamp(2.5rem, 7vw, 7rem); padding-block: clamp(4.5rem, 8vw, 7rem); }
         .book-detail-page .book-detail-cover { position: sticky; top: 2rem; display: flex; justify-content: center; }
-        .book-detail-page .book-detail-cover img { width: min(100%, 27rem); height: auto; display: block; border: 1px solid var(--line); box-shadow: 0 1.5rem 3.5rem var(--shadow); }
+        .book-detail-page .book-detail-cover img { width: min(100%, 25rem); height: auto; display: block; border: 1px solid color-mix(in srgb, var(--accent) 35%, var(--line)); box-shadow: 0 1.5rem 3.5rem var(--shadow); transition: transform 300ms ease, box-shadow 300ms ease; }
+        .book-detail-page .book-detail-cover img:hover { transform: translateY(-.25rem); box-shadow: 0 2rem 4rem var(--shadow); }
         .book-detail-page .book-detail-cover-missing { width: min(100%, 27rem); aspect-ratio: 4 / 5.55; display: grid; place-items: center; border: 1px solid var(--line); background: var(--surface); color: var(--muted); text-align: center; }
-        .book-detail-page .book-detail-content { max-width: 46rem; padding-top: .5rem; }
-        .book-detail-page .book-detail-content h1 { margin: .4rem 0 .8rem; font-size: clamp(2.7rem, 6vw, 5.6rem); line-height: .9; letter-spacing: -.035em; }
+        .book-detail-page .book-detail-content { max-width: 46rem; padding-top: 2.5rem; }
+        .book-detail-page .book-detail-content h1 { margin: .4rem 0 .8rem; font-size: clamp(3rem, 6vw, 5.8rem); line-height: .9; letter-spacing: -.055em; }
         .book-detail-page .book-subtitle { margin-bottom: 1.1rem; color: var(--muted); font-size: clamp(1.05rem, 2vw, 1.35rem); line-height: 1.5; }
-        .book-detail-page .book-status { display: inline-flex; width: fit-content; margin-bottom: 1.3rem; padding: .4rem .65rem; border: 1px solid var(--line); border-radius: 999px; color: var(--accent); font-size: .75rem; font-weight: 700; }
+        .book-detail-page .book-status { display: inline-flex; width: fit-content; margin-bottom: 1.3rem; padding: .4rem .65rem; border: 1px solid color-mix(in srgb, var(--accent) 55%, var(--line)); border-radius: 999px; color: var(--accent); font-size: .75rem; font-weight: 700; }
         .book-detail-page .book-detail-meta { margin: .35rem 0; color: var(--muted); font-size: .85rem; }
         .book-detail-page .book-detail-description { margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--line); }
         .book-detail-page .book-detail-description p { margin-bottom: 1rem; color: var(--muted); line-height: 1.85; }
-        .book-detail-page .book-detail-contents { margin-top: 2rem; padding: 1.4rem; border: 1px solid var(--line); border-radius: .2rem; background: var(--surface); }
+        .book-detail-page .book-detail-contents { margin-top: 2rem; padding: 1.4rem; border: 1px solid var(--line); border-radius: .25rem; background: color-mix(in srgb, var(--surface) 88%, transparent); box-shadow: 0 .8rem 2rem var(--shadow); }
         .book-detail-page .book-detail-contents h2 { margin-bottom: .9rem; font-size: 1.4rem; }
         .book-detail-page .book-detail-contents ul { margin: 0; padding-left: 1.2rem; color: var(--muted); line-height: 1.8; }
         .book-detail-page .book-detail-notice { margin: 1.5rem 0; padding: 1rem; border-left: 2px solid var(--accent); background: var(--surface); color: var(--muted); line-height: 1.6; }
-        @media (max-width: 760px) { .book-detail-page .book-detail { grid-template-columns: 1fr; gap: 2.5rem; padding-block: 3.5rem 5rem; } .book-detail-page .book-detail-cover { position: static; } .book-detail-page .book-detail-cover img, .book-detail-page .book-detail-cover-missing { width: min(72vw, 19rem); } .book-detail-page .book-detail-content h1 { font-size: clamp(2.7rem, 13vw, 4.5rem); } }
+        @media (max-width: 760px) { .book-detail-page::before, .book-detail-page::after { height: 25rem; } .book-detail-page .book-detail { grid-template-columns: 1fr; gap: 2.5rem; padding-block: 3.5rem 5rem; } .book-detail-page .book-detail-cover { position: static; } .book-detail-page .book-detail-cover img, .book-detail-page .book-detail-cover-missing { width: min(72vw, 19rem); } .book-detail-page .book-detail-content { padding-top: 0; } .book-detail-page .book-detail-content h1 { font-size: clamp(2.7rem, 13vw, 4.5rem); } }
       `}</style>
     </main>
   );
