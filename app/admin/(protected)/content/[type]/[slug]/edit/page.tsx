@@ -48,8 +48,14 @@ export default async function EditContentPage({
   const Icon = current.icon;
 
   return (
-    <section className="admin-editor-page">
-      <div className="admin-editor-header">
+    <section
+      className="admin-editor-page"
+      style={{ width: "100%", maxWidth: "none", paddingBlock: "1rem 4rem" }}
+    >
+      <div
+        className="admin-editor-header"
+        style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: "1.5rem", flexWrap: "wrap", marginBottom: "1rem" }}
+      >
         <div>
           <Link className="admin-outline-link" href={`/admin/content/${contentType}/${slug}`}>
             <ArrowLeft size={14} /> Back to preview
@@ -73,7 +79,10 @@ export default async function EditContentPage({
         </div>
       </div>
 
-      <article className="admin-editor-card">
+      <article
+        className="admin-editor-card"
+        style={{ width: "100%", maxWidth: "none", padding: "clamp(1rem, 2vw, 2rem)", border: "1px solid var(--line)", background: "var(--surface)", boxShadow: "0 0.45rem 1.25rem var(--shadow)" }}
+      >
         <ContentEditForm draft={draft} />
       </article>
     </section>
