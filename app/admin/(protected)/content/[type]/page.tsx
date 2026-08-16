@@ -53,10 +53,13 @@ export default async function ContentTypeWorkspace({
   const current = config[contentType];
   const Icon = current.icon;
   const items = await listAdminContentItems(contentType);
+  const publishedCount = items.filter((item) => item.status !== "draft").length;
+  const draftCount = items.filter((item) => item.status === "draft").length;
+  const pendingChangesCount = items.filter((item) => item.hasUnpublishedChanges).length;
 
   return (
-    <section className="admin-content-workspace">
-      <div className="admin-page-heading">
+    <section className="admin-library-page admin-content-workspace">
+      <div className="admin-library-heading" style={{ alignItems: "flex-end" }}>
         <div>
           <Link className="admin-outline-link" href="/admin/content">
             <ArrowLeft size={14} /> Back to content
@@ -64,6 +67,7 @@ export default async function ContentTypeWorkspace({
           <div className="admin-heading-with-icon">
             <span className="admin-icon"><Icon size={22} /></span>
             <div>
+              <p className="eyebrow">Content workspace</p>
               <h1>{current.label}</h1>
               <p>{current.description}</p>
             </div>
@@ -90,11 +94,18 @@ export default async function ContentTypeWorkspace({
         </Link>
       </div>
 
-      <div className="admin-panel">
+      <div className="admin-stat-list admin-card" style={{ display: "flex", marginTop: "0.8rem", padding: "0.85rem 1rem" }}>
+        <span><strong>{items.length}</strong><small>Total</small></span>
+        <span><strong>{publishedCount}</strong><small>Published</small></span>
+        <span><strong>{draftCount}</strong><small>Drafts</small></span>
+        <span><strong>{pendingChangesCount}</strong><small>Pending changes</small></span>
+      </div>
+
+      <div className="admin-card" style={{ marginTop: "0.8rem" }}>
         <div className="admin-panel-heading">
           <div>
             <h2>{current.label}</h2>
-            <p className="quiet-note">{items.length} item{items.length === 1 ? "" : "s"}</p>
+            <p className="quiet-note">All available records. Nothing is limited to the sample count shown in the design reference.</p>
           </div>
         </div>
 
@@ -103,7 +114,7 @@ export default async function ContentTypeWorkspace({
             style={{
               display: "grid",
               gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))",
-              gap: "1rem",
+              gap: "0.85rem",
             }}
           >
             {items.map((item) => (
@@ -114,55 +125,29 @@ export default async function ContentTypeWorkspace({
                   display: "block",
                   overflow: "hidden",
                   border: "1px solid var(--line)",
-                  borderRadius: "0.8rem",
+                  borderRadius: "0.75rem",
                   background: "var(--surface)",
-                  boxShadow: "0 0.45rem 1.25rem var(--shadow)",
+                  boxShadow: "0 0.35rem 1rem var(--shadow)",
                   transition: "transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease",
                 }}
               >
                 <div style={{ position: "relative", aspectRatio: "16 / 9", overflow: "hidden", background: "var(--surface-muted)" }}>
                   {item.image ? (
-                    <img
-                      src={item.image}
-                      alt=""
-                      loading="lazy"
-                      style={{ width: "100%", height: "100%", display: "block", objectFit: "cover" }}
-                    />
+                    <img src={item.image} alt="" loading="lazy" style={{ width: "100%", height: "100%", display: "block", objectFit: "cover" }} />
                   ) : (
-                    <div
-                      aria-hidden="true"
-                      style={{ width: "100%", height: "100%", display: "grid", placeItems: "center", color: "var(--muted)" }}
-                    >
+                    <div aria-hidden="true" style={{ width: "100%", height: "100%", display: "grid", placeItems: "center", color: "var(--muted)" }}>
                       <Icon size={28} />
                     </div>
                   )}
-                  <span
-                    style={{
-                      position: "absolute",
-                      top: "0.65rem",
-                      left: "0.65rem",
-                      padding: "0.25rem 0.45rem",
-                      borderRadius: "999px",
-                      background: "color-mix(in srgb, var(--surface) 90%, transparent)",
-                      color: "var(--foreground)",
-                      fontSize: "0.64rem",
-                      fontWeight: 700,
-                      letterSpacing: "0.06em",
-                      textTransform: "uppercase",
-                    }}
-                  >
+                  <span style={{ position: "absolute", top: "0.55rem", left: "0.55rem", maxWidth: "calc(100% - 1.1rem)", padding: "0.24rem 0.4rem", borderRadius: "999px", background: "color-mix(in srgb, var(--surface) 92%, transparent)", color: "var(--foreground)", fontSize: "0.58rem", fontWeight: 700, letterSpacing: "0.05em", textTransform: "uppercase" }}>
                     {statusLabel(item)}
                   </span>
                 </div>
 
-                <div style={{ padding: "0.9rem 0.95rem 1rem" }}>
-                  <p className="eyebrow" style={{ marginBottom: "0.45rem", fontSize: "0.62rem" }}>
-                    {item.category ?? current.singular}
-                  </p>
-                  <h3 style={{ marginBottom: "0.55rem", fontSize: "1.2rem", lineHeight: 1.05 }}>
-                    {item.title}
-                  </h3>
-                  <div style={{ display: "flex", flexWrap: "wrap", gap: "0.45rem 0.8rem", color: "var(--muted)", fontSize: "0.72rem" }}>
+                <div style={{ padding: "0.85rem 0.9rem 0.95rem" }}>
+                  <p className="eyebrow" style={{ marginBottom: "0.35rem", fontSize: "0.58rem" }}>{item.category ?? current.singular}</p>
+                  <h3 style={{ marginBottom: "0.5rem", fontSize: "1.05rem", lineHeight: 1.15 }}>{item.title}</h3>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: "0.4rem 0.7rem", color: "var(--muted)", fontSize: "0.68rem" }}>
                     {item.date ? <span>{item.date}</span> : null}
                     {item.readingTime ? <span>{item.readingTime}</span> : null}
                   </div>
@@ -175,11 +160,7 @@ export default async function ContentTypeWorkspace({
             <Icon size={28} />
             <h3>No {current.label.toLowerCase()} yet</h3>
             <p>Create your first {current.singular.toLowerCase()} from this workspace.</p>
-            <Link
-              className="button button-primary"
-              href={`/admin/content/${contentType}/new`}
-              style={{ minHeight: "2.5rem", padding: "0.55rem 0.9rem", fontSize: "0.76rem" }}
-            >
+            <Link className="button button-primary" href={`/admin/content/${contentType}/new`} style={{ minHeight: "2.5rem", padding: "0.55rem 0.9rem", fontSize: "0.76rem" }}>
               <Plus size={16} />
               Add {current.singular}
             </Link>
