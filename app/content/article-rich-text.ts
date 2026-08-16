@@ -98,6 +98,13 @@ function normalizeNodes(value: unknown, depth = 0): RichTextNode[] {
       if (text) nodes.push({ type: "text", text, marks: normalizeMarks(raw.marks) });
       continue;
     }
+    // Tiptap's StarterKit supports Shift+Enter as a hardBreak node. Treat it
+    // as a literal line break in our JSON format instead of rejecting an
+    // otherwise normal piece of writing.
+    if (raw.type === "hardBreak") {
+      nodes.push({ type: "text", text: "\n" });
+      continue;
+    }
     if (raw.type === "paragraph" || raw.type === "heading") {
       const content = normalizeNodes(raw.content, depth).filter((node) => node.type === "text");
       nodes.push({ type: raw.type, attrs: normalizeBlockAttrs(raw.attrs, raw.type === "heading"), ...(content.length ? { content } : {}) });
@@ -131,11 +138,15 @@ function isSupportedMarks(value: unknown) {
   });
 }
 
-function isSupportedNodes(value: unknown, context: "block" | "inline" | "list", depth = 0): boolean {
-  if (!Array.isArray(value) || depth > maxListDepth) return false;
+type SupportedNodeContext = "block" | "inline" | "list" | "listItem";
+
+function isSupportedNodes(value: unknown, context: SupportedNodeContext, depth = 0): boolean {
+  if (!Array.isArray(value) || depth > maxListDepth + 1) return false;
+
   return value.every((raw) => {
     if (!isRecord(raw) || typeof raw.type !== "string") return false;
     if (raw.type === "text") return context === "inline" && typeof raw.text === "string" && isSupportedMarks(raw.marks);
+    if (raw.type === "hardBreak") return context === "inline";
     if (raw.type === "paragraph" || raw.type === "heading") return context !== "inline" && (raw.content === undefined || isSupportedNodes(raw.content, "inline", depth));
     if (raw.type === "bulletList" || raw.type === "orderedList") return context !== "inline" && isSupportedNodes(raw.content, "list", depth + 1);
     if (raw.type === "listItem") return context === "list" && isSupportedNodes(raw.content, "block", depth + 1);
