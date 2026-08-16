@@ -28,7 +28,22 @@ const Indent = Extension.create({
 });
 
 function ToolbarButton({ active = false, disabled = false, label, onClick, children }: { active?: boolean; disabled?: boolean; label: string; onClick: () => void; children: React.ReactNode }) {
-  return <button aria-label={label} aria-pressed={active} className={`admin-rich-text-button${active ? " is-active" : ""}`} disabled={disabled} onMouseDown={(event) => event.preventDefault()} onClick={onClick} title={label} type="button">{children}</button>;
+  return <button
+    aria-label={label}
+    aria-pressed={active}
+    className={`admin-rich-text-button${active ? " is-active" : ""}`}
+    disabled={disabled}
+    onMouseDown={(event) => event.preventDefault()}
+    onClick={onClick}
+    title={label}
+    type="button"
+    style={{
+      background: active ? "var(--accent)" : "transparent",
+      color: active ? "var(--on-accent)" : "var(--foreground)",
+      borderColor: active ? "var(--accent)" : "var(--line)",
+      boxShadow: active ? "inset 0 0 0 1px color-mix(in srgb, var(--accent) 35%, transparent)" : "none",
+    }}
+  >{children}</button>;
 }
 
 export function AdminRichTextEditor({ initialValue, onChange, labelledBy }: AdminRichTextEditorProps) {
