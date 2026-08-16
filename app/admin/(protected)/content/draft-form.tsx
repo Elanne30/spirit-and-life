@@ -3,127 +3,276 @@
 import { useActionState, useState } from "react";
 import { createDraftAction } from "@/app/admin/(protected)/actions/content";
 import { ReflectionBodyEditor } from "@/app/admin/(protected)/content/reflection-body-editor";
+import type { DraftContentType } from "@/app/lib/content-drafts";
 
 const initialContentDraftActionState = {
   status: "idle" as const,
   message: "",
 };
 
-export function DraftForm() {
+type DraftFormProps = {
+  initialContentType?: DraftContentType;
+};
+
+export function DraftForm({ initialContentType = "reflection" }: DraftFormProps) {
   const [state, formAction, isPending] = useActionState(
     createDraftAction,
     initialContentDraftActionState,
   );
-  const [contentType, setContentType] = useState("reflection");
+
+  const contentType = initialContentType;
+  const [category, setCategory] = useState(
+    contentType === "reflection"
+      ? "Biblical Studies"
+      : contentType === "journal"
+        ? "Personal"
+        : "General",
+  );
+
+  const isReflection = contentType === "reflection";
+  const isJournal = contentType === "journal";
+  const isBook = contentType === "book";
 
   return (
     <form className="admin-form admin-draft-form" action={formAction}>
+      <input type="hidden" name="contentType" value={contentType} />
+
       <div className="admin-draft-column">
-      <h3>Content Information</h3>
-      <label htmlFor="draft-content-type">Content type</label>
-      <select
-        id="draft-content-type"
-        name="contentType"
-        value={contentType}
-        onChange={(event) => setContentType(event.target.value)}
-        required
-      >
-        <option value="reflection">Reflection</option>
-        <option value="journal">Journal</option>
-        <option value="book">Book</option>
-      </select>
+        <h3>
+          {isReflection
+            ? "Reflection Information"
+            : isJournal
+              ? "Journal Information"
+              : "Book Information"}
+        </h3>
 
-      <label htmlFor="draft-title">Title</label>
-      <input
-        id="draft-title"
-        name="title"
-        type="text"
-        placeholder="My new reflection"
-        required
-      />
-
-      <label htmlFor="draft-slug">Slug</label>
-      <input
-        id="draft-slug"
-        name="slug"
-        type="text"
-        placeholder="my-new-reflection"
-        required
-      />
-
-      <label htmlFor="draft-date">Date</label>
-      <input
-        id="draft-date"
-        name="date"
-        type="text"
-        placeholder="August 13, 2026"
-      />
-
-      <label htmlFor="draft-reading-time">Reading time</label>
-      <input
-        id="draft-reading-time"
-        name="readingTime"
-        type="text"
-        placeholder="6 min read"
-      />
-
-      <label htmlFor="draft-category">Category</label>
-      <select
-        id="draft-category"
-        name="category"
-        defaultValue="Biblical Studies"
-      >
-        <option value="Biblical Studies">Biblical Studies</option>
-        <option value="Theology">Theology</option>
-        <option value="Christian Living">Christian Living</option>
-        <option value="Faith & Life">Faith & Life</option>
-        <option value="Philosophy">Philosophy</option>
-        <option value="Apologetics">Apologetics</option>
-        <option value="Church History">Church History</option>
-        <option value="SCRIPTURE">SCRIPTURE</option>
-      </select>
-
-      <label htmlFor="draft-tags">Tags</label>
-      <input
-        id="draft-tags"
-        name="tags"
-        type="text"
-        placeholder="Scripture, Faith, Interpretation"
-      />
-
-      <label htmlFor="draft-scripture">Scripture</label>
-      <input
-        id="draft-scripture"
-        name="scripture"
-        type="text"
-        placeholder="Romans 8:28"
-      />
-
-      <label htmlFor="draft-introduction">Introduction</label>
-      <textarea
-        id="draft-introduction"
-        name="introduction"
-        rows={6}
-        placeholder="Write the introduction to your reflection..."
-      />
-
-      <label className="admin-checkbox" htmlFor="draft-featured">
+        <label htmlFor="draft-title">Title</label>
         <input
-          id="draft-featured"
-          name="featured"
-          type="checkbox"
-          value="yes"
+          id="draft-title"
+          name="title"
+          type="text"
+          placeholder={
+            isReflection
+              ? "My new reflection"
+              : isJournal
+                ? "My new journal entry"
+                : "Book title"
+          }
+          required
         />
-        Feature this reflection
-      </label>
+
+        <label htmlFor="draft-slug">Slug</label>
+        <input
+          id="draft-slug"
+          name="slug"
+          type="text"
+          placeholder={
+            isReflection
+              ? "my-new-reflection"
+              : isJournal
+                ? "my-new-journal-entry"
+                : "book-title"
+          }
+          required
+        />
+
+        {isReflection || isJournal ? (
+          <>
+            <label htmlFor="draft-date">Date</label>
+            <input
+              id="draft-date"
+              name="date"
+              type="text"
+              placeholder="August 13, 2026"
+            />
+
+            {isReflection ? (
+              <>
+                <label htmlFor="draft-reading-time">Reading time</label>
+                <input
+                  id="draft-reading-time"
+                  name="readingTime"
+                  type="text"
+                  placeholder="6 min read"
+                />
+
+                <label htmlFor="draft-scripture">Scripture</label>
+                <input
+                  id="draft-scripture"
+                  name="scripture"
+                  type="text"
+                  placeholder="Romans 8:28"
+                />
+              </>
+            ) : (
+              <div>
+                <label htmlFor="draft-label">Label</label>
+                <input
+                  id="draft-label"
+                  name="label"
+                  type="text"
+                  placeholder="Personal Journal"
+                />
+              </div>
+            )}
+          </>
+        ) : (
+          <>
+            <label htmlFor="draft-subtitle">Subtitle</label>
+            <input
+              id="draft-subtitle"
+              name="subtitle"
+              type="text"
+              placeholder="Book subtitle"
+            />
+
+            <label htmlFor="draft-author">Author</label>
+            <input
+              id="draft-author"
+              name="author"
+              type="text"
+              placeholder="Author name"
+            />
+
+            <label htmlFor="draft-publisher">Publisher</label>
+            <input
+              id="draft-publisher"
+              name="publisher"
+              type="text"
+              placeholder="Publisher"
+            />
+
+            <label htmlFor="draft-expected-publication">Expected publication</label>
+            <input
+              id="draft-expected-publication"
+              name="expectedPublication"
+              type="text"
+              placeholder="2026"
+            />
+
+            <label htmlFor="draft-length">Length</label>
+            <input
+              id="draft-length"
+              name="length"
+              type="text"
+              placeholder="320 pages"
+            />
+
+            <label htmlFor="draft-table-of-contents">Table of contents</label>
+            <textarea
+              id="draft-table-of-contents"
+              name="tableOfContents"
+              rows={8}
+              placeholder="Chapter 1&#10;Chapter 2&#10;Chapter 3"
+            />
+          </>
+        )}
+
+        <label htmlFor="draft-category">Category</label>
+        <select
+          id="draft-category"
+          name="category"
+          value={category}
+          onChange={(event) => setCategory(event.target.value)}
+        >
+          {isReflection ? (
+            <>
+              <option value="Biblical Studies">Biblical Studies</option>
+              <option value="Theology">Theology</option>
+              <option value="Christian Living">Christian Living</option>
+              <option value="Faith & Life">Faith & Life</option>
+              <option value="Philosophy">Philosophy</option>
+              <option value="Apologetics">Apologetics</option>
+              <option value="Church History">Church History</option>
+              <option value="SCRIPTURE">SCRIPTURE</option>
+            </>
+          ) : isJournal ? (
+            <>
+              <option value="Personal">Personal</option>
+              <option value="Faith & Life">Faith & Life</option>
+              <option value="Reflection">Reflection</option>
+            </>
+          ) : (
+            <>
+              <option value="General">General</option>
+              <option value="Theology">Theology</option>
+              <option value="Christian Living">Christian Living</option>
+              <option value="Philosophy">Philosophy</option>
+              <option value="Apologetics">Apologetics</option>
+            </>
+          )}
+        </select>
+
+        <label htmlFor="draft-tags">Tags</label>
+        <input
+          id="draft-tags"
+          name="tags"
+          type="text"
+          placeholder="Scripture, Faith, Interpretation"
+        />
+
+        {(isReflection || isJournal) && (
+          <>
+            <label htmlFor="draft-introduction">Introduction</label>
+            <textarea
+              id="draft-introduction"
+              name="introduction"
+              rows={6}
+              placeholder={
+                isReflection
+                  ? "Write the introduction to your reflection..."
+                  : "Write a short introduction to your journal entry..."
+              }
+            />
+          </>
+        )}
+
+        <label className="admin-checkbox" htmlFor="draft-featured">
+          <input
+            id="draft-featured"
+            name="featured"
+            type="checkbox"
+            value="yes"
+          />
+          {isReflection ? "Feature this reflection" : "Feature this content"}
+        </label>
       </div>
 
-      <div className="admin-draft-column admin-structure-column">
-        <h3>Content Structure</h3>
-        {contentType === "reflection" || contentType === "journal" ? <ReflectionBodyEditor /> : <p className="quiet-note">Rich body content is available for reflections and journals. Books retain their existing fields.</p>}
-      </div>
+      {(isReflection || isJournal) && (
+        <div className="admin-draft-column admin-structure-column">
+          <h3>Content Structure</h3>
+          <ReflectionBodyEditor />
+        </div>
+      )}
 
-      <div className="admin-draft-actions"><button className="button button-secondary" type="submit" disabled={isPending}>{isPending ? "Saving..." : "Save draft"}</button><button className="button button-primary" type="submit" disabled={isPending}>{isPending ? "Saving..." : "Save & continue editing"}</button></div>
+      {isBook && (
+        <div className="admin-draft-column admin-structure-column">
+          <h3>Book Notes</h3>
+          <textarea
+            name="bookNotes"
+            rows={12}
+            placeholder="Write your notes or summary..."
+          />
+        </div>
+      )}
+
+      <div className="admin-draft-actions">
+        <button
+          className="button button-secondary"
+          type="submit"
+          disabled={isPending}
+        >
+          {isPending ? "Saving..." : "Save draft"}
+        </button>
+
+        <button
+          className="button button-primary"
+          type="submit"
+          disabled={isPending}
+        >
+          {isPending ? "Saving..." : "Save & continue editing"}
+        </button>
+      </div>
 
       {state.message ? (
         <p
