@@ -113,9 +113,6 @@ async function validateDraftBeforeSave(formData: FormData, mode: "create" | "upd
     return { error: `The ${friendlyField} contains an unsupported character (${unsupported.codePoint}). The text was not changed.` };
   }
 
-  // A new draft is allowed to request a slug that is already used. The
-  // repository's createDraft() function resolves that collision to the next
-  // available slug. Existing drafts, however, must not steal another draft's slug.
   if (mode === "update") {
     const existing = await getDraftByTypeAndSlug(input.contentType, input.slug);
     if (existing && existing.id !== input.draftId) {
@@ -136,14 +133,17 @@ async function validateDraftBeforeSave(formData: FormData, mode: "create" | "upd
   return { ok: true as const };
 }
 
-export async function createDraftActionSafe(previousState: ContentDraftActionState, formData: FormData) {
-  if (!(await requireAdminActionAccess())) return { status: "error" as const, message: "Unauthorized." };
+export async function createDraftActionSafe(
+  previousState: ContentDraftActionState,
+  formData: FormData,
+): Promise<ContentDraftActionState> {
+  if (!(await requireAdminActionAccess())) return { status: "error", message: "Unauthorized." };
 
   const input = parseFormData(formData);
-  if ("error" in input) return { status: "error" as const, message: input.error };
+  if ("error" in input) return { status: "error", message: input.error };
 
   const validation = await validateDraftBeforeSave(formData, "create");
-  if ("error" in validation) return { status: "error" as const, message: validation.error };
+  if ("error" in validation) return { status: "error", message: validation.error };
 
   const saveMode = String(formData.get("saveMode") ?? "draft").trim();
   let draft: Awaited<ReturnType<typeof createDraft>>;
@@ -163,27 +163,27 @@ export async function createDraftActionSafe(previousState: ContentDraftActionSta
     const details = getPostgresErrorDetails(error);
     console.error("[content-drafts] Create draft failed.", details);
     if (details.code === "23505") {
-      return { status: "error" as const, message: "The draft could not be saved because that slug was taken at the same time. Please try Save draft again." };
+      return { status: "error", message: "The draft could not be saved because that slug was taken at the same time. Please try Save draft again." };
     }
-    return { status: "error" as const, message: "The draft could not be saved. Your writing was not changed." };
+    return { status: "error", message: "The draft could not be saved. Your writing was not changed." };
   }
 
-  if (!draft) return { status: "error" as const, message: "The draft could not be created." };
+  if (!draft) return { status: "error", message: "The draft could not be created." };
 
   revalidatePath("/admin/content");
   revalidatePath(`/admin/content/${draft.content_type}`);
   revalidatePath(`/admin/content/${draft.content_type}/${draft.slug}`);
 
-  // redirect() is intentionally outside the try/catch. Next.js implements
-  // redirect as a control-flow exception; catching it makes a successful save
-  // look like a failed save.
   if (saveMode === "continue") redirect(`/admin/content/${draft.content_type}/${draft.slug}?view=edit`);
   redirect(`/admin/content/${draft.content_type}`);
 }
 
-export async function updateDraftActionSafe(previousState: ContentDraftActionState, formData: FormData) {
-  if (!(await requireAdminActionAccess())) return { status: "error" as const, message: "Unauthorized." };
+export async function updateDraftActionSafe(
+  previousState: ContentDraftActionState,
+  formData: FormData,
+): Promise<ContentDraftActionState> {
+  if (!(await requireAdminActionAccess())) return { status: "error", message: "Unauthorized." };
   const validation = await validateDraftBeforeSave(formData, "update");
-  if ("error" in validation) return { status: "error" as const, message: validation.error };
+  if ("error" in validation) return { status: "error", message: validation.error };
   return updateDraftAction(previousState, formData);
 }
