@@ -16,8 +16,6 @@ type ParsedGuardInput = {
   featured: boolean; sections: Array<{ heading: string; paragraphs: string[] }>; richText?: RichTextDocument;
 };
 
-function typeLabel(type: DraftContentType) { return type[0].toUpperCase() + type.slice(1); }
-
 function parseFormData(formData: FormData): ParsedGuardInput | { error: string } {
   const contentType = String(formData.get("contentType") ?? "").trim() as DraftContentType;
   const title = String(formData.get("title") ?? "").trim();
@@ -81,8 +79,15 @@ async function validateDraftBeforeSave(formData: FormData, mode: "create" | "upd
     return { error: `The ${friendlyField} contains an unsupported character (${unsupported.codePoint}). The text was not changed.` };
   }
 
-  const existing = await getDraftByTypeAndSlug(input.contentType, input.slug);
-  if (existing && (mode === "create" || existing.id !== input.draftId)) return { error: `This slug is already being used by another ${typeLabel(input.contentType)}.` };
+  // New content is allowed to use the same requested slug as an existing item.
+  // createDraft() resolves collisions to a clean unique slug. Existing drafts,
+  // however, must not silently change their URL when edited.
+  if (mode === "update") {
+    const existing = await getDraftByTypeAndSlug(input.contentType, input.slug);
+    if (existing && existing.id !== input.draftId) {
+      return { error: `This slug is already being used by another ${input.contentType}. Choose a different slug for this existing ${input.contentType}.` };
+    }
+  }
 
   try { await sql`SELECT ${JSON.stringify(bodyFromParsed(input))}::jsonb`; }
   catch (error) {
