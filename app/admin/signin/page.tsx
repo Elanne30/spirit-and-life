@@ -1,9 +1,17 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/auth";
 import { isAdminEmail } from "@/app/lib/admin-auth";
 import { GoogleSignInButton } from "./google-sign-in-button";
+
+export const metadata: Metadata = {
+  robots: {
+    index: false,
+    follow: false,
+  },
+};
 
 type AdminSignInPageProps = {
   searchParams: Promise<{ callbackUrl?: string; error?: string }>;
