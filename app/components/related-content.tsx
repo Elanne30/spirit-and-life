@@ -19,40 +19,74 @@ type RelatedContentProps = {
 };
 
 export async function RelatedContent({ relations, scriptureReference, scriptureSlugs = [] }: RelatedContentProps) {
-  const books = await listPublishedBooks();
-  const journals = await listPublishedJournals();
-  const reflections = await listPublishedReflections();
+  const [books, journals, reflections] = await Promise.all([
+    listPublishedBooks(),
+    listPublishedJournals(),
+    listPublishedReflections(),
+  ]);
+
   const scriptureItems = [
     ...scriptureSlugs.map((slug) => scriptureReferences.find((reference) => reference.slug === slug)),
     ...(scriptureReference ? scriptureReferences.filter((reference) => reference.reference === scriptureReference) : []),
   ]
     .filter((reference): reference is (typeof scriptureReferences)[number] => Boolean(reference))
-    .map((reference) => ({ href: `/scripture/${reference.slug}`, label: "Scripture", title: reference.reference, description: reference.summary, meta: `${reference.book} · Chapter ${reference.chapter}` }));
+    .map((reference) => ({
+      href: `/scripture/${reference.slug}`,
+      label: "Scripture",
+      title: reference.reference,
+      description: reference.summary,
+      meta: `${reference.book} · Chapter ${reference.chapter}`,
+    }));
+
   const relatedItems: RelatedItem[] = [
     ...(relations.relatedReflectionSlugs ?? [])
       .map((slug) => reflections.find((reflection) => reflection.contentSlug === slug))
       .filter((reflection): reflection is (typeof reflections)[number] => Boolean(reflection))
-      .map((reflection) => ({ href: `/reflections/${reflection.contentSlug}`, label: "Reflection", title: reflection.title, description: reflection.introduction, meta: [reflection.date, reflection.readingTime, reflection.scripture].filter(Boolean).join(" · ") })),
+      .map((reflection) => ({
+        href: `/reflections/${reflection.contentSlug}`,
+        label: "Reflection",
+        title: reflection.title,
+        description: reflection.introduction,
+        meta: [reflection.date, reflection.readingTime, reflection.scripture].filter(Boolean).join(" · "),
+      })),
     ...(relations.relatedJournalSlugs ?? [])
       .map((slug) => journals.find((journal) => journal.contentSlug === slug))
       .filter((journal): journal is (typeof journals)[number] => Boolean(journal))
-      .map((journal) => ({ href: `/journals/${journal.contentSlug}`, label: "Journal", title: journal.title, description: journal.introduction, meta: journal.date })),
+      .map((journal) => ({
+        href: `/journals/${journal.contentSlug}`,
+        label: "Journal",
+        title: journal.title,
+        description: journal.introduction,
+        meta: journal.date,
+      })),
     ...(relations.relatedBookSlugs ?? [])
       .map((slug) => books.find((book) => book.contentSlug === slug))
       .filter((book): book is (typeof books)[number] => Boolean(book))
-      .map((book) => ({ href: `/books/${book.contentSlug}`, label: "Book", title: book.title, description: book.description?.split("\n\n")[0], meta: book.category ?? book.status })),
+      .map((book) => ({
+        href: `/books/${book.contentSlug}`,
+        label: "Book",
+        title: book.title,
+        description: book.description?.split("\n\n")[0],
+        meta: book.category ?? book.status,
+      })),
     ...scriptureItems,
     ...(relations.relatedStudyPlanDates ?? [])
       .map((date) => studies.find((study) => study.date === date))
       .filter((study): study is (typeof studies)[number] => Boolean(study))
-        .map((study) => ({ href: `/study-center/${study.date}`, label: "Study Plan", title: `${study.weekday}, ${study.date}`, description: study.focus, meta: study.passage })),
+      .map((study) => ({
+        href: `/study-center/${study.date}`,
+        label: "Study Plan",
+        title: `${study.weekday}, ${study.date}`,
+        description: study.focus,
+        meta: study.passage,
+      })),
   ];
 
-      const uniqueItems = relatedItems.filter((item, index) => relatedItems.findIndex((candidate) => candidate.href === item.href) === index);
+  const uniqueItems = relatedItems
+    .filter((item, index) => relatedItems.findIndex((candidate) => candidate.href === item.href) === index)
+    .slice(0, 6);
 
-      if (uniqueItems.length === 0) {
-    return null;
-  }
+  if (uniqueItems.length === 0) return null;
 
   return (
     <section className="related-content" aria-labelledby="related-content-title">
