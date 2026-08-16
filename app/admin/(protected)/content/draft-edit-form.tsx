@@ -2,10 +2,7 @@
 
 import { useActionState } from "react";
 import type { ContentDraft } from "@/app/lib/content-drafts";
-import {
-  createDraftActionSafe,
-  updateDraftActionSafe,
-} from "@/app/admin/(protected)/actions/content-save-guard";
+import { updateDraftActionSafe } from "@/app/admin/(protected)/actions/content-save-guard";
 import type { ContentDraftActionState } from "@/app/admin/(protected)/actions/content";
 import {
   ReflectionBodyEditor,
