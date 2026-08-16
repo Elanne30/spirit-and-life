@@ -21,6 +21,27 @@ test("rich text produces a readable legacy section projection", () => {
   assert.deepEqual(richTextToLegacySections(document), [{ heading: "A heading", paragraphs: ["A formatted paragraph", "A list item"] }]);
 });
 
+test("hard line breaks from the editor are accepted and preserved as text line breaks", () => {
+  const document = normalizeRichTextDocument({
+    format: "spirit-and-life-rich-text",
+    version: 1,
+    content: {
+      type: "doc",
+      content: [{
+        type: "paragraph",
+        content: [
+          { type: "text", text: "First line" },
+          { type: "hardBreak" },
+          { type: "text", text: "Second line" },
+        ],
+      }],
+    },
+  });
+
+  assert.ok(document);
+  assert.equal(document.content.content[0].content?.map((node) => node.text ?? "").join(""), "First line\nSecond line");
+});
+
 test("unsafe links and unsupported nodes are rejected", () => {
   const unsafeLink = normalizeRichTextDocument({ format: "spirit-and-life-rich-text", version: 1, content: { type: "doc", content: [{ type: "paragraph", content: [{ type: "text", text: "Bad", marks: [{ type: "link", attrs: { href: "javascript:alert(1)" } }] }] }] } });
   const unsupportedNode = normalizeRichTextDocument({ format: "spirit-and-life-rich-text", version: 1, content: { type: "doc", content: [{ type: "script", text: "Bad" }] } });
