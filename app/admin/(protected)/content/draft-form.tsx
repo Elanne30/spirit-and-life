@@ -260,6 +260,8 @@ export function DraftForm({ initialContentType = "reflection" }: DraftFormProps)
         <button
           className="button button-secondary"
           type="submit"
+          name="saveMode"
+          value="draft"
           disabled={isPending}
         >
           {isPending ? "Saving..." : "Save draft"}
@@ -268,6 +270,8 @@ export function DraftForm({ initialContentType = "reflection" }: DraftFormProps)
         <button
           className="button button-primary"
           type="submit"
+          name="saveMode"
+          value="continue"
           disabled={isPending}
         >
           {isPending ? "Saving..." : "Save & continue editing"}
