@@ -35,28 +35,27 @@ export default async function NewContentPage({
   const contentType = type as keyof typeof config;
   const current = config[contentType];
   const Icon = current.icon;
+  const backLabel = contentType === "reflection" ? "Reflections" : contentType === "journal" ? "Journals" : "Books";
 
   return (
-    <section className="admin-stack">
-      <article className="admin-card">
-        <Link className="admin-outline-link" href={`/admin/content/${contentType}`}>
-          <ArrowLeft size={14} />
-          Back to {contentType === "reflection" ? "Reflections" : contentType === "journal" ? "Journals" : "Books"}
-        </Link>
-
-        <div className="admin-heading-with-icon">
-          <span className="admin-icon">
-            <Icon size={22} />
-          </span>
-          <div>
-            <p className="eyebrow">Create</p>
-            <h1>{current.label}</h1>
-            <p>{current.description}</p>
+    <section className="admin-editor-page">
+      <div className="admin-editor-header">
+        <div>
+          <Link className="admin-outline-link" href={`/admin/content/${contentType}`}>
+            <ArrowLeft size={14} /> Back to {backLabel}
+          </Link>
+          <div className="admin-heading-with-icon">
+            <span className="admin-icon"><Icon size={22} /></span>
+            <div>
+              <p className="eyebrow">Create</p>
+              <h1>{current.label}</h1>
+              <p>{current.description}</p>
+            </div>
           </div>
         </div>
-      </article>
+      </div>
 
-      <article className="admin-card">
+      <article className="admin-editor-card">
         <DraftForm initialContentType={contentType} />
       </article>
     </section>
