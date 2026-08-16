@@ -57,15 +57,18 @@ export default function AboutPage() {
       </section>
 
       <style>{`
-        .about-main { background: var(--background); }
-        .about-main .about-hero { padding-block: clamp(4.5rem, 8vw, 7rem) clamp(3.5rem, 6vw, 5rem); text-align: center; }
-        .about-main .about-hero h1 { max-width: 55rem; margin: .35rem auto 1rem; font-size: clamp(3rem, 6.5vw, 5.8rem); line-height: .92; letter-spacing: -.035em; }
-        .about-main .about-hero > p:last-child { max-width: 40rem; margin-inline: auto; color: var(--muted); line-height: 1.75; }
-        .about-main .about-introduction { width: min(100% - 3rem, 78rem); margin-inline: auto; display: grid; grid-template-columns: minmax(15rem, 25rem) minmax(0, 1fr); align-items: center; gap: clamp(2.5rem, 7vw, 7rem); padding: clamp(3rem, 6vw, 5rem) 0; border-top: 1px solid var(--line); }
+        .about-main { background: var(--background); padding-bottom: 0; }
+        .about-main .about-hero { position: relative; isolation: isolate; width: min(100% - 3rem, 76rem); max-width: none; min-height: 31rem; display: flex; flex-direction: column; align-items: flex-start; justify-content: center; overflow: hidden; padding: clamp(4.5rem, 8vw, 7rem) clamp(1.5rem, 5vw, 4rem); border-bottom: 1px solid var(--line); text-align: left; }
+        .about-main .about-hero::before { position: absolute; z-index: -2; inset: 0; content: ""; background: linear-gradient(90deg, color-mix(in srgb, var(--background) 98%, transparent), color-mix(in srgb, var(--background) 88%, transparent) 45%, color-mix(in srgb, var(--background) 45%, transparent)), url("/images/books/books-hero-library.svg") center / cover no-repeat; opacity: .88; }
+        .about-main .about-hero::after { position: absolute; z-index: -1; inset: 0; content: ""; background: radial-gradient(circle at 80% 48%, color-mix(in srgb, var(--accent) 12%, transparent), transparent 34%); pointer-events: none; }
+        .about-main .about-hero .eyebrow { margin-bottom: 1.1rem; }
+        .about-main .about-hero h1 { max-width: 52rem; margin: .2rem 0 1.2rem; font-size: clamp(3.5rem, 7.5vw, 6.5rem); line-height: .88; letter-spacing: -.055em; }
+        .about-main .about-hero > p:last-child { max-width: 38rem; margin: 0; color: var(--muted); line-height: 1.7; }
+        .about-main .about-introduction { width: min(100% - 3rem, 76rem); margin-inline: auto; display: grid; grid-template-columns: minmax(13rem, 20rem) minmax(0, 1fr); align-items: center; gap: clamp(2.5rem, 7vw, 7rem); padding: clamp(4rem, 7vw, 6rem) 0; border-bottom: 1px solid var(--line); }
         .about-main .about-portrait-wrap { display: flex; justify-content: center; }
-        .about-main .about-portrait { width: min(100%, 20rem); height: auto; display: block; border: 1px solid var(--line); border-radius: .25rem; box-shadow: 0 1.3rem 3rem var(--shadow); }
+        .about-main .about-portrait { width: min(100%, 13.5rem); aspect-ratio: 1; height: auto; display: block; object-fit: cover; object-position: center top; border: 1px solid color-mix(in srgb, var(--accent) 45%, var(--line)); border-radius: 50%; box-shadow: 0 1.2rem 3rem var(--shadow); }
         .about-main .about-copy { max-width: 44rem; }
-        .about-main .about-copy h2 { margin: .4rem 0 1.2rem; font-size: clamp(2.2rem, 4vw, 3.7rem); line-height: .98; }
+        .about-main .about-copy h2 { margin: .4rem 0 1.2rem; font-size: clamp(2.2rem, 4vw, 3.7rem); line-height: .98; letter-spacing: -.035em; }
         .about-main .about-copy p:not(.eyebrow) { color: var(--muted); line-height: 1.8; }
         .about-main .about-philosophy { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1px; margin-top: clamp(2rem, 5vw, 4rem); border: 1px solid var(--line); background: var(--line); }
         .about-main .about-philosophy-section { padding: clamp(1.5rem, 3vw, 2.5rem); background: var(--surface); }
@@ -83,7 +86,7 @@ export default function AboutPage() {
         .about-main .closing-invitation h2 { margin-bottom: .7rem; font-size: clamp(2.2rem, 4.5vw, 4rem); line-height: .95; }
         .about-main .closing-invitation > p { margin-bottom: 1.5rem; color: var(--muted); }
         .about-main .closing-actions { display: flex; justify-content: center; gap: .8rem; flex-wrap: wrap; }
-        @media (max-width: 760px) { .about-main .about-hero { text-align: left; } .about-main .about-hero h1, .about-main .about-hero > p:last-child { margin-inline: 0; } .about-main .about-introduction { width: min(100% - 1.5rem, 48rem); grid-template-columns: 1fr; gap: 2rem; } .about-main .about-portrait { width: min(72vw, 17rem); } .about-main .about-philosophy { grid-template-columns: 1fr; } .about-main .about-commitment { grid-template-columns: 1fr; gap: 2rem; } .about-main .about-commitment ul { grid-template-columns: 1fr; } .about-main .mission-copy { width: min(100% - 1.5rem, 48rem); text-align: left; } .about-main .mission-copy blockquote { text-align: center; } }
+        @media (max-width: 760px) { .about-main .about-hero, .about-main .about-introduction { width: min(100% - 2rem, 40rem); } .about-main .about-hero { min-height: 25rem; padding-block: 4rem 3.5rem; } .about-main .about-hero::before { background: linear-gradient(180deg, color-mix(in srgb, var(--background) 96%, transparent), color-mix(in srgb, var(--background) 72%, transparent)), url("/images/books/books-hero-library.svg") center / cover no-repeat; opacity: .68; } .about-main .about-hero h1 { font-size: clamp(3.3rem, 15vw, 5.2rem); } .about-main .about-introduction { grid-template-columns: 1fr; gap: 2rem; } .about-main .about-portrait { width: min(45vw, 12rem); } .about-main .about-philosophy { grid-template-columns: 1fr; } .about-main .about-commitment { grid-template-columns: 1fr; gap: 2rem; } .about-main .about-commitment ul { grid-template-columns: 1fr; } .about-main .mission-copy { width: min(100% - 2rem, 40rem); text-align: left; } .about-main .mission-copy blockquote { text-align: center; } }
       `}</style>
     </main>
   );
