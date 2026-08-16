@@ -1,4 +1,4 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import { reflections } from "@/app/data/reflections";
 import { journals } from "@/app/data/journals";
@@ -8,7 +8,6 @@ import { draftToReflectionPreview, draftToJournalPreview, draftToBookPreview } f
 import { ReflectionArticle } from "@/app/components/reflection-article";
 import { JournalArticle } from "@/app/components/journal-article";
 import { BookArticle } from "@/app/components/book-article";
-import { ContentEditForm } from "@/app/admin/(protected)/content/content-edit-form";
 import { PublishForm } from "@/app/admin/(protected)/content/publish-form";
 import { startEditingContentAction } from "@/app/admin/(protected)/actions/content";
 import { ContentDeleteForm } from "@/app/admin/(protected)/content/content-delete-form";
@@ -36,6 +35,10 @@ export default async function AdminContentDetailPage({
     notFound();
   }
 
+  if (view === "edit") {
+    redirect(`/admin/content/${contentType}/${slug}/edit`);
+  }
+
   const staticReflection = contentType === "reflection" ? reflections.find((item) => item.contentSlug === slug) : undefined;
   const staticJournal = contentType === "journal" ? journals.find((item) => item.contentSlug === slug) : undefined;
   const staticBook = contentType === "book" ? books.find((item) => item.contentSlug === slug) : undefined;
@@ -51,8 +54,6 @@ export default async function AdminContentDetailPage({
   const displayedJournal = contentType === "journal" ? ((draft ? draftToJournalPreview(draft) : null) ?? staticJournal) : undefined;
   const displayedBook = contentType === "book" ? ((draft ? draftToBookPreview(draft) : null) ?? staticBook) : undefined;
 
-  const showEdit = view === "edit" && Boolean(draft);
-
   return (
     <section className="admin-stack">
       <article className="admin-card">
@@ -61,18 +62,18 @@ export default async function AdminContentDetailPage({
             <p className="eyebrow">{contentType}</p>
             <h2>{draft?.title ?? staticTitle}</h2>
           </div>
-          <Link className="button button-secondary" href="/admin/content">
-            Back to content
+          <Link className="button button-secondary" href={`/admin/content/${contentType}`}>
+            Back to {contentType}s
           </Link>
           <ContentDeleteForm contentType={contentType} slug={slug} title={draft?.title ?? staticTitle ?? "this content"} />
         </div>
 
         <nav className="admin-tab-row" aria-label="Preview or edit">
-          <Link className={`admin-tab${!showEdit ? " is-active" : ""}`} href={`/admin/content/${contentType}/${slug}`}>
+          <Link className="admin-tab is-active" href={`/admin/content/${contentType}/${slug}`}>
             Preview
           </Link>
           {draft ? (
-            <Link className={`admin-tab${showEdit ? " is-active" : ""}`} href={`/admin/content/${contentType}/${slug}?view=edit`}>
+            <Link className="admin-tab" href={`/admin/content/${contentType}/${slug}/edit`}>
               Edit
             </Link>
           ) : (
@@ -102,15 +103,9 @@ export default async function AdminContentDetailPage({
       </article>
 
       <article className="admin-card admin-preview">
-        {showEdit && draft ? (
-          <ContentEditForm draft={draft} />
-        ) : (
-          <>
-            {displayedReflection ? <ReflectionArticle reflection={displayedReflection} showBackLink={false} /> : null}
-            {displayedJournal ? <JournalArticle journal={displayedJournal} showBackLink={false} /> : null}
-            {displayedBook ? <BookArticle book={displayedBook} showBackLink={false} /> : null}
-          </>
-        )}
+        {displayedReflection ? <ReflectionArticle reflection={displayedReflection} showBackLink={false} /> : null}
+        {displayedJournal ? <JournalArticle journal={displayedJournal} showBackLink={false} /> : null}
+        {displayedBook ? <BookArticle book={displayedBook} showBackLink={false} /> : null}
       </article>
     </section>
   );
