@@ -105,7 +105,7 @@ function RulerHandle({ label, left, onMove, kind }: { label: string; left: numbe
 function toCase(value: string, mode: "upper" | "lower" | "title" | "sentence") {
   if (mode === "upper") return value.toUpperCase();
   if (mode === "lower") return value.toLowerCase();
-  if (mode === "title") return value.toLowerCase().replace(/\b([\p{L}\p{N])/gu, (match) => match.toUpperCase());
+  if (mode === "title") return value.toLowerCase().replace(/\b([\p{L}\p{N}])/gu, (match) => match.toUpperCase());
   const lower = value.toLowerCase();
   return lower.replace(/(^|[.!?]\s+)([\p{L}\p{N}])/gu, (_, prefix: string, letter: string) => `${prefix}${letter.toUpperCase()}`);
 }
@@ -156,8 +156,8 @@ export function AdminRichTextEditor({ initialValue, onChange, labelledBy }: Admi
     if (!ranges.length) { setOpenMenu(null); return; }
     const tr = editor.state.tr;
     [...ranges].reverse().forEach((range) => {
-      const replacement = editor.schema.text(toCase(range.text, mode), range.marks);
-      tr.replaceWith(range.from, range.to, replacement);
+      const schema = editor.state.schema;
+      tr.replaceWith(range.from, range.to, schema.text(toCase(range.text, mode), range.marks));
     });
     editor.view.dispatch(tr);
     setOpenMenu(null);
