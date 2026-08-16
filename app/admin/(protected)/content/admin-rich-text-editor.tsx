@@ -41,7 +41,16 @@ export function AdminRichTextEditor({ initialValue, onChange, labelledBy }: Admi
       Indent,
     ],
     content: initialValue.content,
-    editorProps: { attributes: { class: "admin-rich-text-surface", role: "textbox", "aria-multiline": "true", ...(labelledBy ? { "aria-labelledby": labelledBy } : {}) } },
+    editorProps: {
+      attributes: {
+        class: "admin-rich-text-surface",
+        role: "textbox",
+        "aria-multiline": "true",
+        spellCheck: "true",
+        style: "background: var(--surface); color: var(--foreground); caret-color: var(--foreground);",
+        ...(labelledBy ? { "aria-labelledby": labelledBy } : {}),
+      },
+    },
     onUpdate: ({ editor: instance }) => onChange({ format: "spirit-and-life-rich-text", version: 1, content: instance.getJSON() as RichTextDocument["content"] }),
   });
 
