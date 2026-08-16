@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { ArrowRight, BarChart3, BookOpen, CalendarDays, FileText, Mail, PenLine, Send, Users } from "lucide-react";
 import { listAdminContentItems, type AdminContentItem } from "@/app/admin/(protected)/content/admin-content";
-import type { DraftContentType } from "@/app/lib/content-drafts";
 import { getNewsletterSubscriberSummary } from "@/app/lib/newsletter";
 import { getPushSubscriberSummary } from "@/app/lib/push";
 
@@ -149,7 +148,7 @@ export default async function AdminDashboardPage() {
         </div>
       </article>
 
-      <div className="admin-grid" style={{ marginTop: "0.8rem", gridTemplateColumns: "repeat(3, minmax(0, 1fr))" }}>
+      <div className="admin-grid" style={{ marginTop: "0.8rem", gridTemplateColumns: "repeat(auto-fit, minmax(14rem, 1fr))" }}>
         {operations.map((card) => {
           const Icon = card.icon;
           return (
