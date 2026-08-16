@@ -15,6 +15,29 @@ type AdminRichTextEditorProps = {
   labelledBy?: string;
 };
 
+const numericFontSizes = [
+  { label: "12", value: "12px" },
+  { label: "14", value: "14px" },
+  { label: "16", value: "16px" },
+  { label: "18", value: "18px" },
+  { label: "20", value: "20px" },
+  { label: "22", value: "22px" },
+  { label: "24", value: "24px" },
+  { label: "26", value: "26px" },
+  { label: "28", value: "28px" },
+  { label: "30", value: "30px" },
+  { label: "32", value: "32px" },
+  { label: "36", value: "36px" },
+  { label: "40", value: "40px" },
+];
+
+const legacyFontSizeLabels: Record<string, string> = {
+  "0.875rem": "14",
+  "1rem": "16",
+  "1.25rem": "20",
+  "1.5rem": "24",
+};
+
 const Indent = Extension.create({
   name: "spiritAndLifeIndent",
   addGlobalAttributes() {
@@ -63,7 +86,7 @@ export function AdminRichTextEditor({ initialValue, onChange, labelledBy }: Admi
         role: "textbox",
         "aria-multiline": "true",
         spellCheck: "true",
-        style: "background: var(--surface); color: var(--foreground); caret-color: var(--foreground); padding: 2.25rem 3rem; min-height: 38rem; max-width: 100%; margin: 0 auto;",
+        style: "background: var(--surface); color: var(--foreground); caret-color: var(--foreground); padding: clamp(1.25rem, 3vw, 3rem) clamp(1rem, 5vw, 3rem); min-height: 38rem; width: 100%; max-width: 62rem; box-sizing: border-box; margin: 0 auto;",
         ...(labelledBy ? { "aria-labelledby": labelledBy } : {}),
       },
     },
@@ -94,6 +117,9 @@ export function AdminRichTextEditor({ initialValue, onChange, labelledBy }: Admi
 
   if (!editor) return <div className="admin-rich-text-loading">Loading editor…</div>;
 
+  const hasTextSelection = !editor.state.selection.empty;
+  const active = (name: string, attributes?: Record<string, unknown>) => hasTextSelection && editor.isActive(name, attributes);
+  const activeAlignment = (alignment: (typeof textAlignments)[number]) => hasTextSelection && editor.isActive({ textAlign: alignment });
   const inList = editor.isActive("bulletList") || editor.isActive("orderedList");
   const currentIndent = Number(editor.getAttributes(editor.isActive("heading") ? "heading" : "paragraph").indent ?? 0);
   const updateIndent = (amount: number) => {
@@ -113,16 +139,22 @@ export function AdminRichTextEditor({ initialValue, onChange, labelledBy }: Admi
     if (!(/^(https?:|mailto:)/i.test(href.trim()) || (/^\/(?!\/)/).test(href.trim()))) { window.alert("Use an http(s), mailto, or site-relative link."); return; }
     editor.chain().focus().extendMarkRange("link").setLink({ href: href.trim() }).run();
   };
+  const currentFontSize = editor.getAttributes("textStyle").fontSize as string | undefined;
+  const currentFontSizeLabel = currentFontSize ? legacyFontSizeLabels[currentFontSize] ?? currentFontSize.replace("px", "") : "";
+  const rulerMarks = ["0", "4", "8", "12", "16", "20", "24", "28", "32", "36", "40"];
 
   return <div className="admin-rich-text-editor">
     <div className="admin-rich-text-toolbar" role="toolbar" aria-label="Rich text formatting">
       <div className="admin-rich-text-group"><ToolbarButton label="Undo" disabled={!editor.can().undo()} onClick={() => editor.chain().focus().undo().run()}><RotateCcw size={16} /></ToolbarButton><ToolbarButton label="Redo" disabled={!editor.can().redo()} onClick={() => editor.chain().focus().redo().run()}><Redo2 size={16} /></ToolbarButton></div>
-      <div className="admin-rich-text-group"><ToolbarButton label="Bold" active={editor.isActive("bold")} onClick={() => editor.chain().focus().toggleBold().run()}><Bold size={16} /></ToolbarButton><ToolbarButton label="Italic" active={editor.isActive("italic")} onClick={() => editor.chain().focus().toggleItalic().run()}><Italic size={16} /></ToolbarButton><ToolbarButton label="Underline" active={editor.isActive("underline")} onClick={() => editor.chain().focus().toggleUnderline().run()}><Underline size={16} /></ToolbarButton></div>
-      <div className="admin-rich-text-group"><label className="sr-only" htmlFor="rich-text-font-family">Font family</label><select id="rich-text-font-family" aria-label="Font family" value={editor.getAttributes("textStyle").fontFamily ?? ""} onChange={(event) => event.target.value ? editor.chain().focus().setFontFamily(event.target.value).run() : editor.chain().focus().unsetFontFamily().run()}><option value="">Site default</option><option value={fontFamilies[0]}>Serif</option><option value={fontFamilies[1]}>Sans serif</option><option value={fontFamilies[2]}>Georgia</option></select><label className="sr-only" htmlFor="rich-text-font-size">Font size</label><select id="rich-text-font-size" aria-label="Font size" value={editor.getAttributes("textStyle").fontSize ?? ""} onChange={(event) => event.target.value ? editor.chain().focus().setFontSize(event.target.value).run() : editor.chain().focus().unsetFontSize().run()}><option value="">Size</option><option value={fontSizes[0]}>Small</option><option value={fontSizes[1]}>Normal</option><option value={fontSizes[2]}>Large</option><option value={fontSizes[3]}>Extra large</option></select></div>
-      <div className="admin-rich-text-group"><ToolbarButton label="Paragraph" active={editor.isActive("paragraph")} onClick={() => editor.chain().focus().setParagraph().run()}><Pilcrow size={16} /></ToolbarButton><ToolbarButton label="Section heading" active={editor.isActive("heading", { level: 2 })} onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}><Heading2 size={16} /></ToolbarButton></div>
-      <div className="admin-rich-text-group">{[["left", AlignLeft, "Align left"], ["center", AlignCenter, "Align center"], ["right", AlignRight, "Align right"], ["justify", AlignJustify, "Justify"]].map(([alignment, Icon, label]) => <ToolbarButton key={alignment as string} label={label as string} active={editor.isActive({ textAlign: alignment })} onClick={() => editor.chain().focus().setTextAlign(alignment as "left" | "center" | "right" | "justify").run()}>{<Icon size={16} />}</ToolbarButton>)}</div>
-      <div className="admin-rich-text-group"><ToolbarButton label="Bulleted list" active={editor.isActive("bulletList")} onClick={() => editor.chain().focus().toggleBulletList().run()}><List size={16} /></ToolbarButton><ToolbarButton label="Numbered list" active={editor.isActive("orderedList")} onClick={() => editor.chain().focus().toggleOrderedList().run()}><ListOrdered size={16} /></ToolbarButton><ToolbarButton label="Outdent" disabled={!inList && currentIndent <= 0} onClick={() => updateIndent(-1)}><IndentDecrease size={16} /></ToolbarButton><ToolbarButton label="Indent" disabled={!inList && currentIndent >= 4} onClick={() => updateIndent(1)}><IndentIncrease size={16} /></ToolbarButton></div>
-      <div className="admin-rich-text-group"><ToolbarButton label="Add or edit link" active={editor.isActive("link")} onClick={setLink}><Link2 size={16} /></ToolbarButton></div>
+      <div className="admin-rich-text-group"><ToolbarButton label="Bold" active={active("bold")} onClick={() => editor.chain().focus().toggleBold().run()}><Bold size={16} /></ToolbarButton><ToolbarButton label="Italic" active={active("italic")} onClick={() => editor.chain().focus().toggleItalic().run()}><Italic size={16} /></ToolbarButton><ToolbarButton label="Underline" active={active("underline")} onClick={() => editor.chain().focus().toggleUnderline().run()}><Underline size={16} /></ToolbarButton></div>
+      <div className="admin-rich-text-group"><label className="sr-only" htmlFor="rich-text-font-family">Font family</label><select id="rich-text-font-family" aria-label="Font family" value={editor.getAttributes("textStyle").fontFamily ?? ""} onChange={(event) => event.target.value ? editor.chain().focus().setFontFamily(event.target.value).run() : editor.chain().focus().unsetFontFamily().run()}><option value="">Site default</option><option value={fontFamilies[0]}>Serif</option><option value={fontFamilies[1]}>Sans serif</option><option value={fontFamilies[2]}>Georgia</option></select><label className="sr-only" htmlFor="rich-text-font-size">Font size</label><select id="rich-text-font-size" aria-label="Font size" value={currentFontSize ?? ""} onChange={(event) => event.target.value ? editor.chain().focus().setFontSize(event.target.value).run() : editor.chain().focus().unsetFontSize().run()}><option value="">{currentFontSizeLabel || "Size"}</option>{numericFontSizes.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}{currentFontSize && !fontSizes.includes(currentFontSize as (typeof fontSizes)[number]) ? null : null}</select></div>
+      <div className="admin-rich-text-group"><ToolbarButton label="Paragraph" active={active("paragraph")} onClick={() => editor.chain().focus().setParagraph().run()}><Pilcrow size={16} /></ToolbarButton><ToolbarButton label="Section heading" active={active("heading", { level: 2 })} onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}><Heading2 size={16} /></ToolbarButton></div>
+      <div className="admin-rich-text-group">{[["left", AlignLeft, "Align left"], ["center", AlignCenter, "Align center"], ["right", AlignRight, "Align right"], ["justify", AlignJustify, "Justify"]].map(([alignment, Icon, label]) => <ToolbarButton key={alignment as string} label={label as string} active={activeAlignment(alignment as (typeof textAlignments)[number])} onClick={() => editor.chain().focus().setTextAlign(alignment as "left" | "center" | "right" | "justify").run()}>{<Icon size={16} />}</ToolbarButton>)}</div>
+      <div className="admin-rich-text-group"><ToolbarButton label="Bulleted list" active={active("bulletList")} onClick={() => editor.chain().focus().toggleBulletList().run()}><List size={16} /></ToolbarButton><ToolbarButton label="Numbered list" active={active("orderedList")} onClick={() => editor.chain().focus().toggleOrderedList().run()}><ListOrdered size={16} /></ToolbarButton><ToolbarButton label="Outdent" disabled={!inList && currentIndent <= 0} onClick={() => updateIndent(-1)}><IndentDecrease size={16} /></ToolbarButton><ToolbarButton label="Indent" disabled={!inList && currentIndent >= 4} onClick={() => updateIndent(1)}><IndentIncrease size={16} /></ToolbarButton></div>
+      <div className="admin-rich-text-group"><ToolbarButton label="Add or edit link" active={active("link")} onClick={setLink}><Link2 size={16} /></ToolbarButton></div>
+    </div>
+    <div className="admin-rich-text-ruler" aria-hidden="true" style={{ width: "100%", maxWidth: "62rem", margin: "0 auto", padding: "0 clamp(1rem, 5vw, 3rem)", boxSizing: "border-box", height: "1.6rem", display: "grid", gridTemplateColumns: "repeat(11, minmax(0, 1fr))", alignItems: "end", borderBottom: "1px solid var(--line)", background: "var(--surface-muted)", color: "var(--muted)", fontSize: "0.58rem", lineHeight: 1, userSelect: "none" }}>
+      {rulerMarks.map((mark) => <span key={mark} style={{ position: "relative", height: "0.85rem", borderLeft: "1px solid color-mix(in srgb, var(--muted) 55%, transparent)", paddingLeft: "0.18rem" }}>{mark}</span>)}
     </div>
     <EditorContent editor={editor} />
   </div>;
