@@ -1,7 +1,9 @@
 "use server";
 
+import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
 import { sql } from "@vercel/postgres";
-import { createDraftAction, updateDraftAction, type ContentDraftActionState } from "@/app/admin/(protected)/actions/content";
+import { createDraft, updateDraftAction, type ContentDraftActionState } from "@/app/admin/(protected)/actions/content";
 import { getDraftByTypeAndSlug, isValidDraftSlug, normalizeDraftSlug, type DraftContentType } from "@/app/lib/content-drafts";
 import { normalizeRichTextDocument, richTextToLegacySections, type RichTextDocument } from "@/app/content/article-rich-text";
 import { findUnsupportedText, getPostgresErrorDetails } from "@/app/lib/content-save-validation";
@@ -62,7 +64,21 @@ function parseFormData(formData: FormData): ParsedGuardInput | { error: string }
 }
 
 function bodyFromParsed(input: ParsedGuardInput) {
-  return { date: input.date, readingTime: input.readingTime, scripture: input.scripture, featured: input.featured, sections: input.sections, ...(input.richText ? { richText: input.richText } : {}), label: input.label, subtitle: input.subtitle, expectedPublication: input.expectedPublication, author: input.author, publisher: input.publisher, length: input.length, tableOfContents: input.tableOfContents };
+  return {
+    date: input.date,
+    readingTime: input.readingTime,
+    scripture: input.scripture,
+    featured: input.featured,
+    sections: input.sections,
+    ...(input.richText ? { richText: input.richText } : {}),
+    label: input.label,
+    subtitle: input.subtitle,
+    expectedPublication: input.expectedPublication,
+    author: input.author,
+    publisher: input.publisher,
+    length: input.length,
+    tableOfContents: input.tableOfContents,
+  };
 }
 
 async function validateDraftBeforeSave(formData: FormData, mode: "create" | "update") {
@@ -72,16 +88,34 @@ async function validateDraftBeforeSave(formData: FormData, mode: "create" | "upd
   if (!input.title) return { error: "A title is required." };
   if (!isValidDraftSlug(input.slug)) return { error: "Use a lowercase slug with letters, numbers, and single hyphens only." };
 
-  const textPayload = { title: input.title, slug: input.slug, date: input.date, readingTime: input.readingTime, scripture: input.scripture, introduction: input.introduction, category: input.category, tags: input.tags, label: input.label, subtitle: input.subtitle, expectedPublication: input.expectedPublication, author: input.author, publisher: input.publisher, length: input.length, tableOfContents: input.tableOfContents, imageReference: input.imageReference, body: bodyFromParsed(input) };
+  const textPayload = {
+    title: input.title,
+    slug: input.slug,
+    date: input.date,
+    readingTime: input.readingTime,
+    scripture: input.scripture,
+    introduction: input.introduction,
+    category: input.category,
+    tags: input.tags,
+    label: input.label,
+    subtitle: input.subtitle,
+    expectedPublication: input.expectedPublication,
+    author: input.author,
+    publisher: input.publisher,
+    length: input.length,
+    tableOfContents: input.tableOfContents,
+    imageReference: input.imageReference,
+    body: bodyFromParsed(input),
+  };
   const unsupported = findUnsupportedText(textPayload, "content");
   if (unsupported) {
     const friendlyField = unsupported.field.replace(/^content\./, "");
     return { error: `The ${friendlyField} contains an unsupported character (${unsupported.codePoint}). The text was not changed.` };
   }
 
-  // New content is allowed to use the same requested slug as an existing item.
-  // createDraft() resolves collisions to a clean unique slug. Existing drafts,
-  // however, must not silently change their URL when edited.
+  // New content may request an existing slug. createDraft() resolves that
+  // collision to the next available slug. Existing drafts must not silently
+  // change their URL while being edited.
   if (mode === "update") {
     const existing = await getDraftByTypeAndSlug(input.contentType, input.slug);
     if (existing && existing.id !== input.draftId) {
@@ -104,9 +138,47 @@ async function validateDraftBeforeSave(formData: FormData, mode: "create" | "upd
 
 export async function createDraftActionSafe(previousState: ContentDraftActionState, formData: FormData) {
   if (!(await requireAdminActionAccess())) return { status: "error" as const, message: "Unauthorized." };
+
+  const input = parseFormData(formData);
+  if ("error" in input) return { status: "error" as const, message: input.error };
+
   const validation = await validateDraftBeforeSave(formData, "create");
   if ("error" in validation) return { status: "error" as const, message: validation.error };
-  return createDraftAction(previousState, formData);
+
+  const saveMode = String(formData.get("saveMode") ?? "draft").trim();
+  let draft: Awaited<ReturnType<typeof createDraft>>;
+
+  try {
+    draft = await createDraft({
+      contentType: input.contentType,
+      title: input.title,
+      slug: input.slug,
+      introduction: input.introduction || undefined,
+      category: input.category || undefined,
+      tags: input.tags,
+      imageReference: input.imageReference || undefined,
+      body: bodyFromParsed(input),
+    });
+  } catch (error) {
+    const details = getPostgresErrorDetails(error);
+    console.error("[content-drafts] Create draft failed.", details);
+    if (details.code === "23505") {
+      return { status: "error" as const, message: "The draft could not be saved because that slug was taken at the same time. Please try Save draft again." };
+    }
+    return { status: "error" as const, message: "The draft could not be saved. Your writing was not changed." };
+  }
+
+  if (!draft) return { status: "error" as const, message: "The draft could not be created." };
+
+  revalidatePath("/admin/content");
+  revalidatePath(`/admin/content/${draft.content_type}`);
+  revalidatePath(`/admin/content/${draft.content_type}/${draft.slug}`);
+
+  // redirect() intentionally lives outside the try/catch. Next.js implements
+  // redirect as a control-flow exception; catching it turns a successful save
+  // into the misleading "slug is already in use" error.
+  if (saveMode === "continue") redirect(`/admin/content/${draft.content_type}/${draft.slug}?view=edit`);
+  redirect(`/admin/content/${draft.content_type}`);
 }
 
 export async function updateDraftActionSafe(previousState: ContentDraftActionState, formData: FormData) {
