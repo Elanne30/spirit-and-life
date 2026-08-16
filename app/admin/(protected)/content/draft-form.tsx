@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState, useState } from "react";
-import { createDraftAction } from "@/app/admin/(protected)/actions/content";
+import { createDraftActionSafe } from "@/app/admin/(protected)/actions/content-save-guard";
 import { ReflectionBodyEditor } from "@/app/admin/(protected)/content/reflection-body-editor";
 import type { DraftContentType } from "@/app/lib/content-drafts";
 
@@ -16,7 +16,7 @@ type DraftFormProps = {
 
 export function DraftForm({ initialContentType = "reflection" }: DraftFormProps) {
   const [state, formAction, isPending] = useActionState(
-    createDraftAction,
+    createDraftActionSafe,
     initialContentDraftActionState,
   );
 
