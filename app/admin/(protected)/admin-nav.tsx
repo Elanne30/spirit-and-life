@@ -28,8 +28,17 @@ export function AdminNav() {
   return (
     <nav className="admin-nav" aria-label="Admin sections">
       {adminNavigation.map((group) => (
-        <div className="admin-nav-group" key={group.label}>
-          <span className="admin-nav-group-label">{group.label}</span>
+        <div
+          className="admin-nav-group"
+          key={group.label}
+          style={{ display: "grid", gap: "0.2rem", marginBottom: "0.75rem", minWidth: "max-content" }}
+        >
+          <span
+            className="admin-nav-group-label"
+            style={{ margin: "0.35rem 0 0.25rem 0.55rem", color: "var(--muted)", fontSize: "0.58rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase" }}
+          >
+            {group.label}
+          </span>
           {group.items.map((item) => {
             const Icon = item.icon;
             const isActive = item.href === "/admin"
