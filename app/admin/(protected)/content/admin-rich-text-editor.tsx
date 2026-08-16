@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import TextAlign from "@tiptap/extension-text-align";
@@ -32,6 +32,7 @@ function ToolbarButton({ active = false, disabled = false, label, onClick, child
 }
 
 export function AdminRichTextEditor({ initialValue, onChange, labelledBy }: AdminRichTextEditorProps) {
+  const [, forceUpdate] = useState(0);
   const editor = useEditor({
     immediatelyRender: false,
     extensions: [
@@ -47,12 +48,27 @@ export function AdminRichTextEditor({ initialValue, onChange, labelledBy }: Admi
         role: "textbox",
         "aria-multiline": "true",
         spellCheck: "true",
-        style: "background: var(--surface); color: var(--foreground); caret-color: var(--foreground);",
+        style: "background: var(--surface); color: var(--foreground); caret-color: var(--foreground); padding: 2.25rem 3rem; min-height: 38rem; max-width: 100%; margin: 0 auto;",
         ...(labelledBy ? { "aria-labelledby": labelledBy } : {}),
       },
     },
     onUpdate: ({ editor: instance }) => onChange({ format: "spirit-and-life-rich-text", version: 1, content: instance.getJSON() as RichTextDocument["content"] }),
   });
+
+  useEffect(() => {
+    if (!editor) return;
+    const update = () => forceUpdate((value) => value + 1);
+    editor.on("selectionUpdate", update);
+    editor.on("transaction", update);
+    editor.on("focus", update);
+    editor.on("blur", update);
+    return () => {
+      editor.off("selectionUpdate", update);
+      editor.off("transaction", update);
+      editor.off("focus", update);
+      editor.off("blur", update);
+    };
+  }, [editor]);
 
   useEffect(() => {
     if (!editor) return;
