@@ -56,6 +56,13 @@ function Menu({ name, label, value, open, onToggle, children }: { name: string; 
 function MenuItem({ active, label, onClick, children }: { active?: boolean; label: string; onClick: () => void; children?: ReactNode }) {
   return <button type="button" role="menuitem" aria-label={label} className={`${styles.dropdownItem}${active ? ` ${styles.dropdownItemActive}` : ""}`} onMouseDown={event => event.preventDefault()} onClick={onClick}>{children ?? label}</button>;
 }
+function RulerHandle({ label, left, onMove, kind }: { label: string; left: number; onMove: (clientX: number) => void; kind: "first" | "body" | "right" }) {
+  const dragging = useRef(false);
+  return <button type="button" aria-label={label} title={label} className={`${styles.rulerHandle} ${styles[`rulerHandle${kind}`]}`} style={{ left: `${left}px` }}
+    onPointerDown={event => { event.preventDefault(); event.currentTarget.setPointerCapture(event.pointerId); dragging.current = true; }}
+    onPointerMove={event => { if (dragging.current) onMove(event.clientX); }}
+    onPointerUp={() => { dragging.current = false; }} onPointerCancel={() => { dragging.current = false; }} />;
+}
 
 export function AdminRichTextEditor({ initialValue, onChange, labelledBy }: AdminRichTextEditorProps) {
   const [, forceUpdate] = useState(0);
@@ -147,10 +154,9 @@ export function AdminRichTextEditor({ initialValue, onChange, labelledBy }: Admi
         <div className={styles.rulerHeaderTrack} style={rulerTrackStyle}>
           <div id="spirit-life-horizontal-ruler" className={styles.horizontalRuler} style={{ width: `${pageOuterWidth}px` }}>
             {Array.from({ length: 18 }, (_, index) => <span key={index} className={styles.rulerNumber} style={{ left: `${index * 48 * zoom / 100}px` }}>{index / 2}</span>)}
-            <span className={`${styles.marginZone} ${styles.marginZoneLeft}`} style={{ width: `${96 * zoom / 100}px` }} />
-            <span className={`${styles.marginZone} ${styles.marginZoneRight}`} style={{ width: `${96 * zoom / 100}px` }} />
+            <span className={`${styles.marginZone} ${styles.marginZoneLeft}`} style={{ width: `${96 * zoom / 100}px` }} /><span className={`${styles.marginZone} ${styles.marginZoneRight}`} style={{ width: `${96 * zoom / 100}px` }} />
             <span className={styles.marginLabel} style={{ left: `${96 * zoom / 100}px` }}>1</span><span className={styles.marginLabel} style={{ left: `${7.5 * 96 * zoom / 100}px` }}>7.5</span>
-            <span className={styles.rulerMarkLine} style={{ left: `${rulerLeft(currentFirstLineIndent)}px` }} /><span className={styles.rulerMarkLine} style={{ left: `${rulerLeft(currentIndent)}px` }} /><span className={styles.rulerMarkRight} style={{ left: `${rulerRight(currentRightIndent)}px` }} />
+            <RulerHandle kind="first" label="First-line indent" left={rulerLeft(currentFirstLineIndent)} onMove={clientX => setRulerIndent("first", clientX)} /><RulerHandle kind="body" label="Left indent" left={rulerLeft(currentIndent)} onMove={clientX => setRulerIndent("body", clientX)} /><RulerHandle kind="right" label="Right indent" left={rulerRight(currentRightIndent)} onMove={clientX => setRulerIndent("right", clientX)} />
           </div>
         </div>
       </div>
