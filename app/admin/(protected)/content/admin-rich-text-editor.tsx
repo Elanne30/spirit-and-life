@@ -9,7 +9,7 @@ import { TextStyleKit } from "@tiptap/extension-text-style";
 import { Extension, Mark } from "@tiptap/core";
 import {
   AlignCenter, AlignJustify, AlignLeft, AlignRight, Bold, ChevronDown,
-  IndentDecrease, IndentIncrease, Italic, Link2, List, ListOrdered, Minus,
+  CaseUpper, IndentDecrease, IndentIncrease, Italic, Link2, List, ListOrdered, Minus,
   Pilcrow, Plus, Redo2, RotateCcw, Underline,
 } from "lucide-react";
 import { fontFamilies, fontSizes, type RichTextDocument, textAlignments, type TextAlignment } from "@/app/content/article-rich-text";
@@ -17,7 +17,7 @@ import styles from "./admin-rich-text-editor.module.css";
 
 type AdminRichTextEditorProps = { initialValue: RichTextDocument; onChange: (document: RichTextDocument) => void; labelledBy?: string };
 type HeadingLevel = 1 | 2 | 3 | 4 | 5 | 6;
-type MenuName = "heading" | "paragraph" | "spacing" | null;
+type MenuName = "heading" | "paragraph" | "spacing" | "color" | "case" | null;
 
 const PAGE_WIDTH_IN = 8.6;
 const PAGE_HEIGHT_IN = 11;
@@ -35,6 +35,24 @@ const headingOptions: Array<{ label: string; value: HeadingLevel | "paragraph" }
   { label: "Heading 6", value: 6 }, { label: "Paragraph", value: "paragraph" },
 ];
 const spacingOptions = [{ label: "Single", value: 1 }, { label: "1.15", value: 1.15 }, { label: "1.5", value: 1.5 }, { label: "Double", value: 2 }];
+const colorOptions = [
+  { label: "Default", value: "" },
+  { label: "Deep brown", value: "#75442d" },
+  { label: "Light brown", value: "#9a5e3a" },
+  { label: "Gold", value: "#e5b56c" },
+  { label: "Warm gold", value: "#d39a67" },
+  { label: "Soft gold", value: "#efb37d" },
+  { label: "Charcoal", value: "#282b28" },
+  { label: "Muted gray", value: "#6b716b" },
+  { label: "White", value: "#fffaf2" },
+  { label: "Black", value: "#111111" },
+];
+const caseOptions = [
+  { label: "UPPERCASE", value: "upper" },
+  { label: "lowercase", value: "lower" },
+  { label: "Capitalize Each Word", value: "title" },
+  { label: "Sentence case", value: "sentence" },
+];
 
 const UnderlineMark = Mark.create({ name: "underline", parseHTML() { return [{ tag: "u" }, { style: "text-decoration=underline" }]; }, renderHTML() { return ["u", 0]; } });
 const DocumentLayout = Extension.create({
@@ -82,6 +100,14 @@ function RulerHandle({ label, left, onMove, kind }: { label: string; left: numbe
   return <button type="button" aria-label={label} title={label} className={`${styles.rulerHandle} ${styles[styleName]}`} style={{ left: `${left}px` }} onPointerDown={(event) => { event.preventDefault(); event.currentTarget.setPointerCapture(event.pointerId); dragging.current = true; }} onPointerMove={(event) => { if (dragging.current) onMove(event.clientX); }} onPointerUp={() => { dragging.current = false; }} onPointerCancel={() => { dragging.current = false; }} />;
 }
 
+function toCase(value: string, mode: "upper" | "lower" | "title" | "sentence") {
+  if (mode === "upper") return value.toUpperCase();
+  if (mode === "lower") return value.toLowerCase();
+  if (mode === "title") return value.toLowerCase().replace(/\b([\p{L}\p{N])/gu, (match) => match.toUpperCase());
+  const lower = value.toLowerCase();
+  return lower.replace(/(^|[.!?]\s+)([\p{L}\p{N}])/gu, (_, prefix: string, letter: string) => `${prefix}${letter.toUpperCase()}`);
+}
+
 export function AdminRichTextEditor({ initialValue, onChange, labelledBy }: AdminRichTextEditorProps) {
   const [, forceUpdate] = useState(0), [openMenu, setOpenMenu] = useState<MenuName>(null), [zoom, setZoom] = useState(100), [scrollLeft, setScrollLeft] = useState(0), [scrollTop, setScrollTop] = useState(0);
   const editor = useEditor({
@@ -102,7 +128,7 @@ export function AdminRichTextEditor({ initialValue, onChange, labelledBy }: Admi
   const currentAlignment: TextAlignment = textAlignments.includes(attrs.textAlign as TextAlignment) ? attrs.textAlign as TextAlignment : "left";
   const inBulletList = editor.isActive("bulletList"), inOrderedList = editor.isActive("orderedList");
   const currentHeading = hasSelection && !sameBlock ? "Mixed" : editor.isActive("heading") ? `Heading ${Number(attrs.level ?? 1)}` : "Normal";
-  const textStyleAttrs = editor.getAttributes("textStyle") as { fontFamily?: string; fontSize?: string }, currentFontFamily = textStyleAttrs.fontFamily, currentFontSize = textStyleAttrs.fontSize;
+  const textStyleAttrs = editor.getAttributes("textStyle") as { fontFamily?: string; fontSize?: string; color?: string }, currentFontFamily = textStyleAttrs.fontFamily, currentFontSize = textStyleAttrs.fontSize, currentColor = textStyleAttrs.color;
   const currentFontFamilyValue = hasSelection && currentFontFamily === undefined ? MIXED_VALUE : currentFontFamily ?? "";
   const currentFontSizeValue = hasSelection && currentFontSize === undefined ? MIXED_VALUE : currentFontSize ?? "";
   const currentFontSizeLabel = currentFontSize?.replace("px", "") || (hasSelection ? "Mixed" : "11");
@@ -115,6 +141,23 @@ export function AdminRichTextEditor({ initialValue, onChange, labelledBy }: Admi
   const setRulerIndent = (kind: "first" | "body" | "right", clientX: number) => { const ruler = document.getElementById("spirit-life-horizontal-ruler"); if (!ruler) return; const rect = ruler.getBoundingClientRect(); const inches = Math.max(0, Math.min(PAGE_WIDTH_IN, (clientX - rect.left + scrollLeft) / (96 * (zoom / 100)))); if (kind === "right") { setBlockAttribute("rightIndent", Math.max(0, Math.min(MAX_INDENT, Math.round((PAGE_WIDTH_IN - DEFAULT_MARGIN_IN - inches) / INDENT_STEP_IN)))); return; } setBlockAttribute(kind === "first" ? "firstLineIndent" : "indent", Math.max(0, Math.min(MAX_INDENT, Math.round((inches - DEFAULT_MARGIN_IN) / INDENT_STEP_IN)))); };
   const rulerLeft = (indent: number) => (DEFAULT_MARGIN_IN + indent * INDENT_STEP_IN) * 96 * (zoom / 100), rulerRight = (indent: number) => (PAGE_WIDTH_IN - DEFAULT_MARGIN_IN - indent * INDENT_STEP_IN) * 96 * (zoom / 100);
   const setLink = () => { const previous = editor.getAttributes("link").href as string | undefined, href = window.prompt("Link URL", previous ?? ""); if (href === null) return; if (!href.trim()) { editor.chain().focus().unsetLink().run(); return; } if (!(/^(https?:|mailto:)/i.test(href.trim()) || /^\/(?!\/)/.test(href.trim()))) { window.alert("Use an http(s), mailto, or site-relative link."); return; } editor.chain().focus().extendMarkRange("link").setLink({ href: href.trim() }).run(); };
+  const applyCase = (mode: "upper" | "lower" | "title" | "sentence") => {
+    if (!hasSelection) { setOpenMenu(null); return; }
+    const ranges: Array<{ from: number; to: number; text: string; marks: typeof editor.state.doc.content.firstChild extends never ? never : any }> = [];
+    editor.state.doc.nodesBetween(selection.from, selection.to, (node, pos) => {
+      if (!node.isText || !node.text) return;
+      const from = Math.max(selection.from, pos), to = Math.min(selection.to, pos + node.nodeSize);
+      if (from >= to) return;
+      const startOffset = from - pos, endOffset = to - pos;
+      ranges.push({ from, to, text: node.text.slice(startOffset, endOffset), marks: node.marks });
+    });
+    if (!ranges.length) { setOpenMenu(null); return; }
+    const tr = editor.state.tr;
+    [...ranges].reverse().forEach((range) => tr.insertText(toCase(range.text, mode), range.from, range.to, range.marks));
+    editor.view.dispatch(tr);
+    setOpenMenu(null);
+  };
+  const applyColor = (value: string) => { const chain = editor.chain().focus(); if (value) chain.setColor(value).run(); else chain.unsetColor().run(); setOpenMenu(null); };
   const pageOuterWidth = PAGE_WIDTH_IN * 96 * (zoom / 100), pageOuterHeight = PAGE_HEIGHT_IN * 96 * (zoom / 100);
   const pageStyle = { transform: `scale(${zoom / 100})`, transformOrigin: "top left" } as CSSProperties;
   const rulerTrackStyle = { width: `${pageOuterWidth}px`, marginLeft: `max(24px, calc(50% - ${pageOuterWidth / 2}px))`, transform: `translateX(${-scrollLeft}px)` } as CSSProperties;
@@ -128,6 +171,7 @@ export function AdminRichTextEditor({ initialValue, onChange, labelledBy }: Admi
       <ToolbarGroup>{([["left", AlignLeft, "Align left"], ["center", AlignCenter, "Align center"], ["right", AlignRight, "Align right"], ["justify", AlignJustify, "Justify"]] as const).map(([alignment, Icon, label]) => <ToolbarButton key={alignment} label={label} active={currentAlignment === alignment} onClick={() => editor.chain().focus().setTextAlign(alignment).run()}><Icon size={18} /></ToolbarButton>)}</ToolbarGroup>
       <ToolbarGroup><ToolbarButton label="Bulleted list" active={inBulletList} onClick={() => editor.chain().focus().toggleBulletList().run()}><List size={18} /></ToolbarButton><ToolbarButton label="Numbered list" active={inOrderedList} onClick={() => editor.chain().focus().toggleOrderedList().run()}><ListOrdered size={18} /></ToolbarButton><ToolbarButton label="Decrease indent" disabled={!inBulletList && !inOrderedList && currentIndent === 0} active={currentIndent > 0} onClick={() => setIndent(-1)}><IndentDecrease size={18} /></ToolbarButton><ToolbarButton label="Increase indent" disabled={!inBulletList && !inOrderedList && currentIndent >= MAX_INDENT} active={currentIndent > 0} onClick={() => setIndent(1)}><IndentIncrease size={18} /></ToolbarButton></ToolbarGroup>
       <ToolbarGroup><Menu name="paragraph" label="Paragraph options" value={<Pilcrow size={18} />} open={openMenu === "paragraph"} onToggle={() => setOpenMenu(openMenu === "paragraph" ? null : "paragraph")}><MenuItem label="Decrease indent" onClick={() => { setIndent(-1); setOpenMenu(null); }} /><MenuItem label="Increase indent" onClick={() => { setIndent(1); setOpenMenu(null); }} /><MenuItem label="First-line indent" onClick={() => { setBlockAttribute("firstLineIndent", Math.min(MAX_INDENT, currentFirstLineIndent + 1)); setOpenMenu(null); }} /><MenuItem label="Right indent" onClick={() => { setBlockAttribute("rightIndent", Math.min(MAX_INDENT, currentRightIndent + 1)); setOpenMenu(null); }} /></Menu><Menu name="spacing" label="Line spacing" value={<span className={styles.spacingLabel}>↕</span>} open={openMenu === "spacing"} onToggle={() => setOpenMenu(openMenu === "spacing" ? null : "spacing")}>{spacingOptions.map((option) => <MenuItem key={option.label} label={`${option.label} line spacing`} active={!hasSelection || sameBlock ? currentSpacing === option.value : false} onClick={() => setSpacing(option.value)}>{option.label} line spacing</MenuItem>)}</Menu><ToolbarButton label="Add or edit link" active={editor.isActive("link")} onClick={setLink}><Link2 size={18} /></ToolbarButton></ToolbarGroup>
+      <ToolbarGroup><Menu name="color" label="Text color" value={<span style={{ display: "inline-flex", flexDirection: "column", alignItems: "center", lineHeight: 1 }}><span style={{ fontWeight: 800, fontSize: 16 }}>A</span><span style={{ width: 15, height: 3, borderRadius: 2, background: currentColor || "#75442d" }} /></span>} open={openMenu === "color"} onToggle={() => setOpenMenu(openMenu === "color" ? null : "color")}>{colorOptions.map((option) => <MenuItem key={option.label} label={option.label} active={Boolean(option.value) && currentColor?.toLowerCase() === option.value.toLowerCase()} onClick={() => applyColor(option.value)}><span style={{ display: "flex", alignItems: "center", gap: 9 }}><span style={{ width: 20, height: 20, borderRadius: 3, border: "1px solid #c9c9c9", background: option.value || "transparent", position: "relative" }}>{!option.value ? <span style={{ position: "absolute", left: 2, right: 2, top: 9, borderTop: "2px solid #b42318", transform: "rotate(-45deg)" }} /> : null}</span><span>{option.label}</span></span></MenuItem>)}</Menu><Menu name="case" label="Change case" value={<CaseUpper size={18} />} open={openMenu === "case"} onToggle={() => setOpenMenu(openMenu === "case" ? null : "case")}>{caseOptions.map((option) => <MenuItem key={option.value} label={option.label} onClick={() => applyCase(option.value as "upper" | "lower" | "title" | "sentence")}>{option.label}</MenuItem>)}</Menu></ToolbarGroup>
     </div>
     <div className={styles.rulerHeader} aria-hidden="true"><div className={styles.rulerHeaderViewport}><div className={styles.rulerHeaderTrack} style={rulerTrackStyle}><div id="spirit-life-horizontal-ruler" className={styles.horizontalRuler} style={{ width: `${pageOuterWidth}px` }}>{Array.from({ length: 19 }, (_, index) => <span key={index} className={styles.rulerNumber} style={{ left: `${index * 48 * (zoom / 100)}px` }}>{index / 2}</span>)}<span className={`${styles.marginZone} ${styles.marginZoneLeft}`} style={{ width: `${96 * (zoom / 100)}px` }} /><span className={`${styles.marginZone} ${styles.marginZoneRight}`} style={{ width: `${96 * (zoom / 100)}px` }} /><span className={styles.marginLabel} style={{ left: `${96 * (zoom / 100)}px` }}>1</span><span className={styles.marginLabel} style={{ left: `${7.6 * 96 * (zoom / 100)}px` }}>7.6</span><RulerHandle kind="first" label="First-line indent" left={rulerLeft(currentFirstLineIndent)} onMove={(clientX) => setRulerIndent("first", clientX)} /><RulerHandle kind="body" label="Left indent" left={rulerLeft(currentIndent)} onMove={(clientX) => setRulerIndent("body", clientX)} /><RulerHandle kind="right" label="Right indent" left={rulerRight(currentRightIndent)} onMove={(clientX) => setRulerIndent("right", clientX)} /></div></div></div></div>
     <div className={styles.workspace}><div className={styles.verticalRulerViewport} aria-hidden="true"><div className={styles.verticalRuler} style={{ height: `${pageOuterHeight}px`, transform: `translateY(${-scrollTop}px)` }}>{Array.from({ length: 23 }, (_, index) => <span key={index} className={styles.verticalRulerMark} style={{ top: `${index * 48 * (zoom / 100)}px` }}>{index / 2}</span>)}</div></div><div className={styles.pageViewport} onScroll={(event) => { setScrollLeft(event.currentTarget.scrollLeft); setScrollTop(event.currentTarget.scrollTop); }}><div className={styles.pageStage} style={{ width: `${pageOuterWidth + 48}px`, minHeight: `${pageOuterHeight + 48}px` }}><div className={styles.page} style={{ ...pageStyle, width: `${pageOuterWidth}px` }}><EditorContent editor={editor} /></div></div></div></div>
