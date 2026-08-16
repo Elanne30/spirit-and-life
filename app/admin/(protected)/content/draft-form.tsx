@@ -8,10 +8,37 @@ import type { DraftContentType } from "@/app/lib/content-drafts";
 const initialContentDraftActionState = { status: "idle" as const, message: "" };
 type DraftFormProps = { initialContentType?: DraftContentType };
 
+function slugifyTitle(value: string) {
+  return value
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .replace(/-+/g, "-")
+    .slice(0, 120)
+    .replace(/-+$/g, "");
+}
+
+function normalizeSlugInput(value: string) {
+  return value
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9-]+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 120)
+    .replace(/-+$/g, "");
+}
+
 export function DraftForm({ initialContentType = "reflection" }: DraftFormProps) {
   const [state, formAction, isPending] = useActionState(createDraftActionSafe, initialContentDraftActionState);
   const contentType = initialContentType;
   const [category, setCategory] = useState(contentType === "reflection" ? "Biblical Studies" : contentType === "journal" ? "Personal" : "General");
+  const [title, setTitle] = useState("");
+  const [slug, setSlug] = useState("");
+  const [slugEdited, setSlugEdited] = useState(false);
   const isReflection = contentType === "reflection";
   const isJournal = contentType === "journal";
   const isBook = contentType === "book";
@@ -20,8 +47,36 @@ export function DraftForm({ initialContentType = "reflection" }: DraftFormProps)
       <input type="hidden" name="contentType" value={contentType} />
       <div className="admin-draft-column" style={{ gridColumn: "1 / -1", width: "100%" }}>
         <h3>{isReflection ? "Reflection Information" : isJournal ? "Journal Information" : "Book Information"}</h3>
-        <label htmlFor="draft-title">Title</label><input id="draft-title" name="title" type="text" placeholder={isReflection ? "My new reflection" : isJournal ? "My new journal entry" : "Book title"} required />
-        <label htmlFor="draft-slug">Slug</label><input id="draft-slug" name="slug" type="text" placeholder={isReflection ? "my-new-reflection" : isJournal ? "my-new-journal-entry" : "book-title"} required />
+        <label htmlFor="draft-title">Title</label>
+        <input
+          id="draft-title"
+          name="title"
+          type="text"
+          value={title}
+          onChange={(event) => {
+            const nextTitle = event.target.value;
+            setTitle(nextTitle);
+            if (!slugEdited) setSlug(slugifyTitle(nextTitle));
+          }}
+          placeholder={isReflection ? "My new reflection" : isJournal ? "My new journal entry" : "Book title"}
+          required
+        />
+        <label htmlFor="draft-slug">Slug</label>
+        <input
+          id="draft-slug"
+          name="slug"
+          type="text"
+          value={slug}
+          onChange={(event) => {
+            setSlugEdited(true);
+            setSlug(normalizeSlugInput(event.target.value));
+          }}
+          placeholder={isReflection ? "my-new-reflection" : isJournal ? "my-new-journal-entry" : "book-title"}
+          required
+          pattern="[a-z0-9]+(?:-[a-z0-9]+)*"
+          maxLength={120}
+        />
+        <p className="form-note">Use lowercase letters, numbers, and single hyphens. The slug is generated from your title until you edit it.</p>
         {isReflection || isJournal ? <>
           <label htmlFor="draft-date">Date</label><input id="draft-date" name="date" type="text" placeholder="August 13, 2026" />
           {isReflection ? <><label htmlFor="draft-reading-time">Reading time</label><input id="draft-reading-time" name="readingTime" type="text" placeholder="6 min read" /><label htmlFor="draft-scripture">Scripture</label><input id="draft-scripture" name="scripture" type="text" placeholder="Romans 8:28" /></> : <div><label htmlFor="draft-label">Label</label><input id="draft-label" name="label" type="text" placeholder="Personal Journal" /></div>}
