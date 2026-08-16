@@ -56,7 +56,7 @@ export async function listAdminContentItems(contentType: DraftContentType): Prom
       hasUnpublishedChanges: draft?.has_unpublished_changes ?? false,
       draftId: draft?.id,
       isStaticSource: true,
-      image: draft?.image_reference ?? item.image,
+      image: draft ? (draft.image_reference ?? undefined) : item.image,
       readingTime: item.readingTime,
     };
   });
