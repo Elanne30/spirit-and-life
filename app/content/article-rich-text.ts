@@ -58,25 +58,40 @@ function normalizeMarks(value: unknown): RichTextMark[] | undefined {
   if (!Array.isArray(value)) return undefined;
   const marks: RichTextMark[] = [];
   const seen = new Set<string>();
+
   for (const raw of value) {
     if (!isRecord(raw) || typeof raw.type !== "string") continue;
+
     if (["bold", "italic", "underline"].includes(raw.type) && !seen.has(raw.type)) {
       marks.push({ type: raw.type as RichTextMark["type"] });
       seen.add(raw.type);
+      continue;
     }
+
     if (raw.type === "link" && !seen.has("link")) {
       const href = validLink(isRecord(raw.attrs) ? raw.attrs.href : undefined);
       if (href) marks.push({ type: "link", attrs: { href } });
       seen.add("link");
+      continue;
     }
+
     if (raw.type === "textStyle" && !seen.has("textStyle")) {
       const attrs = isRecord(raw.attrs) ? raw.attrs : {};
       const fontFamily = fontFamilies.includes(attrs.fontFamily as FontFamily) ? attrs.fontFamily as FontFamily : undefined;
       const fontSize = fontSizes.includes(attrs.fontSize as FontSize) ? attrs.fontSize as FontSize : undefined;
-      if (fontFamily || fontSize) marks.push({ type: "textStyle", attrs: { ...(fontFamily ? { fontFamily } : {}), ...(fontSize ? { fontSize } : {}) } });
+      if (fontFamily || fontSize) {
+        marks.push({
+          type: "textStyle",
+          attrs: {
+            ...(fontFamily ? { fontFamily } : {}),
+            ...(fontSize ? { fontSize } : {}),
+          },
+        });
+      }
       seen.add("textStyle");
     }
   }
+
   return marks.length ? marks : undefined;
 }
 
@@ -89,65 +104,112 @@ function normalizeBlockAttrs(value: unknown, heading = false) {
 }
 
 function normalizeNodes(value: unknown, depth = 0): RichTextNode[] {
-  if (depth > maxListDepth) return [];
+  if (depth > maxListDepth + 1) return [];
   const nodes: RichTextNode[] = [];
+
   for (const raw of asContent(value)) {
     if (!isRecord(raw) || typeof raw.type !== "string") continue;
+
     if (raw.type === "text") {
       const text = asText(raw.text);
       if (text) nodes.push({ type: "text", text, marks: normalizeMarks(raw.marks) });
       continue;
     }
+
     if (raw.type === "paragraph" || raw.type === "heading") {
       const content = normalizeNodes(raw.content, depth).filter((node) => node.type === "text");
-      nodes.push({ type: raw.type, attrs: normalizeBlockAttrs(raw.attrs, raw.type === "heading"), ...(content.length ? { content } : {}) });
+      nodes.push({
+        type: raw.type,
+        attrs: normalizeBlockAttrs(raw.attrs, raw.type === "heading"),
+        ...(content.length ? { content } : {}),
+      });
       continue;
     }
+
     if (raw.type === "bulletList" || raw.type === "orderedList") {
       const content = normalizeNodes(raw.content, depth + 1).filter((node) => node.type === "listItem");
       if (content.length) nodes.push({ type: raw.type, content });
       continue;
     }
+
     if (raw.type === "listItem") {
-      const content = normalizeNodes(raw.content, depth + 1).filter((node) => ["paragraph", "heading", "bulletList", "orderedList"].includes(node.type));
+      const content = normalizeNodes(raw.content, depth + 1).filter((node) =>
+        ["paragraph", "heading", "bulletList", "orderedList"].includes(node.type),
+      );
       if (content.length) nodes.push({ type: "listItem", content });
     }
   }
+
   return nodes;
 }
 
 function isSupportedMarks(value: unknown) {
   if (value === undefined) return true;
   if (!Array.isArray(value)) return false;
+
   return value.every((mark) => {
     if (!isRecord(mark) || typeof mark.type !== "string") return false;
     if (["bold", "italic", "underline"].includes(mark.type)) return true;
     if (mark.type === "link") return validLink(isRecord(mark.attrs) ? mark.attrs.href : undefined) !== null;
     if (mark.type === "textStyle") {
       const attrs = isRecord(mark.attrs) ? mark.attrs : {};
-      return (attrs.fontFamily === undefined || fontFamilies.includes(attrs.fontFamily as FontFamily)) && (attrs.fontSize === undefined || fontSizes.includes(attrs.fontSize as FontSize));
+      return (
+        (attrs.fontFamily === undefined || fontFamilies.includes(attrs.fontFamily as FontFamily)) &&
+        (attrs.fontSize === undefined || fontSizes.includes(attrs.fontSize as FontSize))
+      );
     }
     return false;
   });
 }
 
 function isSupportedNodes(value: unknown, context: "block" | "inline" | "list", depth = 0): boolean {
-  if (!Array.isArray(value) || depth > maxListDepth) return false;
+  if (!Array.isArray(value) || depth > maxListDepth + 1) return false;
+
   return value.every((raw) => {
     if (!isRecord(raw) || typeof raw.type !== "string") return false;
-    if (raw.type === "text") return context === "inline" && typeof raw.text === "string" && isSupportedMarks(raw.marks);
-    if (raw.type === "paragraph" || raw.type === "heading") return context !== "inline" && (raw.content === undefined || isSupportedNodes(raw.content, "inline", depth));
-    if (raw.type === "bulletList" || raw.type === "orderedList") return context !== "inline" && isSupportedNodes(raw.content, "list", depth + 1);
-    if (raw.type === "listItem") return context === "list" && isSupportedNodes(raw.content, "block", depth + 1);
-    return false;
+
+    if (raw.type === "text") {
+      return context === "inline" && typeof raw.text === "string" && isSupportedMarks(raw.marks);
+    }
+
+    if (raw.type === "paragraph" || raw.type === "heading") {
+      return context !== "inline" && (raw.content === undefined || isSupportedNodes(raw.content, "inline", depth));
+    }
+
+    if (raw.type === "bulletList" || raw.type === "orderedList") {
+      return context !== "inline" && isSupportedNodes(raw.content, "list", depth + 1);
+    }
+
+    if (raw.type === "listItem") {
+      return context === "list" && isSupportedNodes(raw.content, "listItem", depth + 1);
+    }
+
+    return context === "listItem" && (raw.type === "paragraph" || raw.type === "heading" || raw.type === "bulletList" || raw.type === "orderedList");
   });
 }
 
 export function normalizeRichTextDocument(value: unknown): RichTextDocument | null {
-  if (!isRecord(value) || value.format !== RICH_TEXT_FORMAT || value.version !== RICH_TEXT_VERSION || !isRecord(value.content) || value.content.type !== "doc") return null;
+  if (
+    !isRecord(value) ||
+    value.format !== RICH_TEXT_FORMAT ||
+    value.version !== RICH_TEXT_VERSION ||
+    !isRecord(value.content) ||
+    value.content.type !== "doc"
+  ) {
+    return null;
+  }
+
   if (!isSupportedNodes(value.content.content, "block")) return null;
+
   const content = normalizeNodes(value.content.content);
-  return { format: RICH_TEXT_FORMAT, version: RICH_TEXT_VERSION, content: { type: "doc", content: content.length ? content : [{ type: "paragraph" }] } };
+  return {
+    format: RICH_TEXT_FORMAT,
+    version: RICH_TEXT_VERSION,
+    content: {
+      type: "doc",
+      content: content.length ? content : [{ type: "paragraph" }],
+    },
+  };
 }
 
 export function legacySectionsToRichText(sections: LegacySection[] | undefined): RichTextDocument {
