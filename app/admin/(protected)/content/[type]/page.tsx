@@ -75,9 +75,17 @@ export default async function ContentTypeWorkspace({
           href={`/admin/content/${contentType}/new`}
           aria-label={`Add ${current.singular}`}
           title={`Add ${current.singular}`}
-          style={{ minHeight: "2.5rem", padding: "0.55rem 0.9rem", fontSize: "0.76rem", gap: "0.4rem" }}
+          style={{
+            minHeight: "2rem",
+            padding: "0.35rem 0.65rem",
+            fontSize: "0.68rem",
+            gap: "0.3rem",
+            marginLeft: "auto",
+            alignSelf: "flex-end",
+            whiteSpace: "nowrap",
+          }}
         >
-          <Plus size={16} />
+          <Plus size={13} />
           <span>Add</span>
         </Link>
       </div>
