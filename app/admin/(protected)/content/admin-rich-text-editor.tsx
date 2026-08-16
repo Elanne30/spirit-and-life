@@ -7,6 +7,7 @@ import StarterKit from "@tiptap/starter-kit";
 import TextAlign from "@tiptap/extension-text-align";
 import { TextStyleKit } from "@tiptap/extension-text-style";
 import { Extension, Mark } from "@tiptap/core";
+import type { Mark as ProseMirrorMark } from "@tiptap/pm/model";
 import {
   AlignCenter, AlignJustify, AlignLeft, AlignRight, Bold, ChevronDown,
   CaseUpper, IndentDecrease, IndentIncrease, Italic, Link2, List, ListOrdered, Minus,
@@ -18,6 +19,7 @@ import styles from "./admin-rich-text-editor.module.css";
 type AdminRichTextEditorProps = { initialValue: RichTextDocument; onChange: (document: RichTextDocument) => void; labelledBy?: string };
 type HeadingLevel = 1 | 2 | 3 | 4 | 5 | 6;
 type MenuName = "heading" | "paragraph" | "spacing" | "color" | "case" | null;
+type TextRange = { from: number; to: number; text: string; marks: readonly ProseMirrorMark[] };
 
 const PAGE_WIDTH_IN = 8.6;
 const PAGE_HEIGHT_IN = 11;
@@ -143,7 +145,7 @@ export function AdminRichTextEditor({ initialValue, onChange, labelledBy }: Admi
   const setLink = () => { const previous = editor.getAttributes("link").href as string | undefined, href = window.prompt("Link URL", previous ?? ""); if (href === null) return; if (!href.trim()) { editor.chain().focus().unsetLink().run(); return; } if (!(/^(https?:|mailto:)/i.test(href.trim()) || /^\/(?!\/)/.test(href.trim()))) { window.alert("Use an http(s), mailto, or site-relative link."); return; } editor.chain().focus().extendMarkRange("link").setLink({ href: href.trim() }).run(); };
   const applyCase = (mode: "upper" | "lower" | "title" | "sentence") => {
     if (!hasSelection) { setOpenMenu(null); return; }
-    const ranges: Array<{ from: number; to: number; text: string; marks: typeof editor.state.doc.content.firstChild extends never ? never : any }> = [];
+    const ranges: TextRange[] = [];
     editor.state.doc.nodesBetween(selection.from, selection.to, (node, pos) => {
       if (!node.isText || !node.text) return;
       const from = Math.max(selection.from, pos), to = Math.min(selection.to, pos + node.nodeSize);
