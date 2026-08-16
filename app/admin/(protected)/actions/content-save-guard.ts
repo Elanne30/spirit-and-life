@@ -4,7 +4,7 @@ import { sql } from "@vercel/postgres";
 import { createDraftAction, updateDraftAction, type ContentDraftActionState } from "@/app/admin/(protected)/actions/content";
 import { getDraftByTypeAndSlug, isValidDraftSlug, normalizeDraftSlug, type DraftContentType } from "@/app/lib/content-drafts";
 import { normalizeRichTextDocument, richTextToLegacySections, type RichTextDocument } from "@/app/content/article-rich-text";
-import { findUnsupportedText } from "@/app/lib/content-save-validation";
+import { findUnsupportedText, getPostgresErrorDetails } from "@/app/lib/content-save-validation";
 
 const contentTypes: DraftContentType[] = ["reflection", "journal", "book"];
 
@@ -175,14 +175,14 @@ async function validateDraftBeforeSave(formData: FormData, mode: "create" | "upd
   try {
     await sql`SELECT ${bodyJson}::jsonb`;
   } catch (error) {
-    console.error("[content-drafts] Body JSONB preflight failed.", error);
+    console.error("[content-drafts] Body JSONB preflight failed.", getPostgresErrorDetails(error));
     return { error: "The article body could not be saved because its structured data is not valid for the database." };
   }
 
   try {
     await sql`SELECT ${tagsJson}::jsonb`;
   } catch (error) {
-    console.error("[content-drafts] Tags JSONB preflight failed.", error);
+    console.error("[content-drafts] Tags JSONB preflight failed.", getPostgresErrorDetails(error));
     return { error: "The tags could not be saved because their structured data is not valid for the database." };
   }
 
