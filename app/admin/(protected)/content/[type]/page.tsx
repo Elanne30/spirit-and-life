@@ -24,7 +24,7 @@ const config: Record<DraftContentType, {
   book: {
     label: "Books",
     singular: "Book",
-    description: "Manage your book notes, summaries, and reading records.",
+    description: "Manage your books, previews, and reading records.",
     icon: BookOpen,
   },
 };
@@ -71,11 +71,13 @@ export default async function ContentTypeWorkspace({
         </div>
 
         <Link
-          className="button button-primary"
+          className="button button-primary admin-content-add-button"
           href={`/admin/content/${contentType}/new`}
+          aria-label={`Add ${current.singular}`}
+          title={`Add ${current.singular}`}
         >
-          <Plus size={17} />
-          New {current.singular}
+          <Plus size={18} />
+          <span>Add</span>
         </Link>
       </div>
 
@@ -88,21 +90,31 @@ export default async function ContentTypeWorkspace({
         </div>
 
         {items.length ? (
-          <div className="admin-content-list">
+          <div className="admin-content-grid">
             {items.map((item) => (
               <Link
-                className="admin-content-list-item"
+                className="admin-content-card"
                 href={`/admin/content/${item.contentType}/${item.slug}`}
                 key={`${item.contentType}-${item.slug}`}
               >
-                <div>
-                  <strong>{item.title}</strong>
-                  <small>
-                    {item.category ?? statusLabel(item)}
-                    {item.date ? ` · ${item.date}` : ""}
-                  </small>
+                <div className="admin-content-card-media">
+                  {item.image ? (
+                    <img src={item.image} alt="" loading="lazy" />
+                  ) : (
+                    <div className="admin-content-card-media-placeholder" aria-hidden="true">
+                      <Icon size={28} />
+                    </div>
+                  )}
+                  <span className="admin-content-card-status">{statusLabel(item)}</span>
                 </div>
-                <span>{statusLabel(item)}</span>
+                <div className="admin-content-card-body">
+                  <p className="eyebrow">{item.category ?? current.singular}</p>
+                  <h3>{item.title}</h3>
+                  <div className="admin-content-card-meta">
+                    {item.date ? <span>{item.date}</span> : null}
+                    {item.readingTime ? <span>{item.readingTime}</span> : null}
+                  </div>
+                </div>
               </Link>
             ))}
           </div>
@@ -116,7 +128,7 @@ export default async function ContentTypeWorkspace({
               href={`/admin/content/${contentType}/new`}
             >
               <Plus size={17} />
-              New {current.singular}
+              Add {current.singular}
             </Link>
           </div>
         )}
