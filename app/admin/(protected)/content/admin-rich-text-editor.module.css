@@ -120,3 +120,58 @@
   .pageStage { padding-inline: 6px; }
   .zoomControl input { width: 68px; }
 }
+
+.editorShell { position: relative; z-index: 0; isolation: isolate; contain: paint; }
+.rulerHeader, .workspace, .pageViewport, .verticalRulerViewport { z-index: auto; }
+.rulerHeader { position: relative; }
+.workspace { overflow: hidden; }
+.verticalRulerViewport { position: relative; }
+
+:global(html[data-theme="light"]) .editorShell { border-color: var(--line); background: var(--surface-muted); color: var(--foreground); box-shadow: 0 1px 2px var(--shadow); }
+:global(html[data-theme="light"]) .toolbar,
+:global(html[data-theme="light"]) .select,
+:global(html[data-theme="light"]) .dropdownTrigger,
+:global(html[data-theme="light"]) .dropdownMenu,
+:global(html[data-theme="light"]) .statusBar,
+:global(html[data-theme="light"]) .loading { background: var(--surface); color: var(--foreground); border-color: var(--line); }
+:global(html[data-theme="light"]) .toolbarButton,
+:global(html[data-theme="light"]) .dropdownItem,
+:global(html[data-theme="light"]) .zoomControl button { color: var(--foreground); }
+:global(html[data-theme="light"]) .toolbarButton:hover,
+:global(html[data-theme="light"]) .dropdownTrigger:hover,
+:global(html[data-theme="light"]) .dropdownItem:hover,
+:global(html[data-theme="light"]) .dropdownItemActive { background: var(--surface-muted); }
+
+:global(html[data-theme="dark"]) .editorShell { border-color: var(--line); background: var(--background); color: var(--foreground); box-shadow: 0 1px 2px var(--shadow); }
+:global(html[data-theme="dark"]) .toolbar,
+:global(html[data-theme="dark"]) .select,
+:global(html[data-theme="dark"]) .dropdownTrigger,
+:global(html[data-theme="dark"]) .dropdownMenu,
+:global(html[data-theme="dark"]) .statusBar,
+:global(html[data-theme="dark"]) .loading { background: var(--surface); color: var(--foreground); border-color: var(--line); }
+:global(html[data-theme="dark"]) .toolbarGroup { border-color: var(--line); }
+:global(html[data-theme="dark"]) .toolbarButton,
+:global(html[data-theme="dark"]) .dropdownItem,
+:global(html[data-theme="dark"]) .zoomControl button { color: var(--foreground); }
+:global(html[data-theme="dark"]) .toolbarButton:hover,
+:global(html[data-theme="dark"]) .dropdownTrigger:hover,
+:global(html[data-theme="dark"]) .dropdownItem:hover,
+:global(html[data-theme="dark"]) .dropdownItemActive,
+:global(html[data-theme="dark"]) .toolbarButton.active { background: var(--surface-muted); border-color: var(--line); }
+:global(html[data-theme="dark"]) .rulerHeader,
+:global(html[data-theme="dark"]) .horizontalRuler,
+:global(html[data-theme="dark"]) .verticalRulerViewport,
+:global(html[data-theme="dark"]) .verticalRuler { background-color: var(--surface-muted); border-color: var(--line); color: var(--muted); }
+:global(html[data-theme="dark"]) .horizontalRuler { background-image: repeating-linear-gradient(to right, transparent 0, transparent 11px, var(--line) 11px, var(--line) 12px); }
+:global(html[data-theme="dark"]) .verticalRuler { background-image: repeating-linear-gradient(to bottom, transparent 0, transparent 23px, var(--line) 23px, var(--line) 24px); }
+:global(html[data-theme="dark"]) .verticalRulerMark { border-color: var(--line); }
+:global(html[data-theme="dark"]) .marginZone { background: color-mix(in srgb, var(--foreground) 8%, transparent); }
+:global(html[data-theme="dark"]) .marginLabel,
+:global(html[data-theme="dark"]) .rulerNumber { color: var(--muted); }
+:global(html[data-theme="dark"]) .rulerHandleBody::after { border-color: var(--muted); background: var(--surface); }
+:global(html[data-theme="dark"]) .rulerHandleFirst::after { border-top-color: var(--accent); }
+:global(html[data-theme="dark"]) .rulerHandleRight::after { border-bottom-color: var(--accent); }
+:global(html[data-theme="dark"]) .workspace { background: var(--background); }
+:global(html[data-theme="dark"]) .pageViewport { scrollbar-color: var(--muted) transparent; }
+:global(html[data-theme="dark"]) .pageViewport::-webkit-scrollbar-thumb { background: var(--muted); }
+:global(html[data-theme="dark"]) .zoomControl input { accent-color: var(--accent); }
