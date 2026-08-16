@@ -38,6 +38,8 @@ const DEFAULT_MARGIN_IN = 1;
 const INDENT_STEP_IN = 0.25;
 const MAX_INDENT = 8;
 
+type HeadingLevel = 1 | 2 | 3 | 4 | 5 | 6;
+
 const numericFontSizes = Array.from({ length: 33 }, (_, index) => {
   const value = index + 8;
   return { label: String(value), value: `${value}px` };
@@ -326,7 +328,7 @@ export function AdminRichTextEditor({ initialValue, onChange, labelledBy }: Admi
     editor.chain().focus().updateAttributes(blockType, { [name]: value }).run();
   };
 
-  const setHeading = (value: number | "paragraph") => {
+  const setHeading = (value: HeadingLevel | "paragraph") => {
     if (value === "paragraph") editor.chain().focus().setParagraph().run();
     else editor.chain().focus().setHeading({ level: value }).run();
     setOpenMenu(null);
@@ -419,12 +421,7 @@ export function AdminRichTextEditor({ initialValue, onChange, labelledBy }: Admi
         </ToolbarGroup>
 
         <ToolbarGroup>
-          <Dropdown
-            label="Style"
-            value={currentHeadingLabel}
-            open={openMenu === "heading"}
-            onToggle={() => setOpenMenu(openMenu === "heading" ? null : "heading")}
-          >
+          <Dropdown label="Style" value={currentHeadingLabel} open={openMenu === "heading"} onToggle={() => setOpenMenu(openMenu === "heading" ? null : "heading")}>
             {headingOptions.map((option, index) => (
               <DropdownItem
                 key={`${option.label}-${index}`}
@@ -432,9 +429,7 @@ export function AdminRichTextEditor({ initialValue, onChange, labelledBy }: Admi
                 active={option.value === "paragraph" ? !editor.isActive("heading") : editor.isActive("heading", { level: option.value })}
                 onClick={() => setHeading(option.value)}
               >
-                <span className={`${styles.headingOption} ${option.value === "paragraph" ? styles.paragraphOption : styles[`heading${option.value}`]}`}>
-                  {option.label}
-                </span>
+                <span className={`${styles.headingOption} ${option.value === "paragraph" ? styles.paragraphOption : styles[`heading${option.value}`]}`}>{option.label}</span>
               </DropdownItem>
             ))}
           </Dropdown>
@@ -447,12 +442,7 @@ export function AdminRichTextEditor({ initialValue, onChange, labelledBy }: Admi
             ["right", AlignRight, "Align right"],
             ["justify", AlignJustify, "Justify"],
           ].map(([alignment, Icon, label]) => (
-            <ToolbarButton
-              key={alignment as string}
-              label={label as string}
-              active={activeAlignment(alignment as (typeof textAlignments)[number])}
-              onClick={() => editor.chain().focus().setTextAlign(alignment as "left" | "center" | "right" | "justify").run()}
-            >
+            <ToolbarButton key={alignment as string} label={label as string} active={activeAlignment(alignment as (typeof textAlignments)[number])} onClick={() => editor.chain().focus().setTextAlign(alignment as "left" | "center" | "right" | "justify").run()}>
               <Icon size={18} />
             </ToolbarButton>
           ))}
@@ -461,35 +451,16 @@ export function AdminRichTextEditor({ initialValue, onChange, labelledBy }: Admi
         <ToolbarGroup>
           <ToolbarButton label="Bulleted list" active={editor.isActive("bulletList")} onClick={() => editor.chain().focus().toggleBulletList().run()}><List size={18} /></ToolbarButton>
           <ToolbarButton label="Numbered list" active={editor.isActive("orderedList")} onClick={() => editor.chain().focus().toggleOrderedList().run()}><ListOrdered size={18} /></ToolbarButton>
-          <ToolbarButton
-            label="Outdent"
-            disabled={!inList && currentIndent <= 0}
-            onClick={() => {
-              if (inList) editor.chain().focus().liftListItem("listItem").run();
-              else setBlockAttribute("indent", Math.max(0, currentIndent - 1));
-            }}
-          >
+          <ToolbarButton label="Outdent" disabled={!inList && currentIndent <= 0} onClick={() => { if (inList) editor.chain().focus().liftListItem("listItem").run(); else setBlockAttribute("indent", Math.max(0, currentIndent - 1)); }}>
             <IndentDecrease size={18} />
           </ToolbarButton>
-          <ToolbarButton
-            label="Indent"
-            disabled={!inList && currentIndent >= MAX_INDENT}
-            onClick={() => {
-              if (inList) editor.chain().focus().sinkListItem("listItem").run();
-              else setBlockAttribute("indent", Math.min(MAX_INDENT, currentIndent + 1));
-            }}
-          >
+          <ToolbarButton label="Indent" disabled={!inList && currentIndent >= MAX_INDENT} onClick={() => { if (inList) editor.chain().focus().sinkListItem("listItem").run(); else setBlockAttribute("indent", Math.min(MAX_INDENT, currentIndent + 1)); }}>
             <IndentIncrease size={18} />
           </ToolbarButton>
         </ToolbarGroup>
 
         <ToolbarGroup>
-          <Dropdown
-            label="Paragraph"
-            value={<Pilcrow size={18} />}
-            open={openMenu === "paragraph"}
-            onToggle={() => setOpenMenu(openMenu === "paragraph" ? null : "paragraph")}
-          >
+          <Dropdown label="Paragraph" value={<Pilcrow size={18} />} open={openMenu === "paragraph"} onToggle={() => setOpenMenu(openMenu === "paragraph" ? null : "paragraph")}>
             <DropdownItem label="Single line spacing" active={currentLineSpacing === 1} onClick={() => { setBlockAttribute("lineSpacing", 1); setOpenMenu(null); }}>Single line spacing</DropdownItem>
             <DropdownItem label="1.15 line spacing" active={currentLineSpacing === 1.15} onClick={() => { setBlockAttribute("lineSpacing", 1.15); setOpenMenu(null); }}>1.15 line spacing</DropdownItem>
             <DropdownItem label="1.5 line spacing" active={currentLineSpacing === 1.5} onClick={() => { setBlockAttribute("lineSpacing", 1.5); setOpenMenu(null); }}>1.5 line spacing</DropdownItem>
@@ -505,16 +476,12 @@ export function AdminRichTextEditor({ initialValue, onChange, labelledBy }: Admi
       <div className={styles.workspace}>
         <div className={styles.canvasRow}>
           <div className={styles.verticalRuler} aria-hidden="true">
-            {Array.from({ length: 12 }, (_, index) => (
-              <span key={index} className={styles.verticalRulerMark} style={{ top: `${(index / 11) * 100}%` }}>{index}</span>
-            ))}
+            {Array.from({ length: 12 }, (_, index) => <span key={index} className={styles.verticalRulerMark} style={{ top: `${(index / 11) * 100}%` }}>{index}</span>)}
           </div>
 
           <div className={styles.pageColumn}>
             <div ref={rulerRef} className={styles.horizontalRuler} aria-label="Document ruler">
-              {Array.from({ length: 9 }, (_, index) => (
-                <span key={index} className={styles.rulerNumber} style={{ left: `${(index / PAGE_WIDTH_IN) * 100}%` }}>{index}</span>
-              ))}
+              {Array.from({ length: 9 }, (_, index) => <span key={index} className={styles.rulerNumber} style={{ left: `${(index / PAGE_WIDTH_IN) * 100}%` }}>{index}</span>)}
               <span className={styles.rulerHalf} style={{ left: `${(8.5 / PAGE_WIDTH_IN) * 100}%` }}>8.5</span>
               <RulerMarker type="first" label="First line indent" left={rulerLeft(currentFirstLineIndent)} onChange={(clientX) => setRulerPosition("first", clientX)} />
               <RulerMarker type="body" label="Left indent" left={rulerLeft(currentIndent)} onChange={(clientX) => setRulerPosition("body", clientX)} />
