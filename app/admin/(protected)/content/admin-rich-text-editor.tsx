@@ -155,7 +155,10 @@ export function AdminRichTextEditor({ initialValue, onChange, labelledBy }: Admi
     });
     if (!ranges.length) { setOpenMenu(null); return; }
     const tr = editor.state.tr;
-    [...ranges].reverse().forEach((range) => tr.insertText(toCase(range.text, mode), range.from, range.to, range.marks));
+    [...ranges].reverse().forEach((range) => {
+      const replacement = editor.schema.text(toCase(range.text, mode), range.marks);
+      tr.replaceWith(range.from, range.to, replacement);
+    });
     editor.view.dispatch(tr);
     setOpenMenu(null);
   };
