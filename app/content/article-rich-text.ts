@@ -2,7 +2,27 @@ export const RICH_TEXT_FORMAT = "spirit-and-life-rich-text" as const;
 export const RICH_TEXT_VERSION = 1 as const;
 
 export const fontFamilies = ["serif", "sans-serif", "Georgia"] as const;
-export const fontSizes = ["0.875rem", "1rem", "1.25rem", "1.5rem"] as const;
+// Keep the original rem values for saved documents and add point-like pixel
+// sizes for the editor's numeric size control.
+export const fontSizes = [
+  "0.875rem",
+  "1rem",
+  "1.25rem",
+  "1.5rem",
+  "12px",
+  "14px",
+  "16px",
+  "18px",
+  "20px",
+  "22px",
+  "24px",
+  "26px",
+  "28px",
+  "30px",
+  "32px",
+  "36px",
+  "40px",
+] as const;
 export const textAlignments = ["left", "center", "right", "justify"] as const;
 
 export type FontFamily = (typeof fontFamilies)[number];
