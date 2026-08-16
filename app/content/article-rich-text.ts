@@ -2,13 +2,13 @@ export const RICH_TEXT_FORMAT = "spirit-and-life-rich-text" as const;
 export const RICH_TEXT_VERSION = 1 as const;
 
 export const fontFamilies = ["serif", "sans-serif", "Georgia"] as const;
-// Keep legacy rem values for existing documents and allow normal numeric document-editor sizes from 8pt through 40pt.
+// Keep legacy rem values for existing documents and allow numeric document-editor sizes from 2pt through 40pt.
 export const fontSizes = [
   "0.875rem",
   "1rem",
   "1.25rem",
   "1.5rem",
-  ...Array.from({ length: 33 }, (_, index) => `${index + 8}px`),
+  ...Array.from({ length: 39 }, (_, index) => `${index + 2}px`),
 ] as const;
 export const textAlignments = ["left", "center", "right", "justify"] as const;
 
@@ -72,11 +72,7 @@ function normalizeNodes(value: unknown, depth = 0): RichTextNode[] {
     if (!isRecord(raw) || typeof raw.type !== "string") continue;
     if (raw.type === "text") { const text = asText(raw.text); if (text) nodes.push({ type: "text", text, marks: normalizeMarks(raw.marks) }); continue; }
     if (raw.type === "hardBreak") { nodes.push({ type: "text", text: "\n" }); continue; }
-    if (raw.type === "paragraph" || raw.type === "heading") {
-      const content = normalizeNodes(raw.content, depth).filter((node) => node.type === "text");
-      nodes.push({ type: raw.type, attrs: normalizeBlockAttrs(raw.attrs, raw.type === "heading"), ...(content.length ? { content } : {}) });
-      continue;
-    }
+    if (raw.type === "paragraph" || raw.type === "heading") { const content = normalizeNodes(raw.content, depth).filter((node) => node.type === "text"); nodes.push({ type: raw.type, attrs: normalizeBlockAttrs(raw.attrs, raw.type === "heading"), ...(content.length ? { content } : {}) }); continue; }
     if (raw.type === "bulletList" || raw.type === "orderedList") { const content = normalizeNodes(raw.content, depth + 1).filter((node) => node.type === "listItem"); if (content.length) nodes.push({ type: raw.type, content }); continue; }
     if (raw.type === "listItem") { const content = normalizeNodes(raw.content, depth + 1).filter((node) => ["paragraph", "heading", "bulletList", "orderedList"].includes(node.type)); if (content.length) nodes.push({ type: "listItem", content }); }
   }
@@ -89,11 +85,7 @@ function isSupportedMarks(value: unknown) {
     if (!isRecord(mark) || typeof mark.type !== "string") return false;
     if (["bold", "italic", "underline"].includes(mark.type)) return true;
     if (mark.type === "link") return validLink(isRecord(mark.attrs) ? mark.attrs.href : undefined) !== null;
-    if (mark.type === "textStyle") {
-      const attrs = isRecord(mark.attrs) ? mark.attrs : {};
-      return (attrs.fontFamily === undefined || fontFamilies.includes(attrs.fontFamily as FontFamily)) &&
-        (attrs.fontSize === undefined || fontSizes.includes(attrs.fontSize as FontSize));
-    }
+    if (mark.type === "textStyle") { const attrs = isRecord(mark.attrs) ? mark.attrs : {}; return (attrs.fontFamily === undefined || fontFamilies.includes(attrs.fontFamily as FontFamily)) && (attrs.fontSize === undefined || fontSizes.includes(attrs.fontSize as FontSize)); }
     return false;
   });
 }
@@ -128,17 +120,8 @@ function nodeText(node: RichTextNode): string { if (node.type === "text") return
 export function richTextToLegacySections(document: RichTextDocument): LegacySection[] {
   const sections: LegacySection[] = [];
   let current: LegacySection | null = null;
-  const addParagraph = (text: string) => {
-    const value = text.trim();
-    if (!value) return;
-    if (!current) { current = { heading: "", paragraphs: [] }; sections.push(current); }
-    current.paragraphs.push(value);
-  };
-  const walk = (nodes: RichTextNode[]) => nodes.forEach((node) => {
-    if (node.type === "heading") { current = { heading: nodeText(node).trim(), paragraphs: [] }; sections.push(current); }
-    else if (node.type === "paragraph") addParagraph(nodeText(node));
-    else if (node.type === "bulletList" || node.type === "orderedList" || node.type === "listItem") walk(node.content ?? []);
-  });
+  const addParagraph = (text: string) => { const value = text.trim(); if (!value) return; if (!current) { current = { heading: "", paragraphs: [] }; sections.push(current); } current.paragraphs.push(value); };
+  const walk = (nodes: RichTextNode[]) => nodes.forEach((node) => { if (node.type === "heading") { current = { heading: nodeText(node).trim(), paragraphs: [] }; sections.push(current); } else if (node.type === "paragraph") addParagraph(nodeText(node)); else if (node.type === "bulletList" || node.type === "orderedList" || node.type === "listItem") walk(node.content ?? []); });
   walk(document.content.content);
   return sections.filter((section) => section.heading || section.paragraphs.length);
 }
