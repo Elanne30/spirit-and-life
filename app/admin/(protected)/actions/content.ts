@@ -168,7 +168,7 @@ function readDraftInput(formData: FormData): ParsedDraftInput {
     sections = richTextToLegacySections(richText);
   }
 
-  if (!(["reflection", "journal", "book"] as DraftContentType[]).includes(contentType)) {
+  if (!( ["reflection", "journal", "book"] as DraftContentType[]).includes(contentType)) {
     return { error: "Choose a valid content type." };
   }
 
@@ -243,8 +243,10 @@ export async function createDraftAction(
     return { status: "error", message: input.error };
   }
 
+  const saveMode = String(formData.get("saveMode") ?? "draft").trim();
+
   try {
-    await createDraft({
+    const draft = await createDraft({
       contentType: input.contentType,
       title: input.title,
       slug: input.slug,
@@ -255,12 +257,22 @@ export async function createDraftAction(
       body: bodyFromInput(input),
     });
 
-    revalidatePath("/admin/content");
+    if (!draft) {
+      return {
+        status: "error",
+        message: "The draft could not be created.",
+      };
+    }
 
-    return {
-      status: "success",
-      message: "Draft saved.",
-    };
+    revalidatePath("/admin/content");
+    revalidatePath(`/admin/content/${draft.content_type}`);
+    revalidatePath(`/admin/content/${draft.content_type}/${draft.slug}`);
+
+    if (saveMode === "continue") {
+      redirect(`/admin/content/${draft.content_type}/${draft.slug}?view=edit`);
+    }
+
+    redirect(`/admin/content/${draft.content_type}`);
   } catch (error) {
     console.error(
       "[content-drafts] Create draft failed.",
@@ -422,7 +434,7 @@ export async function startEditingContentAction(formData: FormData) {
   const contentType = String(formData.get("contentType") ?? "").trim() as DraftContentType;
   const slug = normalizeDraftSlug(String(formData.get("slug") ?? ""));
 
-  if (!(["reflection", "journal", "book"] as DraftContentType[]).includes(contentType) || !slug) {
+  if (!( ["reflection", "journal", "book"] as DraftContentType[]).includes(contentType) || !slug) {
     return;
   }
 
@@ -442,31 +454,12 @@ export async function startEditingContentAction(formData: FormData) {
         category: typeof seedRecord.category === "string" ? seedRecord.category : undefined,
         tags: Array.isArray(seedRecord.tags) ? (seedRecord.tags as string[]) : [],
         imageReference: typeof seedRecord.image === "string" ? seedRecord.image : (typeof seedRecord.cover === "string" ? seedRecord.cover : undefined),
-        body: {
-          date: seedRecord.date ?? "",
-          readingTime: seedRecord.readingTime ?? "",
-          scripture: seedRecord.scripture ?? "",
-          featured: seedRecord.featured === true,
-          sections: Array.isArray(seedRecord.sections) ? seedRecord.sections : [],
-          label: seedRecord.label ?? "",
-          subtitle: seedRecord.subtitle ?? "",
-          expectedPublication: seedRecord.expectedPublication ?? "",
-          author: seedRecord.author ?? "",
-          publisher: seedRecord.publisher ?? "",
-          length: seedRecord.length ?? "",
-          tableOfContents: Array.isArray(seedRecord.tableOfContents) ? seedRecord.tableOfContents : [],
-          relatedReflectionSlugs: seedRecord.relatedReflectionSlugs ?? [],
-          relatedJournalSlugs: seedRecord.relatedJournalSlugs ?? [],
-          relatedBookSlugs: seedRecord.relatedBookSlugs ?? [],
-          relatedStudyPlanDates: seedRecord.relatedStudyPlanDates ?? [],
-        },
+        body: typeof seedRecord.body === "object" && seedRecord.body !== null ? (seedRecord.body as Record<string, unknown>) : {},
       });
-    } else {
-      // No static seed and no existing draft: nothing to edit.
-      return;
     }
   }
 
   revalidatePath("/admin/content");
+  revalidatePath(`/admin/content/${contentType}`);
   redirect(`/admin/content/${contentType}/${slug}?view=edit`);
 }

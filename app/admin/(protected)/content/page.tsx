@@ -1,7 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight, BookOpen, FilePenLine, FileText } from "lucide-react";
-import { DraftForm } from "@/app/admin/(protected)/content/draft-form";
 import { listAdminContentItems, type AdminContentItem } from "@/app/admin/(protected)/content/admin-content";
 import type { DraftContentType } from "@/app/lib/content-drafts";
 
@@ -67,9 +66,9 @@ export default async function AdminContentPage({
     ]),
   ) as Record<DraftContentType, AdminContentItem[]>;
   const overview = [
-    { type: "reflection" as const, title: "Reflections", description: "Manage reflections and devotionals", icon: FilePenLine, count: publishedCount(reflectionItems), href: "/admin/content?type=reflection" },
-    { type: "journal" as const, title: "Journals", description: "Manage journal articles", icon: FileText, count: publishedCount(journalItems), href: "/admin/content?type=journal" },
-    { type: "book" as const, title: "Books", description: "Manage book summaries", icon: BookOpen, count: publishedCount(bookItems), href: "/admin/content?type=book" },
+    { type: "reflection" as const, title: "Reflections", description: "Manage reflections and devotionals", icon: FilePenLine, count: publishedCount(reflectionItems), href: "/admin/content/reflection" },
+    { type: "journal" as const, title: "Journals", description: "Manage journal articles", icon: FileText, count: publishedCount(journalItems), href: "/admin/content/journal" },
+    { type: "book" as const, title: "Books", description: "Manage book summaries", icon: BookOpen, count: publishedCount(bookItems), href: "/admin/content/book" },
     { type: "draft" as const, title: "Drafts", description: "Continue editing drafts", icon: FilePenLine, count: draftCount, href: "/admin/content?type=draft" },
   ];
 
@@ -119,12 +118,6 @@ export default async function AdminContentPage({
         <div className="admin-recent-columns">
           {visibleSections.map((section) => <div key={section.contentType}><h3>{filter ? section.label : `Recent ${section.label}`}</h3><ul className="admin-content-list">{visibleItemsByType[section.contentType].map((item) => <li key={`${item.contentType}-${item.slug}`}><Link href={`/admin/content/${item.contentType}/${item.slug}`}><strong>{item.title}</strong><small>{item.category ?? statusLabel(item)}{item.date ? ` · ${item.date}` : ""}</small></Link></li>)}</ul>{!visibleItemsByType[section.contentType].length ? <p className="quiet-note">Nothing here yet.</p> : null}</div>)}
         </div>
-      </article>
-
-      <article className="admin-card admin-draft-card">
-        <h2>Create New Draft</h2>
-        <p>Start a new piece of content that does not yet exist on the public site.</p>
-        <DraftForm />
       </article>
     </section>
   );
