@@ -1,0 +1,438 @@
+/* Editorial polish layer. Kept separate from the core stylesheet so the visual pass stays easy to review. */
+
+:root {
+  --reading-width: 46rem;
+  --reading-wide: 62rem;
+}
+
+html {
+  scroll-padding-top: 6rem;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--accent) 28%, transparent);
+  color: var(--foreground);
+}
+
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: color-mix(in srgb, var(--background) 92%, transparent);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.header-inner {
+  min-height: 4.75rem;
+}
+
+.brand-link {
+  width: auto;
+  height: auto;
+  gap: .75rem;
+  overflow: visible;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.brand-link .brand-logo {
+  width: 3.35rem;
+  height: 3.35rem;
+  border-radius: 50%;
+  border: 1px solid color-mix(in srgb, var(--foreground) 14%, transparent);
+}
+
+.brand-copy,
+.footer-brand-copy {
+  display: flex;
+  flex-direction: column;
+  gap: .18rem;
+}
+
+.brand-copy strong,
+.footer-brand-copy strong {
+  font-family: var(--font-display), serif;
+  font-size: 1.2rem;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.brand-copy small,
+.footer-brand-copy small {
+  color: var(--muted);
+  font-size: .62rem;
+  letter-spacing: .03em;
+}
+
+.main-navigation a {
+  position: relative;
+  padding-block: .55rem;
+}
+
+.main-navigation a::after {
+  position: absolute;
+  right: 0;
+  bottom: .15rem;
+  left: 0;
+  height: 1px;
+  content: "";
+  background: var(--accent);
+  transform: scaleX(0);
+  transform-origin: center;
+  transition: transform 160ms ease;
+}
+
+.main-navigation a:hover::after,
+.main-navigation a.is-active::after {
+  transform: scaleX(1);
+}
+
+.main-navigation .theme-toggle::after,
+.main-navigation .search-button::after {
+  display: none;
+}
+
+/* Reading pages */
+.reflection-detail-page,
+.journal-detail-page {
+  padding-top: clamp(3.5rem, 7vw, 6rem);
+}
+
+.detail-header {
+  max-width: var(--reading-wide);
+}
+
+.reflection-detail-header h1,
+.journal-detail-header h1 {
+  max-width: 18ch;
+  margin-inline: auto;
+  text-wrap: balance;
+}
+
+.reflection-meta,
+.journal-meta {
+  justify-content: center;
+  gap: .55rem .9rem;
+  flex-wrap: wrap;
+}
+
+.reflection-meta span,
+.journal-meta span {
+  display: inline-flex;
+  align-items: center;
+  gap: .55rem;
+}
+
+.reflection-meta span:not(:last-child)::after,
+.journal-meta span:not(:last-child)::after {
+  content: "·";
+  color: var(--accent);
+}
+
+.reflection-feature-image,
+.journal-feature-image {
+  margin-top: clamp(2.5rem, 5vw, 4rem);
+}
+
+.reflection-feature-image img,
+.journal-feature-image img {
+  display: block;
+  width: 100%;
+  max-height: 44rem;
+  object-fit: cover;
+  border: 1px solid var(--line);
+  box-shadow: 0 1.5rem 4rem var(--shadow);
+}
+
+.reflection-reading-column,
+.journal-reading-column {
+  width: min(100% - 3rem, var(--reading-width));
+  margin-inline: auto;
+}
+
+.reflection-introduction,
+.journal-introduction {
+  margin: clamp(2.5rem, 6vw, 4.5rem) 0 clamp(2.5rem, 5vw, 4rem);
+  padding: 1.5rem 0 1.5rem 1.4rem;
+  border-left: 2px solid var(--accent);
+  color: var(--foreground);
+  font-family: var(--font-display), serif;
+  font-size: clamp(1.35rem, 2.5vw, 1.75rem);
+  line-height: 1.4;
+}
+
+.article-rich-text {
+  color: var(--foreground);
+  font-size: clamp(1.03rem, 1.25vw, 1.12rem);
+  line-height: 1.85;
+}
+
+.article-rich-text p,
+.article-rich-text h2,
+.article-rich-text h3,
+.article-rich-text ul,
+.article-rich-text ol {
+  margin-block: 0 1.35rem;
+}
+
+.article-rich-text p + p {
+  margin-top: .15rem;
+}
+
+.article-rich-text h2 {
+  margin-top: 3rem;
+  font-size: clamp(2rem, 4vw, 3rem);
+  line-height: 1;
+}
+
+.article-rich-text h3 {
+  margin-top: 2.25rem;
+  font-size: clamp(1.5rem, 3vw, 2.1rem);
+  line-height: 1.05;
+}
+
+.article-rich-text a {
+  color: var(--accent-strong);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+.article-rich-text ul,
+.article-rich-text ol {
+  padding-left: 1.5rem;
+}
+
+.article-rich-text li + li {
+  margin-top: .45rem;
+}
+
+.article-rich-text .rich-text-align-justify {
+  text-align: justify;
+  text-justify: inter-word;
+}
+
+.reading-section {
+  margin-top: 3.5rem;
+}
+
+.reading-section h2 {
+  margin-bottom: 1.2rem;
+  font-size: clamp(2rem, 4vw, 3rem);
+  line-height: 1;
+}
+
+.reading-section p {
+  color: var(--foreground);
+  line-height: 1.85;
+}
+
+/* Related content becomes a deliberate end-of-reading experience. */
+.related-content {
+  width: min(100%, var(--reading-wide));
+  margin: clamp(4rem, 8vw, 7rem) auto 0;
+  padding-top: clamp(2.5rem, 5vw, 4rem);
+  border-top: 1px solid var(--line);
+}
+
+.related-content > h2 {
+  margin: .35rem 0 1.6rem;
+  font-size: clamp(2.2rem, 4vw, 3.5rem);
+  line-height: .95;
+}
+
+.related-content-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.related-content-card {
+  min-width: 0;
+  padding: 1.35rem;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+}
+
+.related-content-card:hover {
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--accent) 48%, var(--line));
+  box-shadow: 0 .9rem 2rem var(--shadow);
+}
+
+.related-content-card h3 {
+  margin: .35rem 0 .7rem;
+  font-size: clamp(1.35rem, 2.3vw, 1.9rem);
+  line-height: 1.02;
+}
+
+.related-content-card > p:not(.content-card-label):not(.related-content-meta) {
+  color: var(--muted);
+  line-height: 1.65;
+}
+
+.related-content-meta {
+  color: var(--muted);
+  font-size: .72rem;
+  line-height: 1.5;
+}
+
+/* Books */
+.book-detail-page .book-detail-content {
+  padding-top: 1rem;
+}
+
+.book-detail-page .book-detail-description p {
+  color: var(--foreground);
+  font-size: 1.02rem;
+}
+
+.book-detail-page .book-detail-contents li::marker {
+  color: var(--accent);
+}
+
+.book-detail-page .book-detail-notice {
+  border-left-width: 3px;
+}
+
+/* Forms */
+input,
+textarea,
+select {
+  font-size: 16px;
+}
+
+button:disabled,
+.button[aria-disabled="true"] {
+  cursor: not-allowed;
+  opacity: .6;
+}
+
+/* Search and utility pages should feel like part of the same publication. */
+.search-page,
+.privacy-page,
+.terms-page {
+  min-height: 60vh;
+}
+
+/* Give empty states a finished, editorial treatment. */
+.empty-state {
+  border: 1px dashed var(--line);
+  background: color-mix(in srgb, var(--surface) 70%, transparent);
+  padding: 2rem;
+}
+
+/* Prevent accidental horizontal overflow on narrow screens. */
+img,
+svg,
+video,
+canvas {
+  max-width: 100%;
+}
+
+@media (max-width: 820px) {
+  .site-header {
+    position: sticky;
+  }
+
+  .header-inner {
+    min-height: 4.25rem;
+  }
+
+  .brand-link .brand-logo {
+    width: 3rem;
+    height: 3rem;
+  }
+
+  .brand-copy small {
+    display: none;
+  }
+
+  .main-navigation {
+    padding-bottom: 1rem;
+  }
+
+  .main-navigation.is-open {
+    border-top: 1px solid var(--line);
+  }
+
+  .main-navigation a {
+    padding: .65rem .1rem;
+  }
+
+  .reflection-reading-column,
+  .journal-reading-column {
+    width: min(100% - 1.5rem, var(--reading-width));
+  }
+
+  .related-content-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 560px) {
+  .reflection-detail-page,
+  .journal-detail-page {
+    padding-top: 2.75rem;
+  }
+
+  .reflection-feature-image,
+  .journal-feature-image {
+    width: calc(100% - 1.5rem);
+  }
+
+  .reflection-feature-image img,
+  .journal-feature-image img {
+    max-height: 24rem;
+  }
+
+  .reflection-introduction,
+  .journal-introduction {
+    margin-top: 2.25rem;
+    padding-left: 1rem;
+    font-size: 1.25rem;
+  }
+
+  .article-rich-text {
+    font-size: 1rem;
+    line-height: 1.78;
+  }
+
+  .article-rich-text .rich-text-align-justify {
+    text-align: left;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
+
+@media print {
+  .site-header,
+  .site-footer,
+  .related-content,
+  .button {
+    display: none !important;
+  }
+
+  .reflection-reading-column,
+  .journal-reading-column {
+    width: 100%;
+    max-width: none;
+  }
+
+  .article-rich-text {
+    color: #000;
+  }
+}
