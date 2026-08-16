@@ -94,6 +94,8 @@ type ParsedDraftInput =
       length: string;
       tableOfContents: string[];
       imageReference: string;
+      bookNotes: string;
+      submitIntent: "save" | "continue";
     }
   | { error: string };
 
@@ -115,6 +117,8 @@ function readDraftInput(formData: FormData): ParsedDraftInput {
   const publisher = String(formData.get("publisher") ?? "").trim();
   const length = String(formData.get("length") ?? "").trim();
   const imageReference = String(formData.get("imageReference") ?? "").trim();
+  const bookNotes = String(formData.get("bookNotes") ?? "").trim();
+  const submitIntent = formData.get("submitIntent") === "continue" ? "continue" : "save";
 
   const tableOfContents = String(formData.get("tableOfContents") ?? "")
     .split("\n")
@@ -168,7 +172,7 @@ function readDraftInput(formData: FormData): ParsedDraftInput {
     sections = richTextToLegacySections(richText);
   }
 
-  if (!(["reflection", "journal", "book"] as DraftContentType[]).includes(contentType)) {
+  if (!["reflection", "journal", "book"].includes(contentType)) {
     return { error: "Choose a valid content type." };
   }
 
@@ -208,6 +212,8 @@ function readDraftInput(formData: FormData): ParsedDraftInput {
     length,
     tableOfContents,
     imageReference,
+    bookNotes,
+    submitIntent,
   };
 }
 
@@ -226,6 +232,7 @@ function bodyFromInput(input: Exclude<ParsedDraftInput, { error: string }>) {
     publisher: input.publisher,
     length: input.length,
     tableOfContents: input.tableOfContents,
+    bookNotes: input.bookNotes,
   };
 }
 
@@ -244,7 +251,7 @@ export async function createDraftAction(
   }
 
   try {
-    await createDraft({
+    const draft = await createDraft({
       contentType: input.contentType,
       title: input.title,
       slug: input.slug,
@@ -256,6 +263,11 @@ export async function createDraftAction(
     });
 
     revalidatePath("/admin/content");
+    revalidatePath(`/admin/content/${input.contentType}`);
+
+    if (input.submitIntent === "continue" && draft) {
+      redirect(`/admin/content/${draft.content_type}/${draft.slug}?view=edit`);
+    }
 
     return {
       status: "success",
@@ -317,10 +329,7 @@ export async function updateDraftAction(
     revalidatePath("/admin/content");
     revalidatePath(`/admin/content/${draft.content_type}/${draft.slug}`);
 
-    return {
-      status: "success",
-      message: "Draft updated.",
-    };
+    return { status: "success", message: "Changes saved." };
   } catch (error) {
     console.error(
       "[content-drafts] Update draft failed.",
@@ -329,144 +338,125 @@ export async function updateDraftAction(
 
     return {
       status: "error",
-      message: "That draft slug is already in use or could not be updated.",
+      message: "The changes could not be saved. The draft remains unchanged.",
     };
   }
 }
 
-function publicListRoute(contentType: DraftContentType) {
-  return contentType === "reflection" ? "reflections" : contentType === "journal" ? "journals" : "books";
-}
-
-function revalidatePublicRoutes(contentType: DraftContentType, slug: string) {
-  const listRoute = publicListRoute(contentType);
-  revalidatePath(`/${listRoute}`);
-  revalidatePath(`/${listRoute}/${slug}`);
-  revalidatePath("/");
-  revalidatePath("/search");
-  revalidatePath("/sitemap.xml");
-}
-
-export async function publishDraftAction(
-  _previousState: ContentDraftActionState,
-  formData: FormData,
-): Promise<ContentDraftActionState> {
-  if (!(await requireAdminActionAccess())) {
-    return { status: "error", message: "Unauthorized." };
-  }
+export async function publishDraftAction(formData: FormData) {
+  if (!(await requireAdminActionAccess())) redirect("/admin/login");
 
   const draftId = String(formData.get("draftId") ?? "").trim();
+  if (!draftId) redirect("/admin/content");
 
-  if (!draftId) {
-    return { status: "error", message: "A draft id is required to publish." };
+  await publishDraft(draftId);
+  revalidatePath("/admin/content");
+  redirect("/admin/content");
+}
+
+export async function startEditingContentAction(formData: FormData) {
+  if (!(await requireAdminActionAccess())) redirect("/admin/login");
+
+  const contentType = String(formData.get("contentType") ?? "").trim() as DraftContentType;
+  const slug = normalizeDraftSlug(String(formData.get("slug") ?? ""));
+
+  if (!["reflection", "journal", "book"].includes(contentType) || !slug) {
+    redirect("/admin/content");
   }
 
   try {
-    const draft = await publishDraft(draftId);
+    const existingDraft = await getDraftByTypeAndSlug(contentType, slug);
+    if (existingDraft) redirect(`/admin/content/${contentType}/${existingDraft.slug}?view=edit`);
 
-    if (!draft) {
-      return { status: "error", message: "Draft not found." };
-    }
+    const source =
+      contentType === "reflection"
+        ? reflections.find((item) => item.contentSlug === slug)
+        : contentType === "journal"
+          ? journals.find((item) => item.contentSlug === slug)
+          : books.find((item) => item.contentSlug === slug);
 
-    revalidatePath("/admin/content");
-    revalidatePath(`/admin/content/${draft.content_type}/${draft.slug}`);
-    revalidatePublicRoutes(draft.content_type, draft.slug);
+    if (!source) redirect("/admin/content");
 
-    return {
-      status: "success",
-      message: "Published. It is now live on the public website.",
-    };
+    const sourceBody =
+      contentType === "reflection"
+        ? {
+            date: source.date,
+            readingTime: source.readingTime,
+            scripture: source.scripture,
+            featured: source.featured,
+            sections: source.sections,
+            label: "",
+            subtitle: "",
+            expectedPublication: "",
+            author: "",
+            publisher: "",
+            length: "",
+            tableOfContents: [],
+            bookNotes: "",
+          }
+        : contentType === "journal"
+          ? {
+              date: source.date,
+              readingTime: "",
+              scripture: "",
+              featured: false,
+              sections: source.sections,
+              label: source.label,
+              subtitle: "",
+              expectedPublication: "",
+              author: "",
+              publisher: "",
+              length: "",
+              tableOfContents: [],
+              bookNotes: "",
+            }
+          : {
+              date: "",
+              readingTime: "",
+              scripture: "",
+              featured: false,
+              sections: [],
+              label: "",
+              subtitle: source.subtitle,
+              expectedPublication: source.expectedPublication,
+              author: source.author,
+              publisher: source.publisher,
+              length: source.length,
+              tableOfContents: source.tableOfContents,
+              bookNotes: "",
+            };
+
+    const draft = await createDraft({
+      contentType,
+      title: source.title,
+      slug,
+      introduction: source.introduction,
+      category: source.category,
+      tags: source.tags,
+      imageReference: source.imageReference,
+      body: sourceBody,
+    });
+
+    revalidatePath(`/admin/content/${contentType}/${slug}`);
+    redirect(`/admin/content/${contentType}/${draft.slug}?view=edit`);
   } catch (error) {
-    console.error(
-      "[content-drafts] Publish draft failed.",
-      error instanceof Error ? error.message : "Unknown error",
-    );
-
-    return { status: "error", message: "That content could not be published." };
+    console.error("[content-drafts] Start editing failed.", error instanceof Error ? error.message : "Unknown error");
+    redirect(`/admin/content/${contentType}/${slug}`);
   }
 }
 
 export async function deleteContentAction(formData: FormData) {
-  if (!(await requireAdminActionAccess())) return;
+  if (!(await requireAdminActionAccess())) redirect("/admin/login");
 
   const contentType = String(formData.get("contentType") ?? "").trim() as DraftContentType;
   const slug = normalizeDraftSlug(String(formData.get("slug") ?? ""));
-  if (!( ["reflection", "journal", "book"] as DraftContentType[]).includes(contentType) || !slug) return;
+
+  if (!["reflection", "journal", "book"].includes(contentType) || !slug) {
+    redirect("/admin/content");
+  }
 
   await deleteContent(contentType, slug);
-  revalidatePath("/admin");
   revalidatePath("/admin/content");
-  revalidatePublicRoutes(contentType, slug);
-  redirect("/admin/content");
-}
-
-function findStaticSeed(contentType: DraftContentType, slug: string) {
-  if (contentType === "reflection") {
-    return reflections.find((item) => item.contentSlug === slug);
-  }
-
-  if (contentType === "journal") {
-    return journals.find((item) => item.contentSlug === slug);
-  }
-
-  return books.find((item) => item.contentSlug === slug);
-}
-
-// Seeds a database draft from an existing static article so it can be edited
-// without ever changing the public version until the draft is published.
-export async function startEditingContentAction(formData: FormData) {
-  if (!(await requireAdminActionAccess())) {
-    return;
-  }
-
-  const contentType = String(formData.get("contentType") ?? "").trim() as DraftContentType;
-  const slug = normalizeDraftSlug(String(formData.get("slug") ?? ""));
-
-  if (!(["reflection", "journal", "book"] as DraftContentType[]).includes(contentType) || !slug) {
-    return;
-  }
-
-  const existingDraft = await getDraftByTypeAndSlug(contentType, slug);
-
-  if (!existingDraft) {
-    const seed = findStaticSeed(contentType, slug);
-
-    if (seed) {
-      const seedRecord = seed as Record<string, unknown>;
-
-      await createDraft({
-        contentType,
-        title: String(seedRecord.title ?? ""),
-        slug,
-        introduction: typeof seedRecord.introduction === "string" ? seedRecord.introduction : (typeof seedRecord.description === "string" ? seedRecord.description : undefined),
-        category: typeof seedRecord.category === "string" ? seedRecord.category : undefined,
-        tags: Array.isArray(seedRecord.tags) ? (seedRecord.tags as string[]) : [],
-        imageReference: typeof seedRecord.image === "string" ? seedRecord.image : (typeof seedRecord.cover === "string" ? seedRecord.cover : undefined),
-        body: {
-          date: seedRecord.date ?? "",
-          readingTime: seedRecord.readingTime ?? "",
-          scripture: seedRecord.scripture ?? "",
-          featured: seedRecord.featured === true,
-          sections: Array.isArray(seedRecord.sections) ? seedRecord.sections : [],
-          label: seedRecord.label ?? "",
-          subtitle: seedRecord.subtitle ?? "",
-          expectedPublication: seedRecord.expectedPublication ?? "",
-          author: seedRecord.author ?? "",
-          publisher: seedRecord.publisher ?? "",
-          length: seedRecord.length ?? "",
-          tableOfContents: Array.isArray(seedRecord.tableOfContents) ? seedRecord.tableOfContents : [],
-          relatedReflectionSlugs: seedRecord.relatedReflectionSlugs ?? [],
-          relatedJournalSlugs: seedRecord.relatedJournalSlugs ?? [],
-          relatedBookSlugs: seedRecord.relatedBookSlugs ?? [],
-          relatedStudyPlanDates: seedRecord.relatedStudyPlanDates ?? [],
-        },
-      });
-    } else {
-      // No static seed and no existing draft: nothing to edit.
-      return;
-    }
-  }
-
-  revalidatePath("/admin/content");
-  redirect(`/admin/content/${contentType}/${slug}?view=edit`);
+  revalidatePath(`/admin/content/${contentType}`);
+  redirect(`/admin/content/${contentType}`);
 }
