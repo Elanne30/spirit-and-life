@@ -162,7 +162,9 @@ function isSupportedMarks(value: unknown) {
   });
 }
 
-function isSupportedNodes(value: unknown, context: "block" | "inline" | "list", depth = 0): boolean {
+type SupportedNodeContext = "block" | "inline" | "list" | "listItem";
+
+function isSupportedNodes(value: unknown, context: SupportedNodeContext, depth = 0): boolean {
   if (!Array.isArray(value) || depth > maxListDepth + 1) return false;
 
   return value.every((raw) => {
