@@ -3,9 +3,10 @@
 import { useActionState } from "react";
 import type { ContentDraft } from "@/app/lib/content-drafts";
 import {
-  updateDraftAction,
-  type ContentDraftActionState,
-} from "@/app/admin/(protected)/actions/content";
+  createDraftActionSafe,
+  updateDraftActionSafe,
+} from "@/app/admin/(protected)/actions/content-save-guard";
+import type { ContentDraftActionState } from "@/app/admin/(protected)/actions/content";
 import {
   ReflectionBodyEditor,
   type ReflectionSection,
@@ -48,7 +49,7 @@ function getInitialSections(draft: ContentDraft): ReflectionSection[] {
 
 export function DraftEditForm({ draft }: { draft: ContentDraft }) {
   const [state, formAction, isPending] = useActionState(
-    updateDraftAction,
+    updateDraftActionSafe,
     initialActionState,
   );
 
