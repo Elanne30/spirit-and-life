@@ -3,7 +3,7 @@
 import { useActionState } from "react";
 import { publishManagedDraftAction } from "@/app/admin/(protected)/actions/content-managed-publish";
 import type { ContentDraftActionState } from "@/app/admin/(protected)/actions/content";
-import { unpublishContentAction } from "@/app/admin/(protected)/actions/content-publish";
+import { unpublishManagedDraftAction } from "@/app/admin/(protected)/actions/content-managed-unpublish";
 
 const initialState: ContentDraftActionState = { status: "idle", message: "" };
 
@@ -27,7 +27,7 @@ export function PublishForm({
     return (
       <form
         className="admin-publish-form"
-        action={unpublishContentAction}
+        action={unpublishManagedDraftAction}
         onSubmit={(event) => {
           if (!window.confirm("Unpublish this content? It will disappear from the public website but remain available in the Admin.")) {
             event.preventDefault();
