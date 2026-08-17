@@ -26,7 +26,7 @@ const adminNavigation = [
 
 export function AdminNav() {
   const pathname = usePathname();
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(true);
 
   return (
     <div className="admin-navigation-shell">
@@ -36,10 +36,10 @@ export function AdminNav() {
         onClick={() => setOpen((value) => !value)}
         aria-expanded={open}
         aria-controls="admin-navigation"
-        aria-label={open ? "Close admin navigation" : "Open admin navigation"}
+        aria-label={open ? "Collapse admin navigation" : "Open admin navigation"}
       >
         {open ? <X aria-hidden="true" size={19} /> : <Menu aria-hidden="true" size={19} />}
-        <span>Menu</span>
+        <span>{open ? "Collapse menu" : "Menu"}</span>
       </button>
 
       <nav className={`admin-nav${open ? " is-open" : ""}`} id="admin-navigation" aria-label="Admin sections">
