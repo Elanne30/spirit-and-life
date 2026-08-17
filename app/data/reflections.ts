@@ -21,7 +21,6 @@ const reflectionContent: Record<string, Omit<Reflection, keyof ImageManifestEntr
   "reading-scripture-in-context-why-it-matters": {
     date: "July 15, 2026", readingTime: "6 min read", category: "Biblical Studies", tags: ["Scripture", "Interpretation", "Hermeneutics", "Context"], scripture: "Nehemiah 8:8", featured: true,
     relatedJournalSlugs: ["on-slowing-down-to-read"],
-    relatedBookSlugs: ["thy-word-is-truth-a-journey-through-john-17"],
     introduction: "Every reader of Scripture faces a simple but profound question: how do we move from an ancient text to faithful understanding? The answer begins with context.",
     sections: [
       { heading: "The Principle of Context", paragraphs: ["When we read any piece of writing, we instinctively consider its context. We read a sentence in light of the paragraph, a paragraph in light of the chapter, and a chapter in light of the whole book. Scripture deserves the same care.", "Yet too often, verses are lifted from their surroundings and treated as self-contained promises or commands. A single phrase, separated from its passage, can be made to say almost anything."] },
