@@ -1,6 +1,7 @@
 import Link from "next/link";
-import { CalendarDays, Clock3, Eye, MoreVertical, Plus, Search } from "lucide-react";
+import { CalendarDays, Clock3, Eye, Plus, Search } from "lucide-react";
 import { listAdminContentItems, type AdminContentItem } from "@/app/admin/(protected)/content/admin-content";
+import { ContentMoreActions } from "@/app/admin/(protected)/content/content-more-actions";
 import type { DraftContentType } from "@/app/lib/content-drafts";
 import styles from "../admin-library-reference.module.css";
 
@@ -27,12 +28,12 @@ const config: Record<DraftContentType, {
 };
 
 function statusLabel(item: AdminContentItem) {
-  if (item.status === "published") return "Published";
+  if (item.status === "published" || item.status === "static") return "Published";
   return "Draft";
 }
 
 function statusClass(item: AdminContentItem) {
-  return item.status === "published" ? styles.statusPublished : styles.statusDraft;
+  return item.status === "published" || item.status === "static" ? styles.statusPublished : styles.statusDraft;
 }
 
 function imageFor(item: AdminContentItem) {
@@ -51,7 +52,7 @@ export default async function ContentTypeWorkspace({
   const contentType = type as DraftContentType;
   const current = config[contentType];
   const items = await listAdminContentItems(contentType);
-  const publishedCount = items.filter((item) => item.status === "published").length;
+  const publishedCount = items.filter((item) => item.status === "published" || item.status === "static").length;
   const draftCount = items.filter((item) => item.status === "draft").length;
 
   return (
@@ -122,12 +123,16 @@ export default async function ContentTypeWorkspace({
                   <Link className={styles.action} href={`/admin/content/${item.contentType}/${item.slug}?view=edit`}>
                     Edit
                   </Link>
-                  <Link className={styles.action} href={`/admin/content/${item.contentType}/${item.slug}`} aria-label={`Preview ${item.title}`} title="Open">
+                  <Link className={styles.action} href={`/admin/content/${item.contentType}/${item.slug}`} aria-label={`Preview ${item.title}`} title="Preview">
                     <Eye size={15} />
                   </Link>
-                  <span className={styles.more} aria-hidden="true" title="More options">
-                    <MoreVertical size={15} />
-                  </span>
+                  <ContentMoreActions
+                    contentType={item.contentType}
+                    slug={item.slug}
+                    title={item.title}
+                    status={item.status}
+                    draftId={item.draftId}
+                  />
                 </div>
               </article>
             );
