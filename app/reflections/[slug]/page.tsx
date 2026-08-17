@@ -2,12 +2,12 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ReflectionArticle } from "@/app/components/reflection-article";
 import { articleMetadata, articleStructuredData } from "@/app/content/seo";
-import { getPublishedReflection, listPublishedReflections } from "@/app/content/repository";
+import { getPublishedReflection } from "@/app/content/repository";
 
-export async function generateStaticParams() {
-  const reflections = await listPublishedReflections();
-  return reflections.map((reflection) => ({ slug: reflection.contentSlug }));
-}
+// Reflections are database-backed and can be published from Admin at any time.
+// Keep the detail route dynamic so Previous/Next always sees the current
+// published collection instead of a build-time snapshot.
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
