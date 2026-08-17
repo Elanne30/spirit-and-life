@@ -14,6 +14,7 @@ export function Header() {
 
   return (
     <header className="site-header">
+      <Link className="skip-link" href="#main-content">Skip to content</Link>
       <div className="page-container header-inner">
         <Link className="brand-link" href="/" onClick={() => setMenuOpen(false)}>
           <Image className="brand-logo" src={siteConfig.brand.logo} alt="Spirit & Life" width={616} height={496} />
@@ -38,11 +39,14 @@ export function Header() {
           id="main-navigation"
           aria-label="Main navigation"
         >
-          {navigation.map((item) => (
-            <Link className={pathname === item.href || (item.href !== "/" && pathname.startsWith(`${item.href}/`)) ? "is-active" : undefined} key={item.href} href={item.href} onClick={() => setMenuOpen(false)} aria-current={pathname === item.href || (item.href !== "/" && pathname.startsWith(`${item.href}/`)) ? "page" : undefined}>
-              {item.label}
-            </Link>
-          ))}
+          {navigation.map((item) => {
+            const isActive = pathname === item.href || (item.href !== "/" && pathname.startsWith(`${item.href}/`));
+            return (
+              <Link className={isActive ? "is-active" : undefined} key={item.href} href={item.href} onClick={() => setMenuOpen(false)} aria-current={isActive ? "page" : undefined}>
+                {item.label}
+              </Link>
+            );
+          })}
           <Link className="search-button" href="/search" aria-label="Search">
             <span aria-hidden="true" />
             <span className="search-button-label">Search</span>
