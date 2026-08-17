@@ -118,6 +118,7 @@ export async function uploadContentImageAction(_previousState: ContentDraftActio
     const updated = await updateDraftImage(draftId, blob.url);
     if (!updated) return { status: "error", message: "Draft not found." };
     revalidatePath(`/admin/content/${draft.content_type}/${draft.slug}`);
+    revalidatePath(`/admin/content/${draft.content_type}/${draft.slug}/edit`);
     revalidatePath(`/${draft.content_type === "reflection" ? "reflections" : draft.content_type === "journal" ? "journals" : "books"}/${draft.slug}`);
     return { status: "success", message: "Image uploaded and saved." };
   } catch (error) {
@@ -133,7 +134,7 @@ export async function createDraftAction(_previousState: ContentDraftActionState,
   try {
     const draft = await createDraft({ contentType: input.contentType, title: input.title, slug: input.slug, introduction: input.introduction || undefined, category: input.category || undefined, tags: input.tags, imageReference: input.imageReference || undefined, body: bodyFromInput(input) });
     if (!draft) return { status: "error", message: "The draft could not be created." };
-    revalidatePath("/admin/content"); revalidatePath(`/admin/content/${draft.content_type}`); revalidatePath(`/admin/content/${draft.content_type}/${draft.slug}`);
+    revalidatePath("/admin/content"); revalidatePath(`/admin/content/${draft.content_type}`); revalidatePath(`/admin/content/${draft.content_type}/${draft.slug}`); revalidatePath(`/admin/content/${draft.content_type}/${draft.slug}/edit`);
     if (saveMode === "continue") redirect(`/admin/content/${draft.content_type}/${draft.slug}?view=edit`);
     redirect(`/admin/content/${draft.content_type}`);
   } catch (error) {
@@ -149,7 +150,7 @@ export async function updateDraftAction(_previousState: ContentDraftActionState,
   try {
     const draft = await updateDraft(input.draftId, { contentType: input.contentType, title: input.title, slug: input.slug, introduction: input.introduction || undefined, category: input.category || undefined, tags: input.tags, imageReference: input.imageReference || undefined, body: bodyFromInput(input) });
     if (!draft) return { status: "error", message: "Draft not found." };
-    revalidatePath("/admin/content"); revalidatePath(`/admin/content/${draft.content_type}`); revalidatePath(`/admin/content/${draft.content_type}/${draft.slug}`);
+    revalidatePath("/admin/content"); revalidatePath(`/admin/content/${draft.content_type}`); revalidatePath(`/admin/content/${draft.content_type}/${draft.slug}`); revalidatePath(`/admin/content/${draft.content_type}/${draft.slug}/edit`);
     return { status: "success", message: "Draft updated." };
   } catch (error) {
     console.error("[content-drafts] Update draft failed.", error instanceof Error ? error.message : "Unknown error");
@@ -165,7 +166,7 @@ export async function publishDraftAction(_previousState: ContentDraftActionState
   const draftId = String(formData.get("draftId") ?? "").trim(); if (!draftId) return { status: "error", message: "A draft id is required to publish." };
   try {
     const draft = await publishDraft(draftId); if (!draft) return { status: "error", message: "Draft not found." };
-    revalidatePath("/admin/content"); revalidatePath(`/admin/content/${draft.content_type}/${draft.slug}`); revalidatePublicRoutes(draft.content_type, draft.slug);
+    revalidatePath("/admin/content"); revalidatePath(`/admin/content/${draft.content_type}/${draft.slug}`); revalidatePath(`/admin/content/${draft.content_type}/${draft.slug}/edit`); revalidatePublicRoutes(draft.content_type, draft.slug);
     return { status: "success", message: "Published. It is now live on the public website." };
   } catch (error) {
     console.error("[content-drafts] Publish draft failed.", error instanceof Error ? error.message : "Unknown error");
