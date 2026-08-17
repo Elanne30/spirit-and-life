@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 import { publishDraftAction, type ContentDraftActionState } from "@/app/admin/(protected)/actions/content";
+import { unpublishContentAction } from "@/app/admin/(protected)/actions/content-publish";
 
 const initialState: ContentDraftActionState = { status: "idle", message: "" };
 
@@ -15,12 +16,30 @@ export function PublishForm({
   hasUnpublishedChanges: boolean;
 }) {
   const [state, formAction, isPending] = useActionState(publishDraftAction, initialState);
-
   const hasPendingPublish = status === "published" && hasUnpublishedChanges;
   const label = hasPendingPublish ? "Publish Changes" : "Publish";
   const confirmMessage = hasPendingPublish
     ? "Publish these changes? The updated version will become visible on the public website."
     : "Publish this content? It will become visible on the public website.";
+
+  if (status === "published" && !hasUnpublishedChanges) {
+    return (
+      <form
+        className="admin-publish-form"
+        action={unpublishContentAction}
+        onSubmit={(event) => {
+          if (!window.confirm("Unpublish this content? It will disappear from the public website but remain available in the Admin.")) {
+            event.preventDefault();
+          }
+        }}
+      >
+        <input type="hidden" name="draftId" value={draftId} />
+        <button className="button button-secondary" type="submit" disabled={isPending}>
+          Unpublish
+        </button>
+      </form>
+    );
+  }
 
   return (
     <form
