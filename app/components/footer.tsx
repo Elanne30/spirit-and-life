@@ -19,7 +19,7 @@ export function Footer() {
       <div className="page-container footer-inner">
         <div>
           <Link
-            className="brand-link footer-brand-link"
+            className="brand-logo-link"
             href="/"
             style={{
               width: "auto",
