@@ -32,6 +32,11 @@ export const metadata: Metadata = {
     google: "6ctWZ9OfGvQWfPiPNwSedZE_UQqyq7jToJexeNyjz1U",
   },
   alternates: { canonical: "/" },
+  icons: {
+    icon: "/icon.svg",
+    shortcut: "/icon.svg",
+    apple: "/icon.svg",
+  },
   openGraph: {
     title: siteConfig.name,
     description: siteConfig.description,
