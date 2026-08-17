@@ -1,7 +1,7 @@
 "use client";
 /* eslint-disable @next/next/no-img-element */
 
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useState } from "react";
 import type { ContentDraft } from "@/app/lib/content-drafts";
 import { updateDraftActionSafe } from "@/app/admin/(protected)/actions/content-save-guard";
 import { uploadContentImageAction, type ContentDraftActionState } from "@/app/admin/(protected)/actions/content";
@@ -11,6 +11,28 @@ const initialState: ContentDraftActionState = { status: "idle", message: "" };
 const reflectionCategories = ["Biblical Studies", "Theology", "Christian Living", "Faith & Life", "Philosophy", "Apologetics", "Church History", "SCRIPTURE"];
 const contentCategoryOptions = ["Biblical Studies", "Theology", "Christian Living", "Faith & Life", "Philosophy", "Apologetics", "Church History"];
 function getBodyValue<T>(body: Record<string, unknown>, key: string): T | undefined { return body[key] as T | undefined; }
+function slugifyTitle(value: string) {
+  return value
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .replace(/-+/g, "-")
+    .slice(0, 120)
+    .replace(/-+$/g, "");
+}
+function normalizeSlugInput(value: string) {
+  return value
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9-]+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 120)
+    .replace(/-+$/g, "");
+}
 function getInitialSections(draft: ContentDraft): ReflectionSection[] {
   const value = getBodyValue<unknown[]>(draft.body, "sections");
   if (!Array.isArray(value) || !value.length) return [{ heading: "", paragraphs: [""] }];
@@ -20,6 +42,9 @@ export function ContentEditForm({ draft }: { draft: ContentDraft }) {
   const [state, formAction, isPending] = useActionState(updateDraftActionSafe, initialState);
   const [uploadState, uploadAction, isUploading] = useActionState(uploadContentImageAction, initialState);
   const [preview, setPreview] = useState(draft.image_reference ?? "");
+  const [title, setTitle] = useState(draft.title);
+  const [slug, setSlug] = useState(draft.slug);
+  const [slugEdited, setSlugEdited] = useState(false);
   const date = getBodyValue<string>(draft.body, "date") ?? "";
   const readingTime = getBodyValue<string>(draft.body, "readingTime") ?? "";
   const scripture = getBodyValue<string>(draft.body, "scripture") ?? "";
@@ -32,12 +57,20 @@ export function ContentEditForm({ draft }: { draft: ContentDraft }) {
   const tableOfContents = getBodyValue<string[]>(draft.body, "tableOfContents") ?? [];
   const featured = getBodyValue<boolean>(draft.body, "featured") ?? false;
   const categoryOptions = draft.content_type === "reflection" ? reflectionCategories : contentCategoryOptions;
+
+  useEffect(() => {
+    if (!slugEdited && title !== draft.title) {
+      setSlug(slugifyTitle(title));
+    }
+  }, [title, slugEdited, draft.title]);
+
   return (<>
     <div className="admin-image-control"><p className="admin-form-label">Current image</p>{preview ? <img className="admin-image-preview" src={preview} alt="Current content image" /> : <p className="quiet-note">No image selected.</p>}<form action={uploadAction} className="admin-image-upload-form"><input type="hidden" name="draftId" value={draft.id} /><label className="button button-secondary" htmlFor="edit-image-upload">{preview ? "Change image" : "Upload image"}</label><input id="edit-image-upload" name="image" type="file" accept="image/jpeg,image/png,image/webp,image/gif" onChange={(event) => { const file = event.target.files?.[0]; if (file) setPreview(URL.createObjectURL(file)); }} /><button className="button button-primary" type="submit" disabled={isUploading}>{isUploading ? "Uploading..." : "Upload and save image"}</button>{uploadState.message ? <p className={uploadState.status === "error" ? "form-error" : "form-note"} role="status">{uploadState.message}</p> : null}</form></div>
     <form className="admin-form" action={formAction}>
       <input type="hidden" name="draftId" value={draft.id} /><input type="hidden" name="contentType" value={draft.content_type} />
-      <label htmlFor="edit-title">Title</label><input id="edit-title" name="title" type="text" defaultValue={draft.title} required />
-      <label htmlFor="edit-slug">Slug</label><input id="edit-slug" name="slug" type="text" defaultValue={draft.slug} required />
+      <label htmlFor="edit-title">Title</label><input id="edit-title" name="title" type="text" value={title} onChange={(event) => { setTitle(event.target.value); if (!slugEdited) setSlug(slugifyTitle(event.target.value)); }} required />
+      <label htmlFor="edit-slug">Slug</label><input id="edit-slug" name="slug" type="text" value={slug} onChange={(event) => { setSlugEdited(true); setSlug(normalizeSlugInput(event.target.value)); }} required pattern="[a-z0-9]+(?:-[a-z0-9]+)*" maxLength={120} />
+      <p className="form-note">The slug follows the title automatically until you edit the slug yourself.</p>
       <label htmlFor="edit-category">Category</label><select id="edit-category" name="category" defaultValue={draft.category ?? categoryOptions[0]}>{categoryOptions.map((category) => <option key={category} value={category}>{category}</option>)}</select>
       <label htmlFor="edit-image">Image path</label><input id="edit-image" name="imageReference" type="text" defaultValue={draft.image_reference ?? ""} placeholder="/images/reflections/example.jpg" />
       <label htmlFor="edit-tags">Tags</label><input id="edit-tags" name="tags" type="text" defaultValue={draft.tags.join(", ")} placeholder="Scripture, Faith, Interpretation" />
