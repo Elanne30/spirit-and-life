@@ -2,11 +2,8 @@
 
 import { EyeOff, MoreVertical, Trash2, Upload } from "lucide-react";
 import { useState } from "react";
-import {
-  deleteContentAction,
-  publishDraftAction,
-  unpublishContentAction,
-} from "@/app/admin/(protected)/actions/content";
+import { deleteContentAction, publishDraftAction } from "@/app/admin/(protected)/actions/content";
+import { unpublishContentAction } from "@/app/admin/(protected)/actions/content-publish";
 import type { DraftContentType } from "@/app/lib/content-drafts";
 import styles from "./content-more-actions.module.css";
 
