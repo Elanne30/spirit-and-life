@@ -7,6 +7,7 @@ import { siteConfig } from "@/app/content/site-config";
 import "./globals.css";
 import "./site-polish.css";
 import "./accessibility-polish.css";
+import "./public-layout-fix.css";
 
 const displayFont = Cormorant_Garamond({
   variable: "--font-display",
@@ -66,8 +67,9 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
       </head>
       <body>
         <a className="skip-link" href="#main-content">Skip to main content</a>
-        <SiteChrome />
-        <div id="main-content" tabIndex={-1}>{children}</div>
+        <div id="main-content" tabIndex={-1}>
+          <SiteChrome>{children}</SiteChrome>
+        </div>
       </body>
     </html>
   );
