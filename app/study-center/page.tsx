@@ -36,7 +36,7 @@ export default function StudyCenterPage() {
             <p className="eyebrow">A connected learning space</p>
             <h1 id="study-entry-title">Study Center</h1>
             <p>Explore Bible study plans, reading practices, and learning resources designed for careful attention to Scripture.</p>
-            <p>The native Spirit &amp; Life Study Center keeps this journey inside the site, with each day’s study, reflection, checklist, and journal entry preserved locally.</p>
+            <p>The native Spirit &amp; Life Study Center keeps the full study experience inside the site, with each day&rsquo;s study, reflection, checklist, and journal entry preserved locally.</p>
             <p className="study-entry-note">Continue with the current study from the card below.</p>
           </div>
           <div className="study-entry-links" aria-label="Study Center areas">
@@ -62,7 +62,7 @@ export default function StudyCenterPage() {
             <p>{studyPlan.subtitle}</p>
           </div>
           <div className="study-hero-aside">
-            <span>Today&apos;s place in the journey</span>
+            <span>Today&apos;s place in the plan</span>
             <strong>Week {currentWeek}</strong>
             <p>{currentStudy.movement}</p>
           </div>
@@ -113,7 +113,7 @@ export default function StudyCenterPage() {
 
         <section className="study-movements" aria-labelledby="movements-title">
           <div className="study-section-heading">
-            <div><p className="eyebrow">The larger journey</p><h2 id="movements-title">Five movements through the study.</h2></div>
+            <div><p className="eyebrow">The larger study plan</p><h2 id="movements-title">Five movements through the study.</h2></div>
             <p>Each stage gives the daily work a wider direction.</p>
           </div>
           <div className="movement-grid">
