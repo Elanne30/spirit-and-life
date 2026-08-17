@@ -2,12 +2,12 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { JournalArticle } from "@/app/components/journal-article";
 import { articleMetadata, articleStructuredData } from "@/app/content/seo";
-import { getPublishedJournal, listPublishedJournals } from "@/app/content/repository";
+import { getPublishedJournal } from "@/app/content/repository";
 
-export async function generateStaticParams() {
-  const journals = await listPublishedJournals();
-  return journals.map((journal) => ({ slug: journal.contentSlug }));
-}
+// Journals are database-backed and can be published from Admin at any time.
+// Keep the detail route dynamic so Previous/Next always sees the current
+// published collection instead of a build-time snapshot.
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
