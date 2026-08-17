@@ -1,7 +1,8 @@
 "use client";
 
 import { useActionState } from "react";
-import { publishDraftAction, type ContentDraftActionState } from "@/app/admin/(protected)/actions/content";
+import { publishManagedDraftAction } from "@/app/admin/(protected)/actions/content-managed-publish";
+import type { ContentDraftActionState } from "@/app/admin/(protected)/actions/content";
 import { unpublishContentAction } from "@/app/admin/(protected)/actions/content-publish";
 
 const initialState: ContentDraftActionState = { status: "idle", message: "" };
@@ -15,7 +16,7 @@ export function PublishForm({
   status: "draft" | "published";
   hasUnpublishedChanges: boolean;
 }) {
-  const [state, formAction, isPending] = useActionState(publishDraftAction, initialState);
+  const [state, formAction, isPending] = useActionState(publishManagedDraftAction, initialState);
   const hasPendingPublish = status === "published" && hasUnpublishedChanges;
   const label = hasPendingPublish ? "Publish Changes" : "Publish";
   const confirmMessage = hasPendingPublish
@@ -34,7 +35,7 @@ export function PublishForm({
         }}
       >
         <input type="hidden" name="draftId" value={draftId} />
-        <button className="button button-secondary" type="submit" disabled={isPending}>
+        <button className="button button-secondary" type="submit">
           Unpublish
         </button>
       </form>
