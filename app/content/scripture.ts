@@ -19,7 +19,6 @@ export const scriptureReferences: ScriptureReference[] = [
     summary: "A reference connected to careful reading and faithful understanding of Scripture.",
     relatedReflectionSlugs: ["reading-scripture-in-context-why-it-matters"],
     relatedJournalSlugs: ["on-slowing-down-to-read"],
-    relatedBookSlugs: ["thy-word-is-truth-a-journey-through-john-17"],
   },
   {
     slug: "romans-8-28",
