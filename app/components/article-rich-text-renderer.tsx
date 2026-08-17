@@ -2,8 +2,6 @@ import type { CSSProperties, ElementType, ReactNode } from "react";
 import type { RichTextNode } from "@/app/content/article-rich-text";
 import { normalizeRichTextDocument } from "@/app/content/article-rich-text";
 
-function classNames(...names: Array<string | undefined>) { return names.filter(Boolean).join(" "); }
-
 function blockClass(attrs: Record<string, unknown> | undefined) {
   const align = typeof attrs?.textAlign === "string" ? attrs.textAlign : "left";
   return `rich-text-align-${align}`;
@@ -32,6 +30,7 @@ function renderText(node: RichTextNode, key: string) {
       const style: CSSProperties = {};
       if (typeof mark.attrs?.fontFamily === "string") style.fontFamily = mark.attrs.fontFamily === "Georgia" ? "Georgia, serif" : mark.attrs.fontFamily;
       if (typeof mark.attrs?.fontSize === "string") style.fontSize = mark.attrs.fontSize;
+      if (typeof mark.attrs?.color === "string") style.color = mark.attrs.color;
       content = <span style={style} key={`${key}-style`}>{content}</span>;
     }
     if (mark.type === "link" && typeof mark.attrs?.href === "string") content = <a href={mark.attrs.href} rel={mark.attrs.href.startsWith("http") ? "noreferrer" : undefined} key={`${key}-link`}>{content}</a>;
