@@ -2,7 +2,7 @@ export const RICH_TEXT_FORMAT = "spirit-and-life-rich-text" as const;
 export const RICH_TEXT_VERSION = 1 as const;
 
 export const fontFamilies = ["serif", "sans-serif", "Georgia"] as const;
-// Keep legacy rem values for existing documents and allow numeric document-editor sizes from 2pt through 40pt.
+// Keep legacy rem values for existing documents and allow numeric document-editor sizes from 2px through 40px.
 export const fontSizes = [
   "0.875rem",
   "1rem",
@@ -32,6 +32,13 @@ function validLink(value: unknown) {
   if (href.startsWith("/") && !href.startsWith("//")) return href;
   try { const url = new URL(href); return allowedSchemes.has(url.protocol) ? href : null; } catch { return null; }
 }
+function validColor(value: unknown) {
+  if (typeof value !== "string") return null;
+  const color = value.trim();
+  if (/^#[0-9a-fA-F]{3,8}$/.test(color)) return color;
+  if (/^(rgb|hsl)a?\([^)]*\)$/.test(color)) return color;
+  return null;
+}
 function normalizeMarks(value: unknown): RichTextMark[] | undefined {
   if (!Array.isArray(value)) return undefined;
   const marks: RichTextMark[] = [];
@@ -44,7 +51,8 @@ function normalizeMarks(value: unknown): RichTextMark[] | undefined {
       const attrs = isRecord(raw.attrs) ? raw.attrs : {};
       const fontFamily = fontFamilies.includes(attrs.fontFamily as FontFamily) ? attrs.fontFamily as FontFamily : undefined;
       const fontSize = fontSizes.includes(attrs.fontSize as FontSize) ? attrs.fontSize as FontSize : undefined;
-      if (fontFamily || fontSize) marks.push({ type: "textStyle", attrs: { ...(fontFamily ? { fontFamily } : {}), ...(fontSize ? { fontSize } : {}) } });
+      const color = validColor(attrs.color);
+      if (fontFamily || fontSize || color) marks.push({ type: "textStyle", attrs: { ...(fontFamily ? { fontFamily } : {}), ...(fontSize ? { fontSize } : {}), ...(color ? { color } : {}) } });
       seen.add("textStyle");
     }
   }
@@ -85,7 +93,7 @@ function isSupportedMarks(value: unknown) {
     if (!isRecord(mark) || typeof mark.type !== "string") return false;
     if (["bold", "italic", "underline"].includes(mark.type)) return true;
     if (mark.type === "link") return validLink(isRecord(mark.attrs) ? mark.attrs.href : undefined) !== null;
-    if (mark.type === "textStyle") { const attrs = isRecord(mark.attrs) ? mark.attrs : {}; return (attrs.fontFamily === undefined || fontFamilies.includes(attrs.fontFamily as FontFamily)) && (attrs.fontSize === undefined || fontSizes.includes(attrs.fontSize as FontSize)); }
+    if (mark.type === "textStyle") { const attrs = isRecord(mark.attrs) ? mark.attrs : {}; return (attrs.fontFamily === undefined || fontFamilies.includes(attrs.fontFamily as FontFamily)) && (attrs.fontSize === undefined || fontSizes.includes(attrs.fontSize as FontSize)) && (attrs.color === undefined || validColor(attrs.color) !== null); }
     return false;
   });
 }
