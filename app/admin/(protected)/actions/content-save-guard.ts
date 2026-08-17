@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { sql } from "@vercel/postgres";
+import { put } from "@vercel/blob";
 import { updateDraftAction, type ContentDraftActionState } from "@/app/admin/(protected)/actions/content";
 import { createDraft, getDraftByTypeAndSlug, isValidDraftSlug, normalizeDraftSlug, type DraftContentType } from "@/app/lib/content-drafts";
 import { normalizeRichTextDocument, richTextToLegacySections, type RichTextDocument } from "@/app/content/article-rich-text";
@@ -10,6 +11,8 @@ import { findUnsupportedText, getPostgresErrorDetails } from "@/app/lib/content-
 import { requireAdminActionAccess } from "@/app/lib/admin-session";
 
 const contentTypes: DraftContentType[] = ["reflection", "journal", "book"];
+const allowedBookCoverTypes = new Set(["image/jpeg", "image/png", "image/webp", "image/gif"]);
+const maxBookCoverSize = 8 * 1024 * 1024;
 
 type ParsedGuardInput = {
   contentType: DraftContentType; title: string; slug: string; draftId: string; date: string; readingTime: string;
@@ -45,13 +48,10 @@ function parseFormData(formData: FormData): ParsedGuardInput | { error: string }
   try {
     const parsed = JSON.parse(rawSections);
     if (!Array.isArray(parsed)) return { error: "The content sections must be a list." };
-    sections = parsed
-      .filter((section): section is { heading?: unknown; paragraphs?: unknown } => typeof section === "object" && section !== null)
-      .map((section) => ({
-        heading: typeof section.heading === "string" ? section.heading.trim() : "",
-        paragraphs: Array.isArray(section.paragraphs) ? section.paragraphs.filter((paragraph): paragraph is string => typeof paragraph === "string").map((paragraph) => paragraph.trim()).filter(Boolean) : [],
-      }))
-      .filter((section) => section.heading || section.paragraphs.length);
+    sections = parsed.filter((section): section is { heading?: unknown; paragraphs?: unknown } => typeof section === "object" && section !== null).map((section) => ({
+      heading: typeof section.heading === "string" ? section.heading.trim() : "",
+      paragraphs: Array.isArray(section.paragraphs) ? section.paragraphs.filter((paragraph): paragraph is string => typeof paragraph === "string").map((paragraph) => paragraph.trim()).filter(Boolean) : [],
+    })).filter((section) => section.heading || section.paragraphs.length);
   } catch {
     return { error: "The content sections could not be read because their formatting data is invalid." };
   }
@@ -94,29 +94,14 @@ async function validateDraftBeforeSave(formData: FormData, mode: "create" | "upd
 
   if (mode === "create") {
     const existing = await getDraftByTypeAndSlug(input.contentType, input.slug);
-    if (existing) {
-      return { error: `This slug is already being used by another ${input.contentType}. Choose a different slug.` };
-    }
+    if (existing) return { error: `This slug is already being used by another ${input.contentType}. Choose a different slug.` };
   }
 
   const textPayload = {
-    title: input.title,
-    slug: input.slug,
-    date: input.date,
-    readingTime: input.readingTime,
-    scripture: input.scripture,
-    introduction: input.introduction,
-    category: input.category,
-    tags: input.tags,
-    label: input.label,
-    subtitle: input.subtitle,
-    expectedPublication: input.expectedPublication,
-    author: input.author,
-    publisher: input.publisher,
-    length: input.length,
-    tableOfContents: input.tableOfContents,
-    imageReference: input.imageReference,
-    body: bodyFromParsed(input),
+    title: input.title, slug: input.slug, date: input.date, readingTime: input.readingTime, scripture: input.scripture,
+    introduction: input.introduction, category: input.category, tags: input.tags, label: input.label, subtitle: input.subtitle,
+    expectedPublication: input.expectedPublication, author: input.author, publisher: input.publisher, length: input.length,
+    tableOfContents: input.tableOfContents, imageReference: input.imageReference, body: bodyFromParsed(input),
   };
   const unsupported = findUnsupportedText(textPayload, "content");
   if (unsupported) {
@@ -126,37 +111,40 @@ async function validateDraftBeforeSave(formData: FormData, mode: "create" | "upd
 
   if (mode === "update") {
     const existing = await getDraftByTypeAndSlug(input.contentType, input.slug);
-    if (existing && existing.id !== input.draftId) {
-      return { error: `This slug is already being used by another ${input.contentType}. Choose a different slug for this existing ${input.contentType}.` };
-    }
+    if (existing && existing.id !== input.draftId) return { error: `This slug is already being used by another ${input.contentType}. Choose a different slug for this existing ${input.contentType}.` };
+  }
+
+  const cover = formData.get("bookCover");
+  if (input.contentType === "book" && cover instanceof File && cover.size > 0) {
+    if (!allowedBookCoverTypes.has(cover.type)) return { error: "Use a JPG, PNG, WebP, or GIF image for the book cover." };
+    if (cover.size > maxBookCoverSize) return { error: "Book covers must be 8 MB or smaller." };
   }
 
   try { await sql`SELECT ${JSON.stringify(bodyFromParsed(input))}::jsonb`; }
-  catch (error) {
-    console.error("[content-drafts] Body JSONB preflight failed.", getPostgresErrorDetails(error));
-    return { error: "The article body could not be saved because its structured data is not valid for the database." };
-  }
+  catch (error) { console.error("[content-drafts] Body JSONB preflight failed.", getPostgresErrorDetails(error)); return { error: "The article body could not be saved because its structured data is not valid for the database." }; }
   try { await sql`SELECT ${JSON.stringify(input.tags)}::jsonb`; }
-  catch (error) {
-    console.error("[content-drafts] Tags JSONB preflight failed.", getPostgresErrorDetails(error));
-    return { error: "The tags could not be saved because their structured data is not valid for the database." };
-  }
+  catch (error) { console.error("[content-drafts] Tags JSONB preflight failed.", getPostgresErrorDetails(error)); return { error: "The tags could not be saved because their structured data is not valid for the database." }; }
   return { ok: true as const };
 }
 
 export async function createDraftActionSafe(previousState: ContentDraftActionState, formData: FormData): Promise<ContentDraftActionState> {
   if (!(await requireAdminActionAccess())) return { status: "error", message: "Unauthorized." };
-
   const input = parseFormData(formData);
   if ("error" in input) return { status: "error", message: input.error };
-
   const validation = await validateDraftBeforeSave(formData, "create");
   if ("error" in validation) return { status: "error", message: validation.error };
-
   const saveMode = String(formData.get("saveMode") ?? "draft").trim();
   let draft: Awaited<ReturnType<typeof createDraft>>;
 
   try {
+    const cover = formData.get("bookCover");
+    let imageReference = input.imageReference || undefined;
+    if (input.contentType === "book" && cover instanceof File && cover.size > 0) {
+      const extension = cover.name.split(".").pop()?.toLowerCase() || "jpg";
+      const blob = await put(`content/book/${input.slug}-${Date.now()}.${extension}`, cover, { access: "public", addRandomSuffix: true, contentType: cover.type });
+      imageReference = blob.url;
+    }
+
     draft = await createDraft({
       contentType: input.contentType,
       title: input.title,
@@ -164,24 +152,20 @@ export async function createDraftActionSafe(previousState: ContentDraftActionSta
       introduction: input.introduction || undefined,
       category: input.category || undefined,
       tags: input.tags,
-      imageReference: input.imageReference || undefined,
+      imageReference,
       body: bodyFromParsed(input),
     });
   } catch (error) {
     const details = getPostgresErrorDetails(error);
     console.error("[content-drafts] Create draft failed.", details);
-    if (details.code === "23505") {
-      return { status: "error", message: "This slug is already being used. Choose a different slug." };
-    }
+    if (details.code === "23505") return { status: "error", message: "This slug is already being used. Choose a different slug." };
     return { status: "error", message: "The draft could not be saved. Your writing was not changed." };
   }
 
   if (!draft) return { status: "error", message: "The draft could not be created." };
-
   revalidatePath("/admin/content");
   revalidatePath(`/admin/content/${draft.content_type}`);
   revalidatePath(`/admin/content/${draft.content_type}/${draft.slug}`);
-
   if (saveMode === "continue") redirect(`/admin/content/${draft.content_type}/${draft.slug}?view=edit`);
   redirect(`/admin/content/${draft.content_type}`);
 }
