@@ -1,4 +1,4 @@
-.editorShell { width: 100%; min-width: 0; overflow: hidden; border: 1px solid #d7dbe0; border-radius: 3px; background: #eef0f2; color: #202124; box-shadow: 0 1px 2px rgba(0,0,0,.06); }
+.editorShell { width: 100%; min-width: 0; overflow: visible; border: 1px solid #d7dbe0; border-radius: 3px; background: #eef0f2; color: #202124; box-shadow: 0 1px 2px rgba(0,0,0,.06); }
 .toolbar { position: relative; z-index: 100; display: flex; flex-wrap: wrap; align-items: center; gap: 4px; min-height: 50px; padding: 6px 8px; overflow-x: hidden; overflow-y: visible; background: #fff; border-bottom: 1px solid #d7dbe0; }
 .toolbarGroup { display: flex; align-items: center; flex: 0 0 auto; gap: 1px; padding-right: 6px; border-right: 1px solid #e1e4e8; }
 .toolbarGroup:last-child { padding-right: 0; border-right: 0; }
@@ -42,17 +42,15 @@
 .rulerHandleBody::after { content: ""; display: block; margin: auto; width: 8px; height: 8px; border: 1px solid #6b7280; background: #fff; transform: rotate(45deg); }
 .rulerHandleRight { top: 10px; }
 .rulerHandleRight::after { content: ""; display: block; margin: auto; width: 0; height: 0; border-left: 6px solid transparent; border-right: 6px solid transparent; border-bottom: 8px solid #6b7280; }
-.workspace { position: relative; display: flex; min-width: 0; min-height: 0; height: clamp(520px,70vh,820px); background: #eef0f2; }
-.verticalRulerViewport { position: relative; z-index: 30; flex: 0 0 36px; width: 36px; min-height: 0; overflow: hidden; background: #f7f8f9; border-right: 1px solid #d5d9de; }
+.workspace { position: relative; display: flex; min-width: 0; min-height: 0; height: auto; background: #eef0f2; overflow: visible; align-items: stretch; }
+.verticalRulerViewport { position: relative; z-index: 30; flex: 0 0 36px; width: 36px; min-height: 100%; overflow: hidden; background: #f7f8f9; border-right: 1px solid #d5d9de; }
 .verticalRuler { position: absolute; top: 0; left: 0; width: 36px; background: repeating-linear-gradient(to bottom,transparent 0,transparent 23px,#cfd4da 23px,#cfd4da 24px),#f7f8f9; color: #737a83; will-change: transform; }
 .verticalRulerMark { position: absolute; left: 0; width: 100%; height: 20px; border-top: 1px solid #cfd4da; padding-right: 5px; font-size: 9px; line-height: 16px; text-align: right; }
-.pageViewport { flex: 1 1 auto; min-width: 0; min-height: 0; overflow-x: hidden; overflow-y: auto; padding: 18px 16px 32px; scrollbar-width: thin; scrollbar-color: #aeb5bd transparent; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
-.pageViewport::-webkit-scrollbar { width: 10px; height: 0; }
-.pageViewport::-webkit-scrollbar-thumb { border-radius: 8px; background: #b7bdc5; }
-.pageViewport::-webkit-scrollbar-track { background: transparent; }
+.pageViewport { flex: 1 1 auto; min-width: 0; min-height: 0; overflow: visible; padding: 18px 16px 32px; scrollbar-width: auto; overscroll-behavior: auto; -webkit-overflow-scrolling: auto; touch-action: pan-y; }
+.pageViewport::-webkit-scrollbar { width: auto; height: 0; }
 .pageStage { position: relative; box-sizing: border-box; width: 100%; padding: 0; margin: 0 auto; }
 .page { width: 100% !important; max-width: 840px; min-height: 0 !important; box-sizing: border-box; padding: clamp(28px, 6vw, 96px); margin: 0 auto; background: #fff; color: #202124; box-shadow: 0 2px 9px rgba(0,0,0,.14); transform-origin: top left; }
-.prose { width: 100%; min-height: 0 !important; margin: 0; padding: 0; outline: none; background: transparent; color: #202124; caret-color: #202124; font-family: Calibri,Arial,sans-serif; font-size: 11pt; line-height: 1.15; overflow-wrap: anywhere; white-space: pre-wrap; }
+.prose { width: 100%; min-height: 0 !important; margin: 0; padding: 0; outline: none; background: transparent; color: #202124; caret-color: #202124; font-family: Calibri,Arial,sans-serif; font-size: 11pt; line-height: 1.15; overflow-wrap: anywhere; white-space: pre-wrap; touch-action: pan-y; }
 .prose > :first-child { margin-top: 0; }
 .prose p { margin: 0 0 10pt; }
 .prose h1,.prose h2,.prose h3,.prose h4,.prose h5,.prose h6 { margin: 16pt 0 8pt; color: #202124; font-family: Calibri,Arial,sans-serif; line-height: 1.15; }
@@ -78,7 +76,7 @@
 .zoomControl input { width: 105px; accent-color: #6b7280; }
 .srOnly { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
 
-/* Compact, touch-friendly editor: no horizontal scrolling and only vertical document scrolling. */
+/* Compact, touch-friendly editor. Keep the toolbar compact while the document itself participates in normal page scrolling. */
 .toolbarGroup:has([aria-label="Undo"]),
 .toolbarGroup:has([aria-label="Redo"]),
 .toolbarGroup:has([aria-label="Zoom out"]),
@@ -89,19 +87,17 @@
 
 @media (max-width: 1100px) {
   .toolbar { gap: 3px; padding-inline: 6px; }
-  .workspace { height: clamp(500px, 66vh, 760px); }
+  .workspace { height: auto; }
   .pageViewport { padding-inline: 12px; }
 }
-
 @media (max-width: 900px) {
-  .workspace { height: clamp(480px, 64vh, 720px); }
+  .workspace { height: auto; }
   .pageViewport { padding: 14px 10px 28px; }
   .pageStage { margin-left: 0; margin-right: 0; }
   .rulerHeaderTrack { margin-left: 24px !important; }
   .select { min-width: 100px; max-width: 132px; }
   .dropdownTrigger { min-width: 88px; }
 }
-
 @media (max-width: 640px) {
   .editorShell { border-radius: 0; }
   .toolbar { min-height: 48px; padding: 5px; gap: 3px; }
@@ -110,15 +106,14 @@
   .select { height: 32px; min-width: 96px; max-width: 116px; font-size: 12px; }
   .sizeSelect { width: 56px; min-width: 56px; }
   .dropdownTrigger { min-width: 82px; height: 32px; font-size: 12px; }
-  .workspace { height: clamp(460px, 62vh, 680px); }
-  .verticalRulerViewport { flex-basis: 30px; width: 30px; }
+  .workspace { height: auto; }
+  .verticalRulerViewport { flex-basis: 30px; width: 30px; min-height: 100%; }
   .verticalRuler { width: 30px; }
   .pageViewport { padding: 8px 5px 22px; }
   .page { padding: 28px 22px; }
   .statusBar { flex-direction: row; align-items: center; gap: 8px; padding-inline: 8px; overflow: hidden; white-space: nowrap; }
   .statusLeft { gap: 8px; min-width: 0; overflow: hidden; }
 }
-
 @media (max-width: 420px) {
   .toolbarGroup { padding-right: 3px; }
   .dropdownMenu { max-height: calc(100vh - 12px); }
@@ -126,10 +121,10 @@
   .page { padding-inline: 18px; }
 }
 
-.editorShell { position: relative; z-index: 0; isolation: isolate; contain: paint; }
+.editorShell { position: relative; z-index: 0; isolation: isolate; contain: none; }
 .rulerHeader, .workspace, .pageViewport, .verticalRulerViewport { z-index: auto; }
 .rulerHeader { position: relative; }
-.workspace { overflow: hidden; }
+.workspace { overflow: visible; }
 .verticalRulerViewport { position: relative; }
 
 :global(html[data-theme="light"]) .editorShell { border-color: var(--line); background: var(--surface-muted); color: var(--foreground); box-shadow: 0 1px 2px var(--shadow); }
@@ -144,7 +139,6 @@
 :global(html[data-theme="light"]) .dropdownTrigger:hover,
 :global(html[data-theme="light"]) .dropdownItem:hover,
 :global(html[data-theme="light"]) .dropdownItemActive { background: var(--surface-muted); }
-
 :global(html[data-theme="dark"]) .editorShell { border-color: var(--line); background: var(--background); color: var(--foreground); box-shadow: 0 1px 2px var(--shadow); }
 :global(html[data-theme="dark"]) .toolbar,
 :global(html[data-theme="dark"]) .select,
@@ -174,5 +168,3 @@
 :global(html[data-theme="dark"]) .rulerHandleFirst::after { border-top-color: var(--accent); }
 :global(html[data-theme="dark"]) .rulerHandleRight::after { border-bottom-color: var(--accent); }
 :global(html[data-theme="dark"]) .workspace { background: var(--background); }
-:global(html[data-theme="dark"]) .pageViewport { scrollbar-color: var(--muted) transparent; }
-:global(html[data-theme="dark"]) .pageViewport::-webkit-scrollbar-thumb { background: var(--muted); }
