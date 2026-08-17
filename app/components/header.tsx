@@ -28,7 +28,7 @@ export function Header() {
       <Link className="skip-link" href="#main-content">Skip to content</Link>
       <div className="page-container header-inner">
         <Link
-          className="brand-link"
+          className="brand-logo-link"
           href={isAdmin ? "/admin" : "/"}
           onClick={() => setMenuOpen(false)}
           aria-label={isAdmin ? "Spirit & Life Admin dashboard" : "Spirit & Life home"}
