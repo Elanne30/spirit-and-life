@@ -6,12 +6,13 @@ import { siteConfig } from "@/app/content/site-config";
 import { requireAdminPageAccess } from "@/app/lib/admin-session";
 import { ThemeToggle } from "@/app/components/theme-toggle";
 import styles from "@/app/admin/(protected)/admin.module.css";
+import shellStyles from "@/app/admin/(protected)/admin-shell-overrides.module.css";
 
 export default async function AdminProtectedLayout({ children }: { children: React.ReactNode }) {
   const session = await requireAdminPageAccess();
 
   return (
-    <main className={styles.adminRoot}>
+    <main className={`${styles.adminRoot} ${shellStyles.adminOverrides}`}>
       <div className="admin-shell">
         <header className="admin-topbar">
           <Link className="admin-brand" href="/admin" aria-label="Spirit & Life Admin dashboard">
