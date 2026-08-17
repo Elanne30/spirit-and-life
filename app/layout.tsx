@@ -7,6 +7,7 @@ import { socialPreviewImage } from "@/app/content/seo";
 import { siteConfig } from "@/app/content/site-config";
 import "./globals.css";
 import "./site-polish.css";
+import "./accessibility-polish.css";
 
 const displayFont = Cormorant_Garamond({
   variable: "--font-display",
@@ -61,7 +62,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
       </head>
       <body>
         <Header />
-        {children}
+        <div id="main-content" tabIndex={-1}>{children}</div>
         <Footer />
       </body>
     </html>
