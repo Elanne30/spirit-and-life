@@ -33,12 +33,13 @@ export default async function EditContentPage({
 
   const contentType = type as DraftContentType;
   const slug = normalizeDraftSlug(rawSlug);
+  const draft = await getDraftByTypeAndSlug(contentType, slug);
 
-  if (await isContentDeleted(contentType, slug)) {
+  // A draft is an Admin-managed record and must remain editable even if an
+  // older deletion marker exists from a previous unpublish implementation.
+  if (!draft && (await isContentDeleted(contentType, slug))) {
     notFound();
   }
-
-  const draft = await getDraftByTypeAndSlug(contentType, slug);
 
   if (!draft) {
     redirect(`/admin/content/${contentType}/${slug}`);
