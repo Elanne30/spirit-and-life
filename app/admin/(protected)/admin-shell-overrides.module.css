@@ -1,7 +1,5 @@
-:global(body:has(.adminOverrides)) .site-header,
-:global(body:has(.adminOverrides)) > footer,
-:global(body:has(.adminOverrides)) > .site-header,
-:global(body:has(.adminOverrides)) > .site-footer { display: none !important; }
+:global(body:has(.adminOverrides) > .site-footer),
+:global(body:has(.adminOverrides) > footer) { display: none !important; }
 
 .adminOverrides {
   width: 100%;
@@ -10,6 +8,62 @@
   min-height: 100vh;
   overflow-x: clip;
   background: var(--background);
+}
+
+:global(body:has(.adminOverrides) .admin-site-header) {
+  display: block !important;
+  position: sticky;
+  top: 0;
+  z-index: 200;
+}
+
+:global(body:has(.adminOverrides) .admin-site-header .header-inner) {
+  width: 100%;
+  max-width: none;
+}
+
+:global(body:has(.adminOverrides) .admin-site-header .brand-copy small) {
+  color: var(--muted);
+}
+
+:global(body:has(.adminOverrides) .admin-main-navigation) {
+  gap: clamp(0.45rem, 1.1vw, 1rem);
+}
+
+:global(body:has(.adminOverrides) .admin-main-navigation > a) {
+  white-space: nowrap;
+}
+
+:global(body:has(.adminOverrides) .admin-main-navigation > a.is-active) {
+  color: var(--accent-strong);
+}
+
+:global(body:has(.adminOverrides) .admin-main-navigation .admin-visit-link),
+:global(body:has(.adminOverrides) .admin-main-navigation .admin-signout-link) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  min-height: 2.2rem;
+  padding: 0.35rem 0.6rem;
+  border: 1px solid var(--line);
+  border-radius: 0.45rem;
+  color: var(--muted);
+  font-size: 0.7rem;
+}
+
+:global(body:has(.adminOverrides) .admin-main-navigation .admin-visit-link:hover),
+:global(body:has(.adminOverrides) .admin-main-navigation .admin-signout-link:hover) {
+  border-color: var(--accent);
+  color: var(--accent-strong);
+}
+
+:global(body:has(.adminOverrides) .admin-main-navigation .theme-toggle) {
+  flex: 0 0 auto;
+}
+
+:global(body:has(.adminOverrides) .admin-topbar) {
+  display: none !important;
 }
 
 .adminOverrides :global(.admin-shell) {
@@ -22,185 +76,8 @@
   background: var(--background);
 }
 
-.adminOverrides :global(.admin-topbar) {
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 1rem;
-  width: 100%;
-  min-height: 4.6rem;
-  padding: 0.65rem clamp(0.75rem, 2.5vw, 2rem);
-  box-sizing: border-box;
-  border-bottom: 1px solid var(--line);
-  background: color-mix(in srgb, var(--surface) 96%, var(--background));
-  box-shadow: 0 0.35rem 1.2rem var(--shadow);
-  backdrop-filter: blur(14px);
-}
-
-.adminOverrides :global(.admin-topbar) .admin-brand {
-  display: flex;
-  align-items: center;
-  gap: 0.65rem;
-  min-width: max-content;
-  padding: 0;
-  border: 0;
-}
-
-.adminOverrides :global(.admin-topbar) .admin-brand-logo {
-  width: 2.7rem;
-  height: 2.7rem;
-  object-fit: cover;
-  border-radius: 0.5rem;
-}
-
-.adminOverrides :global(.admin-topbar) .admin-brand strong {
-  display: block;
-  color: var(--foreground);
-  font-family: var(--font-body), sans-serif;
-  font-size: 0.82rem;
-  font-weight: 800;
-  letter-spacing: 0.07em;
-  line-height: 1.1;
-  text-transform: uppercase;
-}
-
-.adminOverrides :global(.admin-topbar) .admin-brand small {
-  display: block;
-  margin-top: 0.18rem;
-  color: var(--muted);
-  font-size: 0.58rem;
-  letter-spacing: 0.04em;
-}
-
 .adminOverrides :global(.admin-navigation-shell) {
-  position: relative;
-  min-width: 0;
-}
-
-.adminOverrides :global(.admin-menu-toggle) {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.4rem;
-  min-height: 2.35rem;
-  padding: 0.45rem 0.65rem;
-  border: 1px solid var(--line);
-  border-radius: 0.5rem;
-  background: var(--surface-muted);
-  color: var(--foreground);
-  font: inherit;
-  font-size: 0.68rem;
-  font-weight: 700;
-  cursor: pointer;
-}
-
-.adminOverrides :global(.admin-menu-toggle:hover) {
-  border-color: var(--accent);
-  color: var(--accent-strong);
-}
-
-.adminOverrides :global(.admin-nav) {
-  display: flex !important;
-  align-items: center;
-  justify-content: center;
-  gap: 0.8rem;
-  min-width: 0;
-  margin: 0 !important;
-  padding: 0 !important;
-  overflow: visible;
-}
-
-.adminOverrides :global(.admin-nav:not(.is-open)) {
   display: none !important;
-}
-
-.adminOverrides :global(.admin-nav-group) {
-  display: flex;
-  align-items: center;
-  gap: 0.35rem;
-  min-width: 0;
-}
-
-.adminOverrides :global(.admin-nav-group-label) {
-  margin: 0 !important;
-  color: var(--muted);
-  font-size: 0.53rem;
-  font-weight: 800;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  white-space: nowrap;
-}
-
-.adminOverrides :global(.admin-nav-group-items) {
-  display: flex;
-  align-items: center;
-  gap: 0.2rem;
-}
-
-.adminOverrides :global(.admin-nav-link) {
-  display: inline-flex;
-  min-height: 2.35rem;
-  align-items: center;
-  gap: 0.4rem;
-  padding: 0.45rem 0.55rem;
-  border: 1px solid transparent;
-  border-radius: 0.45rem;
-  color: var(--muted);
-  font-size: 0.68rem;
-  font-weight: 700;
-  white-space: nowrap;
-}
-
-.adminOverrides :global(.admin-nav-link:hover) {
-  background: var(--surface-muted);
-  color: var(--foreground);
-}
-
-.adminOverrides :global(.admin-nav-link.is-active) {
-  border-color: color-mix(in srgb, var(--accent) 35%, var(--line));
-  background: color-mix(in srgb, var(--accent) 12%, var(--surface));
-  color: var(--accent-strong);
-  box-shadow: none;
-}
-
-.adminOverrides :global(.admin-topbar-actions) {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 0.4rem;
-  min-width: max-content;
-}
-
-.adminOverrides :global(.admin-topbar-actions) .admin-header-link,
-.adminOverrides :global(.admin-topbar-actions) .admin-signout {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  min-height: 2.35rem;
-  padding: 0.45rem 0.6rem;
-  border: 1px solid var(--line);
-  border-radius: 0.5rem;
-  color: var(--muted);
-  font-size: 0.65rem;
-  font-weight: 700;
-}
-
-.adminOverrides :global(.admin-topbar-actions) .admin-header-link:hover,
-.adminOverrides :global(.admin-topbar-actions) .admin-signout:hover {
-  border-color: var(--accent);
-  color: var(--accent-strong);
-}
-
-.adminOverrides :global(.admin-topbar-actions) .theme-toggle {
-  width: 2.35rem;
-  height: 2.35rem;
-  border: 1px solid var(--line);
-  border-radius: 0.5rem;
-  background: var(--surface-muted);
-  color: var(--foreground);
 }
 
 .adminOverrides :global(.admin-content) {
@@ -241,36 +118,15 @@
 }
 
 @media (max-width: 1100px) {
-  .adminOverrides :global(.admin-topbar) {
-    grid-template-columns: auto auto 1fr;
+  :global(body:has(.adminOverrides) .admin-main-navigation > a) {
+    white-space: normal;
   }
 
-  .adminOverrides :global(.admin-nav) {
-    position: absolute;
-    top: calc(100% + 0.55rem);
-    left: 0;
-    width: min(42rem, calc(100vw - 1.5rem));
-    max-height: min(70vh, 32rem);
-    overflow: auto;
-    flex-direction: column;
-    align-items: stretch;
+  :global(body:has(.adminOverrides) .admin-main-navigation .admin-visit-link),
+  :global(body:has(.adminOverrides) .admin-main-navigation .admin-signout-link) {
+    width: 100%;
     justify-content: flex-start;
-    gap: 0.7rem;
-    padding: 0.75rem !important;
-    border: 1px solid var(--line);
-    border-radius: 0.7rem;
-    background: var(--surface);
-    box-shadow: 0 1rem 2.5rem var(--shadow);
   }
-
-  .adminOverrides :global(.admin-nav-group) {
-    display: grid;
-    gap: 0.3rem;
-    align-items: stretch;
-  }
-
-  .adminOverrides :global(.admin-nav-group-label) { padding: 0.15rem 0.35rem; }
-  .adminOverrides :global(.admin-nav-group-items) { flex-wrap: wrap; }
 }
 
 @media (max-width: 640px) {
@@ -279,60 +135,27 @@
     max-width: 100vw;
   }
 
-  .adminOverrides :global(.admin-topbar) {
-    grid-template-columns: minmax(0, 1fr) auto;
-    gap: 0.5rem;
-    min-height: 3.8rem;
-    padding: 0.5rem 0.65rem;
+  :global(body:has(.adminOverrides) .admin-site-header .header-inner) {
+    width: 100%;
   }
 
-  .adminOverrides :global(.admin-topbar) .admin-brand-logo {
-    width: 2.35rem;
-    height: 2.35rem;
-  }
-
-  .adminOverrides :global(.admin-topbar) .admin-brand strong { font-size: 0.72rem; }
-  .adminOverrides :global(.admin-topbar) .admin-brand small { font-size: 0.52rem; }
-
-  .adminOverrides :global(.admin-navigation-shell) { grid-column: 2; grid-row: 1; }
-  .adminOverrides :global(.admin-menu-toggle) { width: 2.45rem; padding: 0; }
-  .adminOverrides :global(.admin-menu-toggle span) { display: none; }
-
-  .adminOverrides :global(.admin-nav) {
-    position: fixed;
-    top: 4rem;
-    left: 0.65rem;
-    right: 0.65rem;
-    width: auto;
-    max-height: calc(100vh - 4.75rem);
-  }
-
-  .adminOverrides :global(.admin-nav-group-items) {
+  :global(body:has(.adminOverrides) .admin-main-navigation) {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.35rem;
   }
 
-  .adminOverrides :global(.admin-nav-link) {
-    min-height: 2.55rem;
+  :global(body:has(.adminOverrides) .admin-main-navigation > a),
+  :global(body:has(.adminOverrides) .admin-main-navigation .admin-visit-link),
+  :global(body:has(.adminOverrides) .admin-main-navigation .admin-signout-link) {
+    min-height: 2.5rem;
     justify-content: flex-start;
     padding-inline: 0.65rem;
   }
 
-  .adminOverrides :global(.admin-topbar-actions) {
-    grid-column: 1 / -1;
-    grid-row: 2;
-    justify-content: stretch;
-    padding-top: 0.15rem;
+  :global(body:has(.adminOverrides) .admin-main-navigation .theme-toggle) {
+    justify-self: start;
   }
-
-  .adminOverrides :global(.admin-topbar-actions) .admin-header-link,
-  .adminOverrides :global(.admin-topbar-actions) .admin-signout {
-    flex: 1 1 auto;
-    justify-content: center;
-  }
-
-  .adminOverrides :global(.admin-topbar-actions) .admin-signout span { display: none; }
-  .adminOverrides :global(.admin-topbar-actions) .theme-toggle { flex: 0 0 2.35rem; }
 
   .adminOverrides :global(.admin-content) {
     padding-inline: 0.65rem !important;
