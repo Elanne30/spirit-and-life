@@ -5,6 +5,10 @@ import { getDraftByTypeAndSlug, isContentDeleted, normalizeDraftSlug, type Draft
 import { ContentEditForm } from "@/app/admin/(protected)/content/content-edit-form";
 import { PublishForm } from "@/app/admin/(protected)/content/publish-form";
 
+// Admin editing must always read the latest database row so saved metadata,
+// including category and tags, is reflected immediately after a save.
+export const dynamic = "force-dynamic";
+
 const config = {
   reflection: {
     label: "Edit Reflection",
