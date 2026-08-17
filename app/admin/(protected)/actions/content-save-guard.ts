@@ -6,7 +6,7 @@ import { sql } from "@vercel/postgres";
 import { put } from "@vercel/blob";
 import { updateDraftAction, type ContentDraftActionState } from "@/app/admin/(protected)/actions/content";
 import { createDraft, getDraftByTypeAndSlug, isValidDraftSlug, normalizeDraftSlug, type DraftContentType } from "@/app/lib/content-drafts";
-import { normalizeRichTextDocument, richTextToLegacySections, type RichTextDocument } from "@/app/content/article-rich-text";
+import { legacySectionsToRichText, normalizeRichTextDocument, richTextToLegacySections, type RichTextDocument } from "@/app/content/article-rich-text";
 import { findUnsupportedText, getPostgresErrorDetails } from "@/app/lib/content-save-validation";
 import { requireAdminActionAccess } from "@/app/lib/admin-session";
 
@@ -58,9 +58,17 @@ function parseFormData(formData: FormData): ParsedGuardInput | { error: string }
 
   let richText: RichTextDocument | undefined;
   if (rawRichText) {
-    try { richText = normalizeRichTextDocument(JSON.parse(rawRichText)) ?? undefined; }
-    catch { return { error: "The article body could not be read because its formatting data is invalid." }; }
-    if (!richText) return { error: "The article body contains unsupported formatting data." };
+    try {
+      const parsedRichText = JSON.parse(rawRichText);
+      // The editor can contain formatting extensions that the legacy normalizer
+      // does not understand yet. Never block a save because of those extensions.
+      // Fall back to the plain-text projection already submitted by the editor.
+      richText = normalizeRichTextDocument(parsedRichText) ?? legacySectionsToRichText(sections);
+    } catch {
+      // If the rich-text payload itself is malformed, the submitted legacy
+      // sections are still valid content and should remain saveable.
+      richText = legacySectionsToRichText(sections);
+    }
     sections = richTextToLegacySections(richText);
   }
 
