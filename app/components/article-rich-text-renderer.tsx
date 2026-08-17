@@ -8,11 +8,13 @@ function blockClass(attrs: Record<string, unknown> | undefined) {
 }
 
 function blockStyle(attrs: Record<string, unknown> | undefined): CSSProperties {
+  const align = typeof attrs?.textAlign === "string" ? attrs.textAlign : "left";
   const indent = typeof attrs?.indent === "number" ? attrs.indent : 0;
   const firstLineIndent = typeof attrs?.firstLineIndent === "number" ? attrs.firstLineIndent : 0;
   const rightIndent = typeof attrs?.rightIndent === "number" ? attrs.rightIndent : 0;
   const lineSpacing = typeof attrs?.lineSpacing === "number" ? attrs.lineSpacing : 1;
   return {
+    textAlign: align as CSSProperties["textAlign"],
     marginLeft: indent ? `${indent * 0.25}in` : undefined,
     textIndent: firstLineIndent ? `${firstLineIndent * 0.25}in` : undefined,
     marginRight: rightIndent ? `${rightIndent * 0.25}in` : undefined,
