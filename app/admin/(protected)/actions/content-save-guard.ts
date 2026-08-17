@@ -45,8 +45,12 @@ function parseFormData(formData: FormData): ParsedGuardInput | { error: string }
   try {
     const parsed = JSON.parse(rawSections);
     if (!Array.isArray(parsed)) return { error: "The content sections must be a list." };
-    sections = parsed.filter((section): section is { heading?: unknown; paragraphs?: unknown } => typeof section === "object" && section !== null)
-      .map((section) => ({ heading: typeof section.heading === "string" ? section.heading.trim() : "", paragraphs: Array.isArray(section.paragraphs) ? section.paragraphs.filter((paragraph): paragraph is string => typeof paragraph === "string").map((paragraph) => paragraph.trim()).filter(Boolean) : [] }))
+    sections = parsed
+      .filter((section): section is { heading?: unknown; paragraphs?: unknown } => typeof section === "object" && section !== null)
+      .map((section) => ({
+        heading: typeof section.heading === "string" ? section.heading.trim() : "",
+        paragraphs: Array.isArray(section.paragraphs) ? section.paragraphs.filter((paragraph): paragraph is string => typeof paragraph === "string").map((paragraph) => paragraph.trim()).filter(Boolean) : [],
+      }))
       .filter((section) => section.heading || section.paragraphs.length);
   } catch {
     return { error: "The content sections could not be read because their formatting data is invalid." };
@@ -87,6 +91,13 @@ async function validateDraftBeforeSave(formData: FormData, mode: "create" | "upd
   if (!contentTypes.includes(input.contentType)) return { error: "Choose a valid content type." };
   if (!input.title) return { error: "A title is required." };
   if (!isValidDraftSlug(input.slug)) return { error: "Use a lowercase slug with letters, numbers, and single hyphens only." };
+
+  if (mode === "create") {
+    const existing = await getDraftByTypeAndSlug(input.contentType, input.slug);
+    if (existing) {
+      return { error: `This slug is already being used by another ${input.contentType}. Choose a different slug.` };
+    }
+  }
 
   const textPayload = {
     title: input.title,
@@ -133,10 +144,7 @@ async function validateDraftBeforeSave(formData: FormData, mode: "create" | "upd
   return { ok: true as const };
 }
 
-export async function createDraftActionSafe(
-  previousState: ContentDraftActionState,
-  formData: FormData,
-): Promise<ContentDraftActionState> {
+export async function createDraftActionSafe(previousState: ContentDraftActionState, formData: FormData): Promise<ContentDraftActionState> {
   if (!(await requireAdminActionAccess())) return { status: "error", message: "Unauthorized." };
 
   const input = parseFormData(formData);
@@ -163,7 +171,7 @@ export async function createDraftActionSafe(
     const details = getPostgresErrorDetails(error);
     console.error("[content-drafts] Create draft failed.", details);
     if (details.code === "23505") {
-      return { status: "error", message: "The draft could not be saved because that slug was taken at the same time. Please try Save draft again." };
+      return { status: "error", message: "This slug is already being used. Choose a different slug." };
     }
     return { status: "error", message: "The draft could not be saved. Your writing was not changed." };
   }
@@ -178,10 +186,7 @@ export async function createDraftActionSafe(
   redirect(`/admin/content/${draft.content_type}`);
 }
 
-export async function updateDraftActionSafe(
-  previousState: ContentDraftActionState,
-  formData: FormData,
-): Promise<ContentDraftActionState> {
+export async function updateDraftActionSafe(previousState: ContentDraftActionState, formData: FormData): Promise<ContentDraftActionState> {
   if (!(await requireAdminActionAccess())) return { status: "error", message: "Unauthorized." };
   const validation = await validateDraftBeforeSave(formData, "update");
   if ("error" in validation) return { status: "error", message: validation.error };
