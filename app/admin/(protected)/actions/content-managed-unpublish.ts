@@ -38,16 +38,20 @@ export async function unpublishManagedDraftAction(formData: FormData) {
     WHERE id = ${draft.id}
   `;
 
+  // Unpublishing is not deletion. The draft must remain accessible in Admin,
+  // while its published version disappears from the public site because its
+  // status is now "draft". Remove any stale deletion markers left by older
+  // unpublish behavior as well.
   for (const slug of [currentSlug, publishedSlug]) {
     if (!slug) continue;
     await sql`
-      INSERT INTO content_deletions (content_type, slug, deleted_at)
-      VALUES (${draft.content_type}, ${slug}, now())
-      ON CONFLICT (content_type, slug) DO UPDATE SET deleted_at = EXCLUDED.deleted_at
+      DELETE FROM content_deletions
+      WHERE content_type = ${draft.content_type} AND slug = ${slug}
     `;
     revalidatePublicRoutes(draft.content_type, slug);
   }
 
   revalidatePath("/admin/content");
   revalidatePath(`/admin/content/${draft.content_type}`);
+  revalidatePath(`/admin/content/${draft.content_type}/${currentSlug}`);
 }
