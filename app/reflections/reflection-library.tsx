@@ -11,50 +11,52 @@ export function ReflectionLibrary({ reflections }: { reflections: Reflection[] }
   const visibleReflections = selectedCategory === "All"
     ? reflections
     : reflections.filter((reflection) => reflection.category === selectedCategory);
+  const featured = reflections.find((reflection) => reflection.featured) ?? reflections[0];
+  const remaining = visibleReflections.filter((reflection) => reflection.contentSlug !== featured?.contentSlug);
 
   return (
     <section className="reflection-library page-container library-section" aria-label="Reflection library">
-      {reflections.length ? <><div className="filter-row" aria-label="Reflection categories">
-        {categories.map((category) => (
-          <button
-            className={`filter-pill${selectedCategory === category ? " is-active" : ""}`}
-            key={category}
-            type="button"
-            aria-pressed={selectedCategory === category}
-            onClick={() => setSelectedCategory(category)}
-          >
-            {category}
-          </button>
-        ))}
-      </div>
-      <div className="reflection-grid">
-        {visibleReflections.map((reflection) => (
-          <article className="reflection-card" key={reflection.contentSlug}>
-            <Link className="reflection-card-image" href={`/reflections/${reflection.contentSlug}`}>
-              <Image
-                src={reflection.image}
-                alt={reflection.title}
-                width={1280}
-                height={853}
-                sizes="(max-width: 720px) 100vw, (max-width: 1024px) 50vw, 33vw"
-              />
+      {reflections.length ? <>
+        <div className="filter-row" aria-label="Reflection categories">
+          {categories.map((category) => (
+            <button className={`filter-pill${selectedCategory === category ? " is-active" : ""}`} key={category} type="button" aria-pressed={selectedCategory === category} onClick={() => setSelectedCategory(category)}>
+              {category}
+            </button>
+          ))}
+        </div>
+
+        {selectedCategory === "All" && featured ? (
+          <article className="featured-reflection-card">
+            <Link className="featured-reflection-image" href={`/reflections/${featured.contentSlug}`}>
+              <Image src={featured.image} alt={featured.title} width={1280} height={853} sizes="(max-width: 720px) 100vw, 55vw" />
             </Link>
-            <div className="reflection-card-body">
-              <p className="content-card-label">{reflection.category}</p>
-              <h2>
-                <Link href={`/reflections/${reflection.contentSlug}`}>
-                  {reflection.title}
-                </Link>
-              </h2>
-              <p>{reflection.introduction}</p>
-              <p className="card-reading-time">{reflection.readingTime}</p>
-              <Link className="content-card-link" href={`/reflections/${reflection.contentSlug}`}>
-                Read More →
-              </Link>
+            <div className="featured-reflection-body">
+              <p className="eyebrow">Featured Reflection</p>
+              <h2><Link href={`/reflections/${featured.contentSlug}`}>{featured.title}</Link></h2>
+              <div className="featured-reflection-meta"><span>{featured.category}</span><span>{featured.date}</span><span>{featured.readingTime}</span><span>{featured.scripture}</span></div>
+              <p>{featured.introduction}</p>
+              <Link className="content-card-link" href={`/reflections/${featured.contentSlug}`}>Read Reflection <span aria-hidden="true">→</span></Link>
             </div>
           </article>
-        ))}
-      </div></> : <p className="empty-state">Reflections will appear here when they are published.</p>}
+        ) : null}
+
+        <div className="reflection-grid">
+          {(selectedCategory === "All" ? remaining : visibleReflections).map((reflection) => (
+            <article className="reflection-card" key={reflection.contentSlug}>
+              <Link className="reflection-card-image" href={`/reflections/${reflection.contentSlug}`}>
+                <Image src={reflection.image} alt={reflection.title} width={1280} height={853} sizes="(max-width: 720px) 100vw, (max-width: 1024px) 50vw, 33vw" />
+              </Link>
+              <div className="reflection-card-body">
+                <p className="content-card-label">{reflection.category}</p>
+                <h2><Link href={`/reflections/${reflection.contentSlug}`}>{reflection.title}</Link></h2>
+                <p>{reflection.introduction}</p>
+                <p className="card-reading-time">{reflection.date} · {reflection.readingTime}</p>
+                <Link className="content-card-link" href={`/reflections/${reflection.contentSlug}`}>Read More →</Link>
+              </div>
+            </article>
+          ))}
+        </div>
+      </> : <p className="empty-state">Reflections will appear here when they are published.</p>}
     </section>
   );
 }
