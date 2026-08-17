@@ -38,15 +38,15 @@ export async function unpublishManagedDraftAction(formData: FormData) {
     WHERE id = ${draft.id}
   `;
 
-  // Unpublishing is not deletion. The draft must remain accessible in Admin,
-  // while its published version disappears from the public site because its
-  // status is now "draft". Remove any stale deletion markers left by older
-  // unpublish behavior as well.
+  // Keep the deletion marker for the PUBLIC repository. Static seed content
+  // uses this marker too, so an unpublished item cannot remain publicly visible.
+  // Admin routes deliberately ignore the marker when the draft still exists.
   for (const slug of [currentSlug, publishedSlug]) {
     if (!slug) continue;
     await sql`
-      DELETE FROM content_deletions
-      WHERE content_type = ${draft.content_type} AND slug = ${slug}
+      INSERT INTO content_deletions (content_type, slug, deleted_at)
+      VALUES (${draft.content_type}, ${slug}, now())
+      ON CONFLICT (content_type, slug) DO UPDATE SET deleted_at = EXCLUDED.deleted_at
     `;
     revalidatePublicRoutes(draft.content_type, slug);
   }
@@ -54,4 +54,5 @@ export async function unpublishManagedDraftAction(formData: FormData) {
   revalidatePath("/admin/content");
   revalidatePath(`/admin/content/${draft.content_type}`);
   revalidatePath(`/admin/content/${draft.content_type}/${currentSlug}`);
+  revalidatePath(`/admin/content/${draft.content_type}/${currentSlug}/edit`);
 }
