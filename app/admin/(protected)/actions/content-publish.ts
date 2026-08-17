@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { sql } from "@vercel/postgres";
 import { requireAdminActionAccess } from "@/app/lib/admin-session";
-import { createDraft, getDraft, type DraftContentType } from "@/app/lib/content-drafts";
+import { createDraft, getDraft, publishDraft, type DraftContentType } from "@/app/lib/content-drafts";
 import { reflections } from "@/app/data/reflections";
 import { journals } from "@/app/data/journals";
 import { books } from "@/app/data/books";
@@ -26,6 +26,55 @@ function findStaticSeed(contentType: DraftContentType, slug: string) {
   if (contentType === "reflection") return reflections.find((item) => item.contentSlug === slug);
   if (contentType === "journal") return journals.find((item) => item.contentSlug === slug);
   return books.find((item) => item.contentSlug === slug);
+}
+
+export async function publishContentAction(formData: FormData) {
+  if (!(await requireAdminActionAccess())) return;
+
+  const draftId = String(formData.get("draftId") ?? "").trim();
+  const contentType = String(formData.get("contentType") ?? "").trim() as DraftContentType;
+  const slug = String(formData.get("slug") ?? "").trim().toLowerCase();
+
+  if (!( ["reflection", "journal", "book"] as DraftContentType[]).includes(contentType) || !slug) return;
+
+  let draft = draftId ? await getDraft(draftId) : null;
+
+  if (!draft) {
+    const seed = findStaticSeed(contentType, slug);
+    if (!seed) return;
+    const seedRecord = seed as Record<string, unknown>;
+    draft = await createDraft({
+      contentType,
+      title: String(seedRecord.title ?? ""),
+      slug,
+      introduction: typeof seedRecord.introduction === "string"
+        ? seedRecord.introduction
+        : typeof seedRecord.description === "string"
+          ? seedRecord.description
+          : undefined,
+      category: typeof seedRecord.category === "string" ? seedRecord.category : undefined,
+      tags: Array.isArray(seedRecord.tags) ? seedRecord.tags as string[] : [],
+      imageReference: typeof seedRecord.image === "string"
+        ? seedRecord.image
+        : typeof seedRecord.cover === "string"
+          ? seedRecord.cover
+          : undefined,
+      body: typeof seedRecord.body === "object" && seedRecord.body !== null
+        ? seedRecord.body as Record<string, unknown>
+        : {},
+    });
+  }
+
+  if (!draft) return;
+
+  const published = await publishDraft(draft.id);
+  if (!published) return;
+
+  revalidatePath("/admin/content");
+  revalidatePath(`/admin/content/${published.content_type}`);
+  revalidatePath(`/admin/content/${published.content_type}/${published.slug}`);
+  revalidatePublicRoutes(published.content_type, published.slug);
+  redirect(`/admin/content/${published.content_type}`);
 }
 
 export async function unpublishContentAction(formData: FormData) {
