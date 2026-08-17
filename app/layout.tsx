@@ -61,6 +61,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
         />
       </head>
       <body>
+        <a className="skip-link" href="#main-content">Skip to main content</a>
         <Header />
         <div id="main-content" tabIndex={-1}>{children}</div>
         <Footer />
