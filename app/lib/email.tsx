@@ -137,12 +137,18 @@ async function sendViaBrevo(payload: EmailPayload, fromEmail: string, apiKey: st
 
 export async function sendNewsletterEmail(payload: EmailPayload) {
   const fromEmail = process.env.NEWSLETTER_FROM_EMAIL?.trim() ?? process.env.RESEND_FROM_EMAIL?.trim();
-  const resendApiKey = process.env.RESEND_API_KEY?.trim();
   const brevoApiKey = process.env.BREVO_API_KEY?.trim();
+  const resendApiKey = process.env.RESEND_API_KEY?.trim();
 
   if (!fromEmail) return { ok: false as const, error: "A verified sender address is not configured." };
+
+  // Brevo is the primary provider. Resend remains available as an explicit fallback.
+  if (brevoApiKey) {
+    const brevoResult = await sendViaBrevo(payload, fromEmail, brevoApiKey);
+    if (brevoResult.ok || !resendApiKey) return brevoResult;
+  }
+
   if (resendApiKey) return sendViaResend(payload, fromEmail, resendApiKey);
-  if (brevoApiKey) return sendViaBrevo(payload, fromEmail, brevoApiKey);
 
   return { ok: false as const, error: "No transactional email provider is configured." };
 }
