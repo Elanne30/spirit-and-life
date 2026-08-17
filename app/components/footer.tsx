@@ -18,8 +18,33 @@ export function Footer() {
     <footer className="site-footer">
       <div className="page-container footer-inner">
         <div>
-          <Link className="brand-link footer-brand-link" href="/">
-            <Image className="brand-logo" src={siteConfig.brand.logo} alt="Spirit & Life" width={616} height={496} />
+          <Link
+            className="brand-link footer-brand-link"
+            href="/"
+            style={{
+              width: "auto",
+              height: "4.75rem",
+              border: "0",
+              borderRadius: 0,
+              background: "transparent",
+              boxShadow: "none",
+              overflow: "visible",
+            }}
+          >
+            <Image
+              className="brand-logo"
+              src={siteConfig.brand.logo}
+              alt="Spirit & Life"
+              width={616}
+              height={496}
+              style={{
+                width: "4.75rem",
+                height: "4.75rem",
+                objectFit: "contain",
+                mixBlendMode: "normal",
+                opacity: 1,
+              }}
+            />
             <span className="footer-brand-copy">
               <strong>Spirit &amp; Life</strong>
               <small>A library of reflective truths</small>
