@@ -28,7 +28,7 @@ export function DraftForm({ initialContentType = "reflection" }: DraftFormProps)
   const isBook = contentType === "book";
 
   return (
-    <form className="admin-form admin-draft-form" action={formAction} style={{ gridTemplateColumns: "minmax(0, 1fr)" }}>
+    <form className="admin-form admin-draft-form" action={formAction} encType="multipart/form-data" style={{ gridTemplateColumns: "minmax(0, 1fr)" }}>
       <input type="hidden" name="contentType" value={contentType} />
 
       <div className="admin-draft-column" style={{ gridColumn: "1 / -1", width: "100%" }}>
@@ -69,11 +69,11 @@ export function DraftForm({ initialContentType = "reflection" }: DraftFormProps)
             <input id="draft-length" name="length" type="text" placeholder="320 pages" />
             <label htmlFor="draft-description">Description</label>
             <textarea id="draft-description" name="introduction" rows={7} placeholder="Write a description of the book..." />
+            <label htmlFor="draft-book-cover">Book Cover</label>
+            <input id="draft-book-cover" name="bookCover" type="file" accept="image/jpeg,image/png,image/webp,image/gif" />
+            <p className="form-note">Upload Book Cover. JPG, PNG, WebP, or GIF, up to 8 MB.</p>
             <label htmlFor="draft-table-of-contents">Table of contents</label>
             <textarea id="draft-table-of-contents" name="tableOfContents" rows={8} placeholder={"Chapter 1\nChapter 2\nChapter 3"} />
-            <label htmlFor="draft-book-cover">Book cover</label>
-            <input id="draft-book-cover" name="image" type="text" placeholder="/images/books/book-cover.jpg" />
-            <p className="form-note">Upload Book Cover is available from the editor after the draft is created. You can enter an existing cover path here if one is already available.</p>
           </>
         )}
 
