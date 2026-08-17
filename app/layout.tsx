@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Cormorant_Garamond, DM_Sans } from "next/font/google";
-import { Footer } from "@/app/components/footer";
-import { Header } from "@/app/components/header";
+import { SiteChrome } from "@/app/components/site-chrome";
 import { ensurePublishingIntegrity } from "@/app/content/publishing-validation";
 import { socialPreviewImage } from "@/app/content/seo";
 import { siteConfig } from "@/app/content/site-config";
@@ -67,9 +66,8 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
       </head>
       <body>
         <a className="skip-link" href="#main-content">Skip to main content</a>
-        <Header />
+        <SiteChrome />
         <div id="main-content" tabIndex={-1}>{children}</div>
-        <Footer />
       </body>
     </html>
   );
