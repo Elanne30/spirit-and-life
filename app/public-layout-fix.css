@@ -1,0 +1,87 @@
+/* Public-site layout correction.
+   Scoped to the public chrome/homepage so the Admin remains untouched. */
+
+.site-header:not(.admin-site-header) .page-container,
+.site-footer .page-container {
+  width: min(100% - 4rem, 92rem);
+  margin-inline: auto;
+}
+
+.home-page {
+  --home-width: min(100% - 4rem, 92rem);
+}
+
+.home-page .hero {
+  padding-inline: max(2rem, calc((100% - 92rem) / 2));
+}
+
+.home-page .hero-copy {
+  width: min(100%, 92rem);
+}
+
+.home-page .hero-side-note {
+  right: max(2rem, calc((100% - 92rem) / 2));
+}
+
+/* The public header carries the single primary brand mark. */
+.home-page .hero-logo {
+  display: none;
+}
+
+/* Keep the hero background tied to the active public theme. */
+html[data-theme="dark"] .home-page .hero-backdrop,
+html[data-theme="light"] .home-page .hero-backdrop {
+  background: var(--hero-overlay), url("/spiri_life_hero.jpg") center / cover;
+}
+
+/* Keep all homepage layout grids bounded and aligned to the same width system. */
+.home-page main,
+.home-page section,
+.home-page .editorial-entry-grid,
+.home-page .home-reflection-grid,
+.home-page .home-companion-section,
+.home-page .feature-split-book,
+.home-page .newsletter-section {
+  max-width: 100%;
+}
+
+.home-page .editorial-entry-grid,
+.home-page .home-reflection-grid,
+.home-page .home-companion-section,
+.home-page .feature-split-book {
+  min-width: 0;
+}
+
+@media (max-width: 720px) {
+  .site-header:not(.admin-site-header) .page-container,
+  .site-footer .page-container {
+    width: min(100% - 2rem, 44rem);
+  }
+
+  .home-page {
+    --home-width: min(100% - 2rem, 44rem);
+  }
+
+  .home-page .hero {
+    padding-inline: 1rem;
+  }
+
+  .home-page .hero-copy {
+    width: 100%;
+  }
+
+  .home-page .hero-side-note {
+    right: 1rem;
+  }
+}
+
+@media (max-width: 430px) {
+  .site-header:not(.admin-site-header) .page-container,
+  .site-footer .page-container {
+    width: calc(100% - 1.25rem);
+  }
+
+  .home-page {
+    --home-width: calc(100% - 1.25rem);
+  }
+}
