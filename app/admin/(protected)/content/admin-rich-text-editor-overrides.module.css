@@ -1,0 +1,139 @@
+:global(.editorShell) {
+  background: var(--surface-muted);
+  color: var(--foreground);
+  border-color: var(--line);
+}
+
+:global(.workspace) {
+  height: auto !important;
+  min-height: 0;
+  background: var(--surface-muted) !important;
+}
+
+:global(.pageViewport) {
+  height: auto !important;
+  min-height: 0;
+  overflow-x: hidden !important;
+  overflow-y: visible !important;
+  padding-bottom: 32px;
+  overscroll-behavior: auto !important;
+  -webkit-overflow-scrolling: auto;
+  touch-action: pan-y;
+}
+
+:global(.pageStage) {
+  height: auto;
+}
+
+:global(.page) {
+  background: var(--surface) !important;
+  color: var(--foreground) !important;
+  box-shadow: 0 2px 9px var(--shadow) !important;
+}
+
+:global(.prose) {
+  color: var(--foreground) !important;
+  caret-color: var(--foreground) !important;
+  touch-action: pan-y;
+}
+
+:global(.prose h1),
+:global(.prose h2),
+:global(.prose h3),
+:global(.prose h4),
+:global(.prose h5),
+:global(.prose h6) {
+  color: var(--foreground) !important;
+}
+
+:global(.toolbar) {
+  background: var(--surface) !important;
+  border-bottom-color: var(--line) !important;
+  color: var(--foreground);
+}
+
+:global(.toolbarGroup) {
+  border-right-color: var(--line) !important;
+}
+
+:global(.toolbarButton) {
+  color: var(--foreground) !important;
+  border-color: transparent;
+}
+
+:global(.toolbarButton:hover) {
+  background: var(--surface-muted) !important;
+}
+
+:global(.toolbarButton.active) {
+  border-color: var(--line) !important;
+  background: var(--surface-muted) !important;
+}
+
+:global(.select),
+:global(.dropdownTrigger) {
+  background: var(--surface) !important;
+  color: var(--foreground) !important;
+  border-color: var(--line) !important;
+}
+
+:global(.select:hover),
+:global(.dropdownTrigger:hover) {
+  background: var(--surface-muted) !important;
+}
+
+:global(.dropdownMenu) {
+  background: var(--surface) !important;
+  color: var(--foreground) !important;
+  border-color: var(--line) !important;
+  box-shadow: 0 8px 24px var(--shadow) !important;
+}
+
+:global(.dropdownItem) {
+  color: var(--foreground) !important;
+}
+
+:global(.dropdownItem:hover),
+:global(.dropdownItemActive) {
+  background: var(--surface-muted) !important;
+}
+
+:global(.rulerHeader),
+:global(.horizontalRuler),
+:global(.verticalRulerViewport),
+:global(.verticalRuler) {
+  background-color: var(--surface-muted) !important;
+  color: var(--muted) !important;
+  border-color: var(--line) !important;
+}
+
+:global(.marginZone) {
+  background: color-mix(in srgb, var(--line) 28%, transparent) !important;
+}
+
+:global(.rulerHandleFirst)::after,
+:global(.rulerHandleRight)::after {
+  border-top-color: var(--muted);
+  border-bottom-color: var(--muted);
+}
+
+:global(.rulerHandleBody)::after {
+  border-color: var(--muted);
+  background: var(--surface);
+}
+
+:global(.statusBar) {
+  background: var(--surface) !important;
+  color: var(--muted) !important;
+  border-top-color: var(--line) !important;
+}
+
+@media (max-width: 640px) {
+  :global(.pageViewport) {
+    padding-bottom: 24px;
+  }
+
+  :global(.page) {
+    padding: 24px 20px;
+  }
+}
