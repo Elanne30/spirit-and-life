@@ -1,6 +1,3 @@
-:global(body:has(.adminOverrides) > .site-footer),
-:global(body:has(.adminOverrides) > footer) { display: none !important; }
-
 .adminOverrides {
   width: 100%;
   max-width: 100vw;
@@ -10,36 +7,36 @@
   background: var(--background);
 }
 
-:global(body:has(.adminOverrides) .admin-site-header) {
-  display: block !important;
+.adminOverrides :global(.admin-site-header) {
   position: sticky;
   top: 0;
   z-index: 200;
+  width: 100%;
 }
 
-:global(body:has(.adminOverrides) .admin-site-header .header-inner) {
+.adminOverrides :global(.admin-site-header .header-inner) {
   width: 100%;
   max-width: none;
 }
 
-:global(body:has(.adminOverrides) .admin-site-header .brand-copy small) {
+.adminOverrides :global(.admin-site-header .brand-copy small) {
   color: var(--muted);
 }
 
-:global(body:has(.adminOverrides) .admin-main-navigation) {
+.adminOverrides :global(.admin-main-navigation) {
   gap: clamp(0.45rem, 1.1vw, 1rem);
 }
 
-:global(body:has(.adminOverrides) .admin-main-navigation > a) {
+.adminOverrides :global(.admin-main-navigation > a) {
   white-space: nowrap;
 }
 
-:global(body:has(.adminOverrides) .admin-main-navigation > a.is-active) {
+.adminOverrides :global(.admin-main-navigation > a.is-active) {
   color: var(--accent-strong);
 }
 
-:global(body:has(.adminOverrides) .admin-main-navigation .admin-visit-link),
-:global(body:has(.adminOverrides) .admin-main-navigation .admin-signout-link) {
+.adminOverrides :global(.admin-main-navigation .admin-visit-link),
+.adminOverrides :global(.admin-main-navigation .admin-signout-link) {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -52,18 +49,14 @@
   font-size: 0.7rem;
 }
 
-:global(body:has(.adminOverrides) .admin-main-navigation .admin-visit-link:hover),
-:global(body:has(.adminOverrides) .admin-main-navigation .admin-signout-link:hover) {
+.adminOverrides :global(.admin-main-navigation .admin-visit-link:hover),
+.adminOverrides :global(.admin-main-navigation .admin-signout-link:hover) {
   border-color: var(--accent);
   color: var(--accent-strong);
 }
 
-:global(body:has(.adminOverrides) .admin-main-navigation .theme-toggle) {
+.adminOverrides :global(.admin-main-navigation .theme-toggle) {
   flex: 0 0 auto;
-}
-
-:global(body:has(.adminOverrides) .admin-topbar) {
-  display: none !important;
 }
 
 .adminOverrides :global(.admin-shell) {
@@ -71,13 +64,9 @@
   width: 100% !important;
   max-width: none !important;
   min-width: 0 !important;
-  min-height: 100vh;
+  min-height: calc(100vh - 4rem);
   margin: 0 !important;
   background: var(--background);
-}
-
-.adminOverrides :global(.admin-navigation-shell) {
-  display: none !important;
 }
 
 .adminOverrides :global(.admin-content) {
@@ -98,6 +87,7 @@
 }
 
 .adminOverrides :global(.admin-header h1) { font-size: 0.8rem; }
+
 .adminOverrides :global(.admin-dashboard),
 .adminOverrides :global(.admin-content-page),
 .adminOverrides :global(.admin-management-page),
@@ -118,12 +108,12 @@
 }
 
 @media (max-width: 1100px) {
-  :global(body:has(.adminOverrides) .admin-main-navigation > a) {
+  .adminOverrides :global(.admin-main-navigation > a) {
     white-space: normal;
   }
 
-  :global(body:has(.adminOverrides) .admin-main-navigation .admin-visit-link),
-  :global(body:has(.adminOverrides) .admin-main-navigation .admin-signout-link) {
+  .adminOverrides :global(.admin-main-navigation .admin-visit-link),
+  .adminOverrides :global(.admin-main-navigation .admin-signout-link) {
     width: 100%;
     justify-content: flex-start;
   }
@@ -135,26 +125,8 @@
     max-width: 100vw;
   }
 
-  :global(body:has(.adminOverrides) .admin-site-header .header-inner) {
+  .adminOverrides :global(.admin-site-header .header-inner) {
     width: 100%;
-  }
-
-  :global(body:has(.adminOverrides) .admin-main-navigation) {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 0.35rem;
-  }
-
-  :global(body:has(.adminOverrides) .admin-main-navigation > a),
-  :global(body:has(.adminOverrides) .admin-main-navigation .admin-visit-link),
-  :global(body:has(.adminOverrides) .admin-main-navigation .admin-signout-link) {
-    min-height: 2.5rem;
-    justify-content: flex-start;
-    padding-inline: 0.65rem;
-  }
-
-  :global(body:has(.adminOverrides) .admin-main-navigation .theme-toggle) {
-    justify-self: start;
   }
 
   .adminOverrides :global(.admin-content) {
