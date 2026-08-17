@@ -27,8 +27,35 @@ export function Header() {
     <header className={`site-header${isAdmin ? " admin-site-header" : ""}`}>
       <Link className="skip-link" href="#main-content">Skip to content</Link>
       <div className="page-container header-inner">
-        <Link className="brand-link" href={isAdmin ? "/admin" : "/"} onClick={() => setMenuOpen(false)} aria-label={isAdmin ? "Spirit & Life Admin dashboard" : "Spirit & Life home"}>
-          <Image className="brand-logo" src={siteConfig.brand.logo} alt="Spirit & Life" width={616} height={496} />
+        <Link
+          className="brand-link"
+          href={isAdmin ? "/admin" : "/"}
+          onClick={() => setMenuOpen(false)}
+          aria-label={isAdmin ? "Spirit & Life Admin dashboard" : "Spirit & Life home"}
+          style={{
+            width: "auto",
+            height: "4.75rem",
+            border: "0",
+            borderRadius: 0,
+            background: "transparent",
+            boxShadow: "none",
+            overflow: "visible",
+          }}
+        >
+          <Image
+            className="brand-logo"
+            src={siteConfig.brand.logo}
+            alt="Spirit & Life"
+            width={616}
+            height={496}
+            style={{
+              width: "4.75rem",
+              height: "4.75rem",
+              objectFit: "contain",
+              mixBlendMode: "normal",
+              opacity: 1,
+            }}
+          />
           <span className="brand-copy">
             <strong>Spirit &amp; Life</strong>
             <small>{isAdmin ? "Admin workspace" : "A library of reflective truths"}</small>
