@@ -36,6 +36,12 @@ const verifiedBookDetails: Record<string, Omit<Book, keyof ImageManifestEntry | 
     length: "180 pages",
     tableOfContents: ["Introduction — Why John 17 Matters", "Chapter 1 — The Hour Has Come", "Chapter 2 — Glory Before the World Was", "Chapter 3 — Keep Them in Your Name", "Chapter 4 — Sanctified by the Truth", "Chapter 5 — That They May Be One", "Chapter 6 — Sent into the World", "Chapter 7 — The Love With Which You Loved Me", "Conclusion — Thy Word Is Truth"],
   },
+  "legal-protocols-of-god": {
+    status: "Coming Soon",
+    category: "Theology",
+    subtitle: "Why God Waits",
+    description: "A working book project exploring the question of why God sometimes waits, and the idea of divine legal protocols. This title is currently in preparation and is not presented as a completed or purchasable book.",
+  },
 };
 
 const booksFromManifest: Book[] = Object.entries(imageManifest)
@@ -53,6 +59,12 @@ export const books: Book[] = [
     contentSlug: "thy-word-is-truth-a-journey-through-john-17",
     title: "Thy Word Is Truth: A Journey Through John 17",
     ...verifiedBookDetails["thy-word-is-truth-a-journey-through-john-17"],
+  },
+  {
+    type: "book",
+    contentSlug: "legal-protocols-of-god",
+    title: "Legal Protocols of God",
+    ...verifiedBookDetails["legal-protocols-of-god"],
   },
 ];
 
