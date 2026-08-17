@@ -4,7 +4,7 @@ function resolveSiteUrl() {
   return "http://localhost:3000";
 }
 
-const emailProvider = process.env.RESEND_API_KEY ? "Resend" : process.env.BREVO_API_KEY ? "Brevo" : null;
+const emailProvider = process.env.BREVO_API_KEY ? "Brevo" : process.env.RESEND_API_KEY ? "Resend" : null;
 
 export const siteConfig = {
   name: "Spirit & Life",
