@@ -30,8 +30,12 @@ export default async function AdminContentDetailPage({
 
   const contentType = type as DraftContentType;
   const slug = normalizeDraftSlug(rawSlug);
+  const draft = await getDraftByTypeAndSlug(contentType, slug);
+  const deleted = await isContentDeleted(contentType, slug);
 
-  if (await isContentDeleted(contentType, slug)) {
+  // A managed draft remains an Admin record when unpublished. Only a slug
+  // with neither a draft nor a valid static record should be treated as gone.
+  if (deleted && !draft) {
     notFound();
   }
 
@@ -43,8 +47,6 @@ export default async function AdminContentDetailPage({
   const staticJournal = contentType === "journal" ? journals.find((item) => item.contentSlug === slug) : undefined;
   const staticBook = contentType === "book" ? books.find((item) => item.contentSlug === slug) : undefined;
   const staticTitle = staticReflection?.title ?? staticJournal?.title ?? staticBook?.title;
-
-  const draft = await getDraftByTypeAndSlug(contentType, slug);
 
   if (!staticTitle && !draft) {
     notFound();
