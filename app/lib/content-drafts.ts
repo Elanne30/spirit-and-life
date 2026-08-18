@@ -3,7 +3,7 @@ import "server-only";
 import crypto from "node:crypto";
 import { sql } from "@vercel/postgres";
 
-export type DraftContentType = "reflection" | "journal" | "book";
+export type DraftContentType = "article" | "reflection" | "journal" | "book";
 export type DraftStatus = "draft" | "published";
 
 export type PublishedSnapshot = {
@@ -21,10 +21,14 @@ export function normalizeDraftSlug(value: string) { return value.trim().toLowerC
 export function isValidDraftSlug(value: string) { return /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(value) && value.length <= 120; }
 async function ensureSchema() {
   if (!schemaPromise) schemaPromise = (async () => {
-    await sql`CREATE TABLE IF NOT EXISTS content_drafts (id text PRIMARY KEY, content_type text NOT NULL CHECK (content_type IN ('reflection', 'journal', 'book')), title text NOT NULL, slug text NOT NULL, status text NOT NULL DEFAULT 'draft' CHECK (status IN ('draft', 'published')), introduction text, body jsonb NOT NULL DEFAULT '{}'::jsonb, category text, tags jsonb NOT NULL DEFAULT '[]'::jsonb, image_reference text, created_at timestamptz NOT NULL DEFAULT now(), updated_at timestamptz NOT NULL DEFAULT now(), published_at timestamptz, author_id text, published_snapshot jsonb, has_unpublished_changes boolean NOT NULL DEFAULT false, UNIQUE (content_type, slug))`;
+    await sql`CREATE TABLE IF NOT EXISTS content_drafts (id text PRIMARY KEY, content_type text NOT NULL CHECK (content_type IN ('article', 'reflection', 'journal', 'book')), title text NOT NULL, slug text NOT NULL, status text NOT NULL DEFAULT 'draft' CHECK (status IN ('draft', 'published')), introduction text, body jsonb NOT NULL DEFAULT '{}'::jsonb, category text, tags jsonb NOT NULL DEFAULT '[]'::jsonb, image_reference text, created_at timestamptz NOT NULL DEFAULT now(), updated_at timestamptz NOT NULL DEFAULT now(), published_at timestamptz, author_id text, published_snapshot jsonb, has_unpublished_changes boolean NOT NULL DEFAULT false, UNIQUE (content_type, slug))`;
     await sql`ALTER TABLE content_drafts ADD COLUMN IF NOT EXISTS published_snapshot jsonb`;
     await sql`ALTER TABLE content_drafts ADD COLUMN IF NOT EXISTS has_unpublished_changes boolean NOT NULL DEFAULT false`;
-    await sql`CREATE TABLE IF NOT EXISTS content_deletions (content_type text NOT NULL CHECK (content_type IN ('reflection', 'journal', 'book')), slug text NOT NULL, deleted_at timestamptz NOT NULL DEFAULT now(), PRIMARY KEY (content_type, slug))`;
+    await sql`ALTER TABLE content_drafts DROP CONSTRAINT IF EXISTS content_drafts_content_type_check`;
+    await sql`ALTER TABLE content_drafts ADD CONSTRAINT content_drafts_content_type_check CHECK (content_type IN ('article', 'reflection', 'journal', 'book'))`;
+    await sql`CREATE TABLE IF NOT EXISTS content_deletions (content_type text NOT NULL CHECK (content_type IN ('article', 'reflection', 'journal', 'book')), slug text NOT NULL, deleted_at timestamptz NOT NULL DEFAULT now(), PRIMARY KEY (content_type, slug))`;
+    await sql`ALTER TABLE content_deletions DROP CONSTRAINT IF EXISTS content_deletions_content_type_check`;
+    await sql`ALTER TABLE content_deletions ADD CONSTRAINT content_deletions_content_type_check CHECK (content_type IN ('article', 'reflection', 'journal', 'book'))`;
     await sql`CREATE INDEX IF NOT EXISTS content_drafts_content_type_idx ON content_drafts (content_type)`;
     await sql`CREATE INDEX IF NOT EXISTS content_drafts_status_idx ON content_drafts (status)`;
     await sql`CREATE INDEX IF NOT EXISTS content_drafts_updated_at_idx ON content_drafts (updated_at DESC)`;
@@ -45,13 +49,4 @@ export async function getPublishedDraft(contentType: DraftContentType, slug: str
 export async function createDraft(input: DraftInput) { await ensureSchema(); const id = crypto.randomUUID(); const timestamp = nowIso(); const slug = await getAvailableDraftSlug(input.contentType, input.slug); await sql`INSERT INTO content_drafts (id, content_type, title, slug, status, introduction, body, category, tags, image_reference, created_at, updated_at, published_at, author_id) VALUES (${id}, ${input.contentType}, ${input.title}, ${slug}, 'draft', ${input.introduction ?? null}, ${JSON.stringify(input.body ?? {})}::jsonb, ${input.category ?? null}, ${JSON.stringify(input.tags ?? [])}::jsonb, ${input.imageReference ?? null}, ${timestamp}, ${timestamp}, NULL, ${input.authorId ?? null})`; return getDraft(id); }
 export async function updateDraft(id: string, input: DraftInput) { await ensureSchema(); const slug = normalizeDraftSlug(input.slug); await sql`UPDATE content_drafts SET content_type = ${input.contentType}, title = ${input.title}, slug = ${slug}, introduction = ${input.introduction ?? null}, body = ${JSON.stringify(input.body ?? {})}::jsonb, category = ${input.category ?? null}, tags = ${JSON.stringify(input.tags ?? [])}::jsonb, image_reference = ${input.imageReference ?? null}, has_unpublished_changes = (status = 'published'), updated_at = ${nowIso()} WHERE id = ${id}`; return getDraft(id); }
 export async function updateDraftImage(id: string, imageReference: string) { await ensureSchema(); await sql`UPDATE content_drafts SET image_reference = ${imageReference}, has_unpublished_changes = (status = 'published'), updated_at = ${nowIso()} WHERE id = ${id}`; return getDraft(id); }
-export async function publishDraft(id: string) {
-  await ensureSchema();
-  const timestamp = nowIso();
-  const existing = await getDraft(id);
-  if (!existing) return null;
-  await sql`UPDATE content_drafts SET status = 'published', published_snapshot = jsonb_build_object('title', title, 'slug', slug, 'introduction', introduction, 'body', body, 'category', category, 'tags', tags, 'image_reference', image_reference), has_unpublished_changes = false, published_at = COALESCE(published_at, ${timestamp}), updated_at = ${timestamp} WHERE id = ${id}`;
-  // A previous unpublish/delete marker must not survive a genuine publish.
-  await sql`DELETE FROM content_deletions WHERE content_type = ${existing.content_type} AND slug IN (${existing.slug}, ${existing.published_snapshot?.slug ?? ""})`;
-  return getDraft(id);
-}
+export async function publishDraft(id: string) { await ensureSchema(); const timestamp = nowIso(); const existing = await getDraft(id); if (!existing) return null; await sql`UPDATE content_drafts SET status = 'published', published_snapshot = jsonb_build_object('title', title, 'slug', slug, 'introduction', introduction, 'body', body, 'category', category, 'tags', tags, 'image_reference', image_reference), has_unpublished_changes = false, published_at = COALESCE(published_at, ${timestamp}), updated_at = ${timestamp} WHERE id = ${id}`; await sql`DELETE FROM content_deletions WHERE content_type = ${existing.content_type} AND slug IN (${existing.slug}, ${existing.published_snapshot?.slug ?? ""})`; return getDraft(id); }
