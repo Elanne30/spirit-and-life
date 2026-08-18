@@ -45,6 +45,10 @@ function imageFor(item: AdminContentItem) {
   return item.image ?? "";
 }
 
+function isDraftContentType(value: AdminContentType): value is DraftContentType {
+  return value === "reflection" || value === "journal" || value === "book";
+}
+
 export default async function ContentTypeWorkspace({
   params,
 }: {
@@ -59,6 +63,7 @@ export default async function ContentTypeWorkspace({
   const items = await listAdminContentItems(contentType);
   const publishedCount = items.filter((item) => item.status === "published" || item.status === "static").length;
   const draftCount = items.filter((item) => item.status === "draft").length;
+  const legacyContentType = isDraftContentType(contentType) ? contentType : null;
 
   return (
     <section className={`${styles.library} admin-library-page`}>
@@ -131,9 +136,9 @@ export default async function ContentTypeWorkspace({
                   <Link className={styles.action} href={`/admin/content/${item.contentType}/${item.slug}`} aria-label={`Preview ${item.title}`} title="Preview">
                     <Eye size={15} />
                   </Link>
-                  {contentType !== "article" ? (
+                  {legacyContentType ? (
                     <ContentMoreActions
-                      contentType={contentType as DraftContentType}
+                      contentType={legacyContentType}
                       slug={item.slug}
                       title={item.title}
                       status={item.status}
