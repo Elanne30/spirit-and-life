@@ -26,13 +26,20 @@ export async function createArticleAction(_previous: ArticleActionState, formDat
   if (!input.title) return { status: "error", message: "A title is required." };
   if (!isValidDraftSlug(input.slug)) return { status: "error", message: "Use a lowercase slug with letters, numbers, and single hyphens only." };
   if (await getArticleDraftBySlug(input.slug)) return { status: "error", message: "This article slug is already in use. Choose a different slug." };
+
+  let draft;
   try {
-    const draft = await createArticleDraft({ contentType: "article", title: input.title, slug: input.slug, category: input.category || undefined, introduction: input.introduction || undefined, tags: input.tags, body: bodyOf(input) });
-    if (!draft) return { status: "error", message: "The article could not be saved." };
-    revalidatePath("/admin/content"); revalidatePath("/admin/content/article");
-    if (String(formData.get("saveMode") ?? "draft") === "continue") redirect(`/admin/content/article/${draft.slug}/edit`);
-    redirect("/admin/content/article");
-  } catch (error) { console.error("[articles] create failed", error); return { status: "error", message: "The article could not be saved. Your writing was not changed." }; }
+    draft = await createArticleDraft({ contentType: "article", title: input.title, slug: input.slug, category: input.category || undefined, introduction: input.introduction || undefined, tags: input.tags, body: bodyOf(input) });
+  } catch (error) {
+    console.error("[articles] create failed", error);
+    return { status: "error", message: "The article could not be saved. Your writing was not changed." };
+  }
+
+  if (!draft) return { status: "error", message: "The article could not be saved. Your writing was not changed." };
+  revalidatePath("/admin/content");
+  revalidatePath("/admin/content/article");
+  if (String(formData.get("saveMode") ?? "draft") === "continue") redirect(`/admin/content/article/${draft.slug}/edit`);
+  redirect("/admin/content/article");
 }
 
 export async function updateArticleAction(_previous: ArticleActionState, formData: FormData): Promise<ArticleActionState> {
