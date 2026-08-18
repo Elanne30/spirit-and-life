@@ -6,7 +6,7 @@ import { ArticleRichTextRenderer } from "@/app/components/article-rich-text-rend
 import { getPublishedArticle, listPublishedArticles } from "@/app/lib/content-drafts";
 import { articlePreview } from "@/app/data/article-preview";
 
-function hasRichText(value: Record<string, unknown>): value is Record<string, unknown> & { richText: Parameters<typeof ArticleRichTextRenderer>["document"] } {
+function hasRichText(value: Record<string, unknown>): value is Record<string, unknown> & { richText: unknown } {
   return "richText" in value && typeof value.richText === "object" && value.richText !== null;
 }
 
