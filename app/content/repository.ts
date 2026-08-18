@@ -1,85 +1,15 @@
+import { articles } from "@/app/data/articles";
 import { books } from "@/app/data/books";
 import { journals } from "@/app/data/journals";
 import { reflections } from "@/app/data/reflections";
 import { listDeletedContentSlugs, listPublishedDrafts, getPublishedDraft, isContentDeleted, type ContentDraft, type DraftContentType } from "@/app/lib/content-drafts";
-import {
-  publishedDraftToReflection,
-  publishedDraftToJournal,
-  publishedDraftToBook,
-} from "@/app/content/published-draft-adapter";
-
-// A published database draft with a matching content type + slug replaces the
-// static entry (never duplicates it); brand-new database content is appended.
-async function mergePublished<T extends { contentSlug: string }>(
-  staticItems: T[],
-  contentType: DraftContentType,
-  adapt: (draft: ContentDraft) => T | null,
-): Promise<T[]> {
-  const [publishedDrafts, deletedSlugs] = await Promise.all([listPublishedDrafts(contentType), listDeletedContentSlugs(contentType)]);
-  const draftsBySlug = new Map(publishedDrafts.map((draft) => [draft.slug, draft]));
-
-  const merged = staticItems.filter((item) => !deletedSlugs.has(item.contentSlug)).map((item) => {
-    const draft = draftsBySlug.get(item.contentSlug);
-
-    if (!draft) {
-      return item;
-    }
-
-    draftsBySlug.delete(item.contentSlug);
-    return adapt(draft) ?? item;
-  });
-
-  const additional = Array.from(draftsBySlug.values())
-    .map(adapt)
-    .filter((item): item is T => item !== null);
-
-  return [...merged, ...additional];
-}
-
-export async function listPublishedReflections() {
-  return mergePublished(reflections, "reflection", publishedDraftToReflection);
-}
-
-export async function getPublishedReflection(slug: string) {
-  if (await isContentDeleted("reflection", slug)) return null;
-  const draft = await getPublishedDraft("reflection", slug);
-  const staticReflection = reflections.find((reflection) => reflection.contentSlug === slug);
-
-  if (draft) {
-    return publishedDraftToReflection(draft) ?? staticReflection;
-  }
-
-  return staticReflection;
-}
-
-export async function listPublishedJournals() {
-  return mergePublished(journals, "journal", publishedDraftToJournal);
-}
-
-export async function getPublishedJournal(slug: string) {
-  if (await isContentDeleted("journal", slug)) return null;
-  const draft = await getPublishedDraft("journal", slug);
-  const staticJournal = journals.find((journal) => journal.contentSlug === slug);
-
-  if (draft) {
-    return publishedDraftToJournal(draft) ?? staticJournal;
-  }
-
-  return staticJournal;
-}
-
-export async function listPublishedBooks() {
-  return mergePublished(books, "book", publishedDraftToBook);
-}
-
-export async function getPublishedBook(slug: string) {
-  if (await isContentDeleted("book", slug)) return null;
-  const draft = await getPublishedDraft("book", slug);
-  const staticBook = books.find((book) => book.contentSlug === slug);
-
-  if (draft) {
-    return publishedDraftToBook(draft) ?? staticBook;
-  }
-
-  return staticBook;
-}
+import { publishedDraftToArticle, publishedDraftToReflection, publishedDraftToJournal, publishedDraftToBook } from "@/app/content/published-draft-adapter";
+async function mergePublished<T extends { contentSlug: string }>(staticItems: T[], contentType: DraftContentType, adapt: (draft: ContentDraft) => T | null): Promise<T[]> { const [publishedDrafts, deletedSlugs] = await Promise.all([listPublishedDrafts(contentType), listDeletedContentSlugs(contentType)]); const draftsBySlug = new Map(publishedDrafts.map((draft) => [draft.slug, draft])); const merged = staticItems.filter((item) => !deletedSlugs.has(item.contentSlug)).map((item) => { const draft = draftsBySlug.get(item.contentSlug); if (!draft) return item; draftsBySlug.delete(item.contentSlug); return adapt(draft) ?? item; }); const additional = Array.from(draftsBySlug.values()).map(adapt).filter((item): item is T => item !== null); return [...merged, ...additional]; }
+export async function listPublishedArticles() { return mergePublished(articles, "article", publishedDraftToArticle); }
+export async function getPublishedArticle(slug: string) { if (await isContentDeleted("article", slug)) return null; const draft = await getPublishedDraft("article", slug); const staticArticle = articles.find((article) => article.contentSlug === slug); return draft ? (publishedDraftToArticle(draft) ?? staticArticle) : staticArticle; }
+export async function listPublishedReflections() { return mergePublished(reflections, "reflection", publishedDraftToReflection); }
+export async function getPublishedReflection(slug: string) { if (await isContentDeleted("reflection", slug)) return null; const draft = await getPublishedDraft("reflection", slug); const staticReflection = reflections.find((reflection) => reflection.contentSlug === slug); return draft ? (publishedDraftToReflection(draft) ?? staticReflection) : staticReflection; }
+export async function listPublishedJournals() { return mergePublished(journals, "journal", publishedDraftToJournal); }
+export async function getPublishedJournal(slug: string) { if (await isContentDeleted("journal", slug)) return null; const draft = await getPublishedDraft("journal", slug); const staticJournal = journals.find((journal) => journal.contentSlug === slug); return draft ? (publishedDraftToJournal(draft) ?? staticJournal) : staticJournal; }
+export async function listPublishedBooks() { return mergePublished(books, "book", publishedDraftToBook); }
+export async function getPublishedBook(slug: string) { if (await isContentDeleted("book", slug)) return null; const draft = await getPublishedDraft("book", slug); const staticBook = books.find((book) => book.contentSlug === slug); return draft ? (publishedDraftToBook(draft) ?? staticBook) : staticBook; }
