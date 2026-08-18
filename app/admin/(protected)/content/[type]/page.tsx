@@ -2,6 +2,7 @@ import Link from "next/link";
 import { CalendarDays, Clock3, Eye, Plus, Search } from "lucide-react";
 import { listAdminContentItems, type AdminContentItem, type AdminContentType } from "@/app/admin/(protected)/content/admin-content";
 import { ContentMoreActions } from "@/app/admin/(protected)/content/content-more-actions";
+import type { DraftContentType } from "@/app/lib/content-drafts";
 import styles from "../admin-library-reference.module.css";
 
 const config: Record<AdminContentType, {
@@ -132,7 +133,7 @@ export default async function ContentTypeWorkspace({
                   </Link>
                   {contentType !== "article" ? (
                     <ContentMoreActions
-                      contentType={item.contentType}
+                      contentType={contentType as DraftContentType}
                       slug={item.slug}
                       title={item.title}
                       status={item.status}
