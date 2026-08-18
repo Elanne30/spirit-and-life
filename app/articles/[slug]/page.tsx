@@ -1,9 +1,17 @@
 import { notFound } from "next/navigation";
 import { getPublishedArticle } from "@/app/lib/content-drafts";
+import { articlePreview } from "@/app/data/article-preview";
 
 export default async function ArticlePage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const article = await getPublishedArticle(slug);
+  const storedArticle = await getPublishedArticle(slug);
+  const article = storedArticle ?? (slug === articlePreview.slug ? {
+    title: articlePreview.title,
+    slug: articlePreview.slug,
+    category: articlePreview.category,
+    introduction: articlePreview.introduction,
+    body: { date: articlePreview.date, readingTime: articlePreview.readingTime, sections: articlePreview.sections },
+  } : null);
   if (!article) notFound();
   const sections = Array.isArray(article.body.sections) ? article.body.sections : [];
   return (
