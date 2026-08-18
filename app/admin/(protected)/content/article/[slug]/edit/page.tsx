@@ -1,0 +1,8 @@
+import { notFound } from "next/navigation";
+import Link from "next/link";
+import { ArrowLeft, FileText } from "lucide-react";
+import { getDraftByTypeAndSlug } from "@/app/lib/content-drafts";
+import { ArticleEditForm } from "@/app/admin/(protected)/content/article-edit-form";
+import { ArticlePublishForm } from "@/app/admin/(protected)/content/article-publish-form";
+export const dynamic = "force-dynamic";
+export default async function EditArticlePage({ params }: { params: Promise<{ slug: string }> }) { const { slug } = await params; const draft = await getDraftByTypeAndSlug("article", slug); if (!draft) notFound(); return <section className="admin-editor-page" style={{ width: "100%", maxWidth: "none", paddingBlock: "1rem 4rem" }}><div className="admin-editor-header" style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: "1.5rem", flexWrap: "wrap", marginBottom: "1rem" }}><div><Link className="admin-outline-link" href={`/admin/content/article/${slug}`}><ArrowLeft size={14} /> Back to preview</Link><div className="admin-heading-with-icon"><span className="admin-icon"><FileText size={22} /></span><div><p className="eyebrow">Writing</p><h1>Edit Article</h1><p>{draft.title}</p></div></div></div><ArticlePublishForm draftId={draft.id} status={draft.status} hasUnpublishedChanges={draft.has_unpublished_changes} /></div><article className="admin-editor-card" style={{ width: "100%", maxWidth: "none", padding: "clamp(1rem, 2vw, 2rem)", border: "1px solid var(--line)", background: "var(--surface)", boxShadow: "0 0.45rem 1.25rem var(--shadow)" }}><ArticleEditForm draft={draft} /></article></section>; }
