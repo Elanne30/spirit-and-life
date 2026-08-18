@@ -1,5 +1,9 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getPublishedArticle } from "@/app/lib/content-drafts";
+import { ReadingProgress } from "@/app/components/reading-progress";
+import { ReadingNavigation } from "@/app/components/reading-navigation";
+import { ArticleRichTextRenderer } from "@/app/components/article-rich-text-renderer";
+import { getPublishedArticle, listPublishedArticles } from "@/app/lib/content-drafts";
 import { articlePreview } from "@/app/data/article-preview";
 
 export default async function ArticlePage({ params }: { params: Promise<{ slug: string }> }) {
@@ -13,13 +17,39 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
     body: { date: articlePreview.date, readingTime: articlePreview.readingTime, sections: articlePreview.sections },
   } : null);
   if (!article) notFound();
+
+  const articles = await listPublishedArticles();
+  const index = articles.findIndex((item) => item.slug === article.slug);
+  const previous = index > 0 ? articles[index - 1] : undefined;
+  const next = index >= 0 && index < articles.length - 1 ? articles[index + 1] : undefined;
   const sections = Array.isArray(article.body.sections) ? article.body.sections : [];
+
   return (
-    <main className="article-page">
-      <article className="article-shell">
-        <header className="article-header"><p className="eyebrow">{article.category ?? "Article"}</p><h1>{article.title}</h1>{article.introduction ? <p className="lead">{article.introduction}</p> : null}<p className="article-meta">{typeof article.body.date === "string" ? article.body.date : ""}{typeof article.body.readingTime === "string" && article.body.readingTime ? ` · ${article.body.readingTime}` : ""}</p></header>
-        <div className="article-body">
-          {sections.map((section, index) => <section key={index}>{typeof section === "object" && section !== null && typeof (section as { heading?: unknown }).heading === "string" && (section as { heading: string }).heading ? <h2>{(section as { heading: string }).heading}</h2> : null}{typeof section === "object" && section !== null && Array.isArray((section as { paragraphs?: unknown }).paragraphs) ? (section as { paragraphs: unknown[] }).paragraphs.filter((paragraph): paragraph is string => typeof paragraph === "string").map((paragraph, paragraphIndex) => <p key={paragraphIndex}>{paragraph}</p>) : null}</section>)}
+    <main className="reflection-detail-page article-detail-page">
+      <ReadingProgress />
+      <article className="reflection-detail article-detail">
+        <header className="reflection-detail-header page-container detail-header">
+          <p className="eyebrow">Article</p>
+          <h1>{article.title}</h1>
+          <div className="reflection-meta article-meta">
+            <span>{typeof article.body.date === "string" ? article.body.date : ""}</span>
+            <span>{typeof article.body.readingTime === "string" ? article.body.readingTime : ""}</span>
+            <span>{article.category ?? "Article"}</span>
+          </div>
+        </header>
+        <div className="article-reading-column reflection-reading-column">
+          {article.introduction ? <p className="reflection-introduction">{article.introduction}</p> : null}
+          {article.body.richText ? <ArticleRichTextRenderer document={article.body.richText} /> : sections.map((section, index) => (
+            <section className="reading-section" key={index}>
+              {typeof section === "object" && section !== null && typeof (section as { heading?: unknown }).heading === "string" && (section as { heading: string }).heading ? <h2>{(section as { heading: string }).heading}</h2> : null}
+              {typeof section === "object" && section !== null && Array.isArray((section as { paragraphs?: unknown }).paragraphs) ? (section as { paragraphs: unknown[] }).paragraphs.filter((paragraph): paragraph is string => typeof paragraph === "string").map((paragraph, paragraphIndex) => <p key={paragraphIndex}>{paragraph}</p>) : null}
+            </section>
+          ))}
+          <ReadingNavigation
+            previous={previous ? { href: `/articles/${previous.slug}`, title: previous.title } : undefined}
+            next={next ? { href: `/articles/${next.slug}`, title: next.title } : undefined}
+          />
+          <Link className="button button-text" href="/articles">Back to Articles</Link>
         </div>
       </article>
     </main>
