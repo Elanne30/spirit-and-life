@@ -31,10 +31,18 @@ export function AdminNav() {
 
   return (
     <div className="admin-navigation-shell">
-      <button className="admin-menu-toggle" type="button" onClick={() => setOpen((value) => !value)} aria-expanded={open} aria-controls="admin-navigation" aria-label={open ? "Collapse admin navigation" : "Open admin navigation"}>
+      <button
+        className="admin-menu-toggle"
+        type="button"
+        onClick={() => setOpen((value) => !value)}
+        aria-expanded={open}
+        aria-controls="admin-navigation"
+        aria-label={open ? "Collapse admin navigation" : "Open admin navigation"}
+      >
         {open ? <X aria-hidden="true" size={19} /> : <Menu aria-hidden="true" size={19} />}
         <span>{open ? "Collapse menu" : "Menu"}</span>
       </button>
+
       <nav className={`admin-nav${open ? " is-open" : ""}`} id="admin-navigation" aria-label="Admin sections">
         {adminNavigation.map((group) => (
           <div className="admin-nav-group" key={group.label}>
@@ -42,8 +50,22 @@ export function AdminNav() {
             <div className="admin-nav-group-items">
               {group.items.map((item) => {
                 const Icon = item.icon;
-                const isActive = item.href === "/admin" ? pathname === "/admin" : pathname === item.href || pathname.startsWith(`${item.href}/`);
-                return <Link key={item.href} href={item.href} className={`admin-nav-link${isActive ? " is-active" : ""}`} aria-current={isActive ? "page" : undefined} onClick={() => setOpen(false)}><Icon aria-hidden="true" size={17} strokeWidth={1.8} /><span>{item.label}</span></Link>;
+                const isActive = item.href === "/admin"
+                  ? pathname === "/admin"
+                  : pathname === item.href || pathname.startsWith(`${item.href}/`);
+
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={`admin-nav-link${isActive ? " is-active" : ""}`}
+                    aria-current={isActive ? "page" : undefined}
+                    onClick={() => setOpen(false)}
+                  >
+                    <Icon aria-hidden="true" size={17} strokeWidth={1.8} />
+                    <span>{item.label}</span>
+                  </Link>
+                );
               })}
             </div>
           </div>
