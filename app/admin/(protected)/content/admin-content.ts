@@ -22,19 +22,16 @@ export type AdminContentItem = {
 };
 
 function staticItemsFor(contentType: DraftContentType): Array<{ contentSlug: string; title: string; category?: string; date?: string; image?: string; readingTime?: string }> {
+  if (contentType === "article") return [];
   if (contentType === "reflection") {
     return reflections.map((item) => ({ contentSlug: item.contentSlug, title: item.title, category: item.category, date: item.date, image: item.image, readingTime: item.readingTime }));
   }
-
   if (contentType === "journal") {
     return journals.map((item) => ({ contentSlug: item.contentSlug, title: item.title, category: item.category, date: item.date, image: item.image }));
   }
-
   return books.map((book) => ({ contentSlug: book.contentSlug, title: book.title, category: book.category, date: book.expectedPublication, image: book.cover }));
 }
 
-// Combines the static source-of-truth articles with any database drafts (of
-// any status) so the admin can see and open everything in one list.
 export async function listAdminContentItems(contentType: DraftContentType): Promise<AdminContentItem[]> {
   const [deletedSlugs, drafts] = await Promise.all([listDeletedContentSlugs(contentType), listAllDrafts(contentType)]);
   const staticItems = staticItemsFor(contentType).filter((item) => !deletedSlugs.has(item.contentSlug));
@@ -43,7 +40,6 @@ export async function listAdminContentItems(contentType: DraftContentType): Prom
   const merged: AdminContentItem[] = staticItems.map((item) => {
     const draft = draftsBySlug.get(item.contentSlug);
     draftsBySlug.delete(item.contentSlug);
-
     return {
       contentType,
       slug: item.contentSlug,
