@@ -1,12 +1,13 @@
 import { reflections } from "@/app/data/reflections";
 import { journals } from "@/app/data/journals";
 import { books } from "@/app/data/books";
-import { listAllDrafts, listDeletedContentSlugs, type ContentDraft, type DraftContentType } from "@/app/lib/content-drafts";
+import { listAllDrafts, listArticleDrafts, listDeletedContentSlugs, type ArticleDraft, type ContentDraft, type DraftContentType } from "@/app/lib/content-drafts";
 
+export type AdminContentType = DraftContentType | "article";
 export type AdminContentStatus = "static" | "draft" | "published";
 
 export type AdminContentItem = {
-  contentType: DraftContentType;
+  contentType: AdminContentType;
   slug: string;
   title: string;
   category?: string;
@@ -22,7 +23,6 @@ export type AdminContentItem = {
 };
 
 function staticItemsFor(contentType: DraftContentType): Array<{ contentSlug: string; title: string; category?: string; date?: string; image?: string; readingTime?: string }> {
-  if (contentType === "article") return [];
   if (contentType === "reflection") {
     return reflections.map((item) => ({ contentSlug: item.contentSlug, title: item.title, category: item.category, date: item.date, image: item.image, readingTime: item.readingTime }));
   }
@@ -32,7 +32,28 @@ function staticItemsFor(contentType: DraftContentType): Array<{ contentSlug: str
   return books.map((book) => ({ contentSlug: book.contentSlug, title: book.title, category: book.category, date: book.expectedPublication, image: book.cover }));
 }
 
-export async function listAdminContentItems(contentType: DraftContentType): Promise<AdminContentItem[]> {
+function mapDraftToAdminItem(draft: ContentDraft | ArticleDraft): AdminContentItem {
+  return {
+    contentType: draft.content_type,
+    slug: draft.slug,
+    title: draft.title,
+    category: draft.category ?? undefined,
+    updatedAt: draft.updated_at,
+    status: draft.status === "published" ? "published" : "draft",
+    hasDraft: true,
+    hasUnpublishedChanges: draft.has_unpublished_changes,
+    draftId: draft.id,
+    isStaticSource: false,
+    image: draft.image_reference ?? undefined,
+  };
+}
+
+export async function listAdminContentItems(contentType: AdminContentType): Promise<AdminContentItem[]> {
+  if (contentType === "article") {
+    const drafts = await listArticleDrafts();
+    return drafts.map(mapDraftToAdminItem);
+  }
+
   const [deletedSlugs, drafts] = await Promise.all([listDeletedContentSlugs(contentType), listAllDrafts(contentType)]);
   const staticItems = staticItemsFor(contentType).filter((item) => !deletedSlugs.has(item.contentSlug));
   const draftsBySlug = new Map(drafts.map((draft) => [draft.slug, draft]));
@@ -57,19 +78,7 @@ export async function listAdminContentItems(contentType: DraftContentType): Prom
     };
   });
 
-  const additional: AdminContentItem[] = Array.from(draftsBySlug.values()).map((draft: ContentDraft) => ({
-    contentType,
-    slug: draft.slug,
-    title: draft.title,
-    category: draft.category ?? undefined,
-    updatedAt: draft.updated_at,
-    status: draft.status === "published" ? "published" : "draft",
-    hasDraft: true,
-    hasUnpublishedChanges: draft.has_unpublished_changes,
-    draftId: draft.id,
-    isStaticSource: false,
-    image: draft.image_reference ?? undefined,
-  }));
+  const additional: AdminContentItem[] = Array.from(draftsBySlug.values()).map((draft: ContentDraft) => mapDraftToAdminItem(draft));
 
   return [...merged, ...additional];
 }
