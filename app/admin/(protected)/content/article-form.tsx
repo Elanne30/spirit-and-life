@@ -10,10 +10,11 @@ type Props = { draft?: ArticleDraft };
 
 function initialBody(draft?: ArticleDraft) {
   const sections = Array.isArray(draft?.body.sections) ? draft?.body.sections : [];
-  return sections
-    .flatMap((section) => (typeof section === "object" && section !== null && Array.isArray((section as { paragraphs?: unknown }).paragraphs) ? (section as { paragraphs: unknown[] }).paragraphs : []))
-    .filter((paragraph): paragraph is string => typeof paragraph === "string")
-    .join("\n\n");
+  return sections.flatMap((section) => (typeof section === "object" && section !== null && Array.isArray((section as { paragraphs?: unknown }).paragraphs) ? (section as { paragraphs: unknown[] }).paragraphs : [])).filter((paragraph): paragraph is string => typeof paragraph === "string").join("\n\n");
+}
+
+function makeSlug(value: string) {
+  return value.normalize("NFKD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 120);
 }
 
 export function ArticleForm({ draft }: Props) {
@@ -23,10 +24,6 @@ export function ArticleForm({ draft }: Props) {
   const [slug, setSlug] = useState(draft?.slug ?? "");
   const [slugEdited, setSlugEdited] = useState(Boolean(draft));
   const [body, setBody] = useState(initialBody(draft));
-
-  function makeSlug(value: string) {
-    return value.normalize("NFKD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 120);
-  }
 
   return (
     <form action={formAction} className="admin-form">
@@ -39,8 +36,8 @@ export function ArticleForm({ draft }: Props) {
       <p className="form-note">The slug follows the title until you edit it yourself.</p>
 
       <label htmlFor="article-category">Category</label>
-      <select id="article-category" name="category" defaultValue={draft?.category ?? "Christian Living"}>
-        <option>Biblical Studies</option><option>Theology</option><option>Christian Living</option><option>Faith &amp; Life</option><option>Philosophy</option><option>Apologetics</option><option>Church History</option>
+      <select id="article-category" name="category" defaultValue={draft?.category ?? "Philosophy"}>
+        <option>Philosophy</option><option>Apologetics</option><option>Biblical Studies</option><option>Theology</option><option>Christian Living</option><option>Faith &amp; Life</option><option>Church History</option>
       </select>
 
       <div className="admin-form-grid">
@@ -52,10 +49,10 @@ export function ArticleForm({ draft }: Props) {
       <textarea id="article-introduction" name="introduction" rows={5} defaultValue={draft?.introduction ?? ""} />
 
       <label htmlFor="article-tags">Tags</label>
-      <input id="article-tags" name="tags" defaultValue={draft?.tags.join(", ") ?? ""} placeholder="Faith, Scripture, Christian Living" />
+      <input id="article-tags" name="tags" defaultValue={draft?.tags.join(", ") ?? ""} placeholder="Faith, Philosophy, Apologetics" />
 
       <label htmlFor="article-body">Article body</label>
-      <textarea id="article-body" rows={24} value={body} onChange={(event) => setBody(event.target.value)} placeholder="Write the article here..." />
+      <textarea id="article-body" name="articleBody" rows={28} value={body} onChange={(event) => setBody(event.target.value)} placeholder="Write the article here..." required />
       <input type="hidden" name="sections" value={JSON.stringify([{ heading: "", paragraphs: body.split(/\n\s*\n/).map((paragraph) => paragraph.trim()).filter(Boolean) }])} />
 
       <label className="admin-checkbox"><input name="featured" type="checkbox" value="yes" defaultChecked={draft?.body.featured === true} /> Feature this article</label>
