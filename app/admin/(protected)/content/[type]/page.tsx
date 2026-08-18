@@ -1,15 +1,19 @@
 import Link from "next/link";
 import { CalendarDays, Clock3, Eye, Plus, Search } from "lucide-react";
-import { listAdminContentItems, type AdminContentItem } from "@/app/admin/(protected)/content/admin-content";
+import { listAdminContentItems, type AdminContentItem, type AdminContentType } from "@/app/admin/(protected)/content/admin-content";
 import { ContentMoreActions } from "@/app/admin/(protected)/content/content-more-actions";
-import type { DraftContentType } from "@/app/lib/content-drafts";
 import styles from "../admin-library-reference.module.css";
 
-const config: Record<DraftContentType, {
+const config: Record<AdminContentType, {
   label: string;
   singular: string;
   description: string;
 }> = {
+  article: {
+    label: "Articles",
+    singular: "Article",
+    description: "Write and manage long-form articles on philosophy, apologetics, theology, and the hard questions of life.",
+  },
   reflection: {
     label: "Reflections",
     singular: "Reflection",
@@ -47,9 +51,9 @@ export default async function ContentTypeWorkspace({
 }) {
   const { type } = await params;
 
-  if (type !== "reflection" && type !== "journal" && type !== "book") return null;
+  if (!(type in config)) return null;
 
-  const contentType = type as DraftContentType;
+  const contentType = type as AdminContentType;
   const current = config[contentType];
   const items = await listAdminContentItems(contentType);
   const publishedCount = items.filter((item) => item.status === "published" || item.status === "static").length;
@@ -126,13 +130,15 @@ export default async function ContentTypeWorkspace({
                   <Link className={styles.action} href={`/admin/content/${item.contentType}/${item.slug}`} aria-label={`Preview ${item.title}`} title="Preview">
                     <Eye size={15} />
                   </Link>
-                  <ContentMoreActions
-                    contentType={item.contentType}
-                    slug={item.slug}
-                    title={item.title}
-                    status={item.status}
-                    draftId={item.draftId}
-                  />
+                  {contentType !== "article" ? (
+                    <ContentMoreActions
+                      contentType={item.contentType}
+                      slug={item.slug}
+                      title={item.title}
+                      status={item.status}
+                      draftId={item.draftId}
+                    />
+                  ) : null}
                 </div>
               </article>
             );
