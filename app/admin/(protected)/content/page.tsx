@@ -1,10 +1,9 @@
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight, BookOpen, FilePenLine, FileText, PenLine } from "lucide-react";
-import { listAdminContentItems, type AdminContentItem } from "@/app/admin/(protected)/content/admin-content";
-import type { DraftContentType } from "@/app/lib/content-drafts";
+import { listAdminContentItems, type AdminContentItem, type AdminContentType } from "@/app/admin/(protected)/content/admin-content";
 
-const sections: Array<{ contentType: DraftContentType; label: string }> = [
+const sections: Array<{ contentType: AdminContentType; label: string }> = [
   { contentType: "article", label: "Articles" },
   { contentType: "reflection", label: "Reflections" },
   { contentType: "journal", label: "Journals" },
@@ -20,7 +19,7 @@ function statusLabel(item: AdminContentItem) {
   return "Published (static)";
 }
 
-type ContentFilter = "article" | "reflection" | "journal" | "book" | "draft";
+type ContentFilter = AdminContentType | "draft";
 
 function filterTitle(filter: ContentFilter | undefined) {
   if (filter === "article") return "Article";
@@ -42,20 +41,26 @@ export default async function AdminContentPage({ searchParams }: { searchParams:
   const [articleItems, reflectionItems, journalItems, bookItems] = await Promise.all(
     sections.map((section) => listAdminContentItems(section.contentType)),
   );
-  const itemsByType: Record<DraftContentType, AdminContentItem[]> = {
+
+  const itemsByType: Record<AdminContentType, AdminContentItem[]> = {
     article: articleItems,
     reflection: reflectionItems,
     journal: journalItems,
     book: bookItems,
   };
+
   const publishedCount = (items: AdminContentItem[]) => items.filter((item) => item.status !== "draft").length;
   const draftCount = Object.values(itemsByType).flat().filter((item) => item.status === "draft").length;
   const requestedFilter = (await searchParams).type;
   const filter: ContentFilter | undefined = requestedFilter === "article" || requestedFilter === "reflection" || requestedFilter === "journal" || requestedFilter === "book" || requestedFilter === "draft" ? requestedFilter : undefined;
   const visibleSections = sections.filter((section) => !filter || filter === "draft" || filter === section.contentType);
   const visibleItemsByType = Object.fromEntries(
-    sections.map((section) => [section.contentType, sortRecentItems(itemsByType[section.contentType]).filter((item) => !filter || filter === section.contentType || (filter === "draft" && item.status === "draft"))]),
-  ) as Record<DraftContentType, AdminContentItem[]>;
+    sections.map((section) => [
+      section.contentType,
+      sortRecentItems(itemsByType[section.contentType]).filter((item) => !filter || filter === section.contentType || (filter === "draft" && item.status === "draft")),
+    ]),
+  ) as Record<AdminContentType, AdminContentItem[]>;
+
   const overview = [
     { type: "article" as const, title: "Articles", description: "Philosophy, apologetics, theology, and hard questions", icon: PenLine, count: publishedCount(articleItems), href: "/admin/content/article" },
     { type: "reflection" as const, title: "Reflections", description: "Manage reflections and devotionals", icon: FilePenLine, count: publishedCount(reflectionItems), href: "/admin/content/reflection" },
@@ -63,6 +68,7 @@ export default async function AdminContentPage({ searchParams }: { searchParams:
     { type: "book" as const, title: "Books", description: "Manage book summaries", icon: BookOpen, count: publishedCount(bookItems), href: "/admin/content/book" },
     { type: "draft" as const, title: "Drafts", description: "Continue editing drafts", icon: FilePenLine, count: draftCount, href: "/admin/content?type=draft" },
   ];
+
   const libraryItems = filter && filter !== "draft" ? visibleItemsByType[filter] : [];
 
   if (filter && filter !== "draft") {
