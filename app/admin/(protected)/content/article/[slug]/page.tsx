@@ -16,7 +16,10 @@ export default async function ArticleAdminPreview({ params }: { params: Promise<
   return (
     <section className="admin-stack">
       <article className="admin-card">
-        <div className="admin-header-row"><div><p className="eyebrow">Article</p><h2>{draft.title}</h2><p>{draft.category ?? "Article"} · {typeof draft.body.date === "string" ? draft.body.date : ""}</p></div><div className="admin-editor-actions"><Link className="button button-secondary" href="/admin/content/article">All Articles</Link><Link className="button button-secondary" href={`/admin/content/article/${draft.slug}/edit`}>Edit</Link><ArticlePublishForm draftId={draft.id} status={draft.status} hasUnpublishedChanges={draft.has_unpublished_changes} /></div></div>
+        <div className="admin-header-row">
+          <div><p className="eyebrow">Article</p><h2>{draft.title}</h2><p>{draft.category ?? "Article"} · {typeof draft.body.date === "string" ? draft.body.date : ""}</p></div>
+          <div className="admin-editor-actions"><Link className="button button-secondary" href="/admin/content/article">All Articles</Link><Link className="button button-secondary" href={`/admin/content/article/${draft.slug}/edit`}>Edit</Link><ArticlePublishForm draftId={draft.id} status={draft.status} hasUnpublishedChanges={draft.has_unpublished_changes} /></div>
+        </div>
         <p className="quiet-note">{draft.status === "published" ? (draft.has_unpublished_changes ? "Published with unpublished changes." : "Published and live.") : "Unpublished draft. It is not visible on the public site."}</p>
       </article>
       <article className="admin-card admin-preview">
