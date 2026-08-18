@@ -4,7 +4,6 @@ import { ReadingProgress } from "@/app/components/reading-progress";
 import { ReadingNavigation } from "@/app/components/reading-navigation";
 import { ArticleRichTextRenderer } from "@/app/components/article-rich-text-renderer";
 import { getPublishedArticle, listPublishedArticles } from "@/app/lib/content-drafts";
-import { articlePreview } from "@/app/data/article-preview";
 
 function hasRichText(value: Record<string, unknown>): value is Record<string, unknown> & { richText: unknown } {
   return "richText" in value && typeof value.richText === "object" && value.richText !== null;
@@ -12,14 +11,7 @@ function hasRichText(value: Record<string, unknown>): value is Record<string, un
 
 export default async function ArticlePage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const storedArticle = await getPublishedArticle(slug);
-  const article = storedArticle ?? (slug === articlePreview.slug ? {
-    title: articlePreview.title,
-    slug: articlePreview.slug,
-    category: articlePreview.category,
-    introduction: articlePreview.introduction,
-    body: { date: articlePreview.date, readingTime: articlePreview.readingTime, sections: articlePreview.sections },
-  } : null);
+  const article = await getPublishedArticle(slug);
   if (!article) notFound();
 
   const articles = await listPublishedArticles();
