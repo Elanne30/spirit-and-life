@@ -1,8 +1,9 @@
 "use client";
 
-import { EyeOff, MoreVertical, Upload } from "lucide-react";
+import { EyeOff, MoreVertical, Trash2, Upload } from "lucide-react";
 import { useState } from "react";
 import { publishArticleAction, unpublishArticleAction } from "@/app/admin/(protected)/actions/article-content";
+import { deleteArticleAction } from "@/app/admin/(protected)/actions/article-delete";
 import styles from "./content-more-actions.module.css";
 
 export function ArticleMoreActions({
@@ -38,6 +39,12 @@ export function ArticleMoreActions({
     requestForm(`publish-article-${slug}`);
   }
 
+  function confirmDelete() {
+    if (!window.confirm(`Delete “${title}”? This will remove it from the Admin and public website.`)) return;
+    close();
+    requestForm(`delete-article-${slug}`);
+  }
+
   return (
     <div className={styles.root}>
       <button className={styles.trigger} type="button" aria-label={`More options for ${title}`} aria-expanded={open} onClick={() => setOpen((value) => !value)}>
@@ -52,11 +59,13 @@ export function ArticleMoreActions({
             ) : (
               <button className={styles.menuItem} type="button" role="menuitem" onClick={confirmPublish}><Upload size={14} />Publish</button>
             )}
+            <button className={`${styles.menuItem} ${styles.danger}`} type="button" role="menuitem" onClick={confirmDelete}><Trash2 size={14} />Delete</button>
           </div>
         </>
       ) : null}
       <form id={`publish-article-${slug}`} action={publishArticleAction} hidden><input type="hidden" name="draftId" value={draftId ?? ""} /></form>
       <form id={`unpublish-article-${slug}`} action={unpublishArticleAction} hidden><input type="hidden" name="draftId" value={draftId ?? ""} /></form>
+      <form id={`delete-article-${slug}`} action={deleteArticleAction} hidden><input type="hidden" name="slug" value={slug} /></form>
     </div>
   );
 }
