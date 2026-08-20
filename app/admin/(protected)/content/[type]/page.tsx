@@ -2,7 +2,7 @@ import Link from "next/link";
 import { CalendarDays, Clock3, Eye, Plus, Search } from "lucide-react";
 import { listAdminContentItems, type AdminContentItem, type AdminContentType } from "@/app/admin/(protected)/content/admin-content";
 import { ContentMoreActions } from "@/app/admin/(protected)/content/content-more-actions";
-import type { DraftContentType } from "@/app/lib/content-drafts";
+import { ArticleMoreActions } from "@/app/admin/(protected)/content/article-more-actions";
 import styles from "../admin-library-reference.module.css";
 
 const config: Record<AdminContentType, {
@@ -45,17 +45,8 @@ function imageFor(item: AdminContentItem) {
   return item.image ?? "";
 }
 
-function isDraftContentType(value: AdminContentType): value is DraftContentType {
-  return value === "reflection" || value === "journal" || value === "book";
-}
-
-export default async function ContentTypeWorkspace({
-  params,
-}: {
-  params: Promise<{ type: string }>;
-}) {
+export default async function ContentTypeWorkspace({ params }: { params: Promise<{ type: string }> }) {
   const { type } = await params;
-
   if (!(type in config)) return null;
 
   const contentType = type as AdminContentType;
@@ -63,7 +54,6 @@ export default async function ContentTypeWorkspace({
   const items = await listAdminContentItems(contentType);
   const publishedCount = items.filter((item) => item.status === "published" || item.status === "static").length;
   const draftCount = items.filter((item) => item.status === "draft").length;
-  const legacyContentType = isDraftContentType(contentType) ? contentType : null;
 
   return (
     <section className={`${styles.library} admin-library-page`}>
@@ -79,17 +69,11 @@ export default async function ContentTypeWorkspace({
           <span className={styles.tab}>Drafts ({draftCount})</span>
           <span className={styles.tab}>Archived (0)</span>
         </nav>
-
         <label className={styles.search}>
           <Search size={15} aria-hidden="true" />
           <input aria-label={`Search ${current.label.toLowerCase()}`} placeholder={`Search ${current.label.toLowerCase()}...`} readOnly />
         </label>
-
-        <Link
-          className={`button button-primary ${styles.addButton}`}
-          href={`/admin/content/${contentType}/new`}
-          aria-label={`Add ${current.singular}`}
-        >
+        <Link className={`button button-primary ${styles.addButton}`} href={`/admin/content/${contentType}/new`} aria-label={`Add ${current.singular}`}>
           <Plus size={15} />
           Add {current.singular}
         </Link>
@@ -102,24 +86,10 @@ export default async function ContentTypeWorkspace({
             const isBook = contentType === "book";
             return (
               <article className={styles.card} key={`${item.contentType}-${item.slug}`}>
-                <Link
-                  className={`${styles.imageWrap} ${isBook ? styles.bookImageWrap : ""}`}
-                  href={`/admin/content/${item.contentType}/${item.slug}`}
-                  aria-label={`Open ${item.title}`}
-                >
-                  {image ? (
-                    <img
-                      className={`${styles.image} ${isBook ? styles.bookImage : ""}`}
-                      src={image}
-                      alt=""
-                      loading="lazy"
-                    />
-                  ) : null}
-                  <span className={`${styles.status} ${statusClass(item)}`}>
-                    {statusLabel(item)}
-                  </span>
+                <Link className={`${styles.imageWrap} ${isBook ? styles.bookImageWrap : ""}`} href={`/admin/content/${item.contentType}/${item.slug}`} aria-label={`Open ${item.title}`}>
+                  {image ? <img className={`${styles.image} ${isBook ? styles.bookImage : ""}`} src={image} alt="" loading="lazy" /> : <span className={styles.imagePlaceholder}>{contentType === "article" ? "Article" : current.singular}</span>}
+                  <span className={`${styles.status} ${statusClass(item)}`}>{statusLabel(item)}</span>
                 </Link>
-
                 <div className={styles.body}>
                   <p className={styles.category}>{item.category ?? current.singular}</p>
                   <h2 className={styles.title}>{item.title}</h2>
@@ -128,32 +98,21 @@ export default async function ContentTypeWorkspace({
                     {item.readingTime ? <span><Clock3 size={12} />{item.readingTime}</span> : null}
                   </div>
                 </div>
-
                 <div className={styles.actions}>
-                  <Link className={styles.action} href={`/admin/content/${item.contentType}/${item.slug}?view=edit`}>
-                    Edit
-                  </Link>
-                  <Link className={styles.action} href={`/admin/content/${item.contentType}/${item.slug}`} aria-label={`Preview ${item.title}`} title="Preview">
-                    <Eye size={15} />
-                  </Link>
-                  {legacyContentType ? (
-                    <ContentMoreActions
-                      contentType={legacyContentType}
-                      slug={item.slug}
-                      title={item.title}
-                      status={item.status}
-                      draftId={item.draftId}
-                    />
-                  ) : null}
+                  <Link className={styles.action} href={`/admin/content/${item.contentType}/${item.slug}?view=edit`}>Edit</Link>
+                  <Link className={styles.action} href={`/admin/content/${item.contentType}/${item.slug}`} aria-label={`Preview ${item.title}`} title="Preview"><Eye size={15} /></Link>
+                  {contentType === "article" ? (
+                    <ArticleMoreActions slug={item.slug} title={item.title} status={item.status} draftId={item.draftId} />
+                  ) : (
+                    <ContentMoreActions contentType={contentType} slug={item.slug} title={item.title} status={item.status} draftId={item.draftId} />
+                  )}
                 </div>
               </article>
             );
           })}
         </div>
       ) : (
-        <div className={styles.empty}>
-          No {current.label.toLowerCase()} yet. Add your first {current.singular.toLowerCase()} to begin.
-        </div>
+        <div className={styles.empty}>No {current.label.toLowerCase()} yet. Add your first {current.singular.toLowerCase()} to begin.</div>
       )}
     </section>
   );
