@@ -38,7 +38,7 @@ export async function RelatedContent({ relations, scriptureReference, scriptureS
       meta: `${reference.book} · Chapter ${reference.chapter}`,
     }));
 
-  const relatedItems: RelatedItem[] = [
+  const explicitItems: RelatedItem[] = [
     ...(relations.relatedReflectionSlugs ?? [])
       .map((slug) => reflections.find((reflection) => reflection.contentSlug === slug))
       .filter((reflection): reflection is (typeof reflections)[number] => Boolean(reflection))
@@ -82,6 +82,32 @@ export async function RelatedContent({ relations, scriptureReference, scriptureS
       })),
   ];
 
+  const fallbackItems: RelatedItem[] = [
+    ...reflections.slice(0, 2).map((reflection) => ({
+      href: `/reflections/${reflection.contentSlug}`,
+      label: "Reflection",
+      title: reflection.title,
+      description: reflection.introduction,
+      meta: [reflection.date, reflection.readingTime, reflection.scripture].filter(Boolean).join(" · "),
+    })),
+    ...journals.slice(0, 2).map((journal) => ({
+      href: `/journals/${journal.contentSlug}`,
+      label: "Journal",
+      title: journal.title,
+      description: journal.introduction,
+      meta: journal.date,
+    })),
+    ...books.slice(0, 1).map((book) => ({
+      href: `/books/${book.contentSlug}`,
+      label: "Book",
+      title: book.title,
+      description: book.description?.split("\n\n")[0],
+      meta: book.category ?? book.status,
+    })),
+    ...scriptureItems,
+  ];
+
+  const relatedItems = explicitItems.length ? explicitItems : fallbackItems;
   const uniqueItems = relatedItems
     .filter((item, index) => relatedItems.findIndex((candidate) => candidate.href === item.href) === index)
     .slice(0, 6);
