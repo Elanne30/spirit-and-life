@@ -1,23 +1,8 @@
 export type ContentKind = "article" | "reflection" | "journal" | "book" | "study-center";
 
-export type Topic = {
-  slug: string;
-  name: string;
-  description?: string;
-};
+export type Topic = { slug: string; name: string; description?: string };
+export type Series = { slug: string; name: string; description?: string };
 
-export type Series = {
-  slug: string;
-  name: string;
-  description?: string;
-};
-
-/**
- * Initial editorial taxonomy for Spirit & Life.
- * Kept as typed application data for the first Phase Two increment so the
- * existing content records remain untouched while the relationship layer is
- * introduced.
- */
 export const TOPICS: readonly Topic[] = [
   { slug: "god", name: "God" },
   { slug: "jesus-christ", name: "Jesus Christ" },
@@ -34,12 +19,8 @@ export const TOPICS: readonly Topic[] = [
   { slug: "science-and-faith", name: "Science & Faith" },
 ];
 
+/** Series are data-driven so editorial series can be added without changing the content model. */
 export const SERIES: readonly Series[] = [];
 
-export function getTopic(slug: string) {
-  return TOPICS.find((topic) => topic.slug === slug) ?? null;
-}
-
-export function getSeries(slug: string) {
-  return SERIES.find((series) => series.slug === slug) ?? null;
-}
+export function getTopic(slug: string) { return TOPICS.find((topic) => topic.slug === slug) ?? null; }
+export function getSeries(slug: string) { return SERIES.find((series) => series.slug === slug) ?? null; }
