@@ -33,6 +33,9 @@ export function ArticleForm({ draft }: Props) {
     <div className="admin-form-grid"><div><label htmlFor="article-date">Date</label><input id="article-date" name="date" defaultValue={typeof draft?.body.date === "string" ? draft.body.date : ""} placeholder="August 18, 2026" /></div><div><label htmlFor="article-reading-time">Reading time</label><input id="article-reading-time" name="readingTime" defaultValue={typeof draft?.body.readingTime === "string" ? draft.body.readingTime : ""} placeholder="6 min read" /></div></div>
     <label htmlFor="article-introduction">Introduction</label>
     <textarea id="article-introduction" name="introduction" rows={5} defaultValue={draft?.introduction ?? ""} />
+    <label htmlFor="article-image">Article image</label>
+    <input id="article-image" name="imageReference" defaultValue={draft?.image_reference ?? ""} placeholder="/images/articles/my-article.jpg or https://..." />
+    <p className="form-note">Optional. Use a site image path or an approved image URL. It appears on Article cards and at the top of the Article.</p>
     <label htmlFor="article-scripture">Scripture reference</label>
     <input id="article-scripture" name="scripture" defaultValue={bodyString(draft, "scripture")} placeholder="Romans 8:28" />
     <label htmlFor="article-tags">Tags</label><input id="article-tags" name="tags" defaultValue={draft?.tags.join(", ") ?? ""} placeholder="Faith, Philosophy, Apologetics" />
