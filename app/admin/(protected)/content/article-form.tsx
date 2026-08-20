@@ -9,6 +9,8 @@ import type { ArticleDraft } from "@/app/lib/content-drafts";
 const initialState: ArticleActionState = { status: "idle", message: "" };
 type Props = { draft?: ArticleDraft };
 function makeSlug(value: string) { return value.normalize("NFKD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 120); }
+function bodyString(draft: ArticleDraft | undefined, key: string) { return typeof draft?.body[key] === "string" ? String(draft.body[key]) : ""; }
+function bodyList(draft: ArticleDraft | undefined, key: string) { return Array.isArray(draft?.body[key]) ? draft?.body[key].filter((value): value is string => typeof value === "string").join(", ") : ""; }
 
 export function ArticleForm({ draft }: Props) {
   const action = draft ? updateArticleAction : createArticleAction;
@@ -29,8 +31,25 @@ export function ArticleForm({ draft }: Props) {
     <label htmlFor="article-category">Category</label>
     <select id="article-category" name="category" defaultValue={draft?.category ?? "Philosophy"}><option>Philosophy</option><option>Apologetics</option><option>Biblical Studies</option><option>Theology</option><option>Christian Living</option><option>Faith &amp; Life</option><option>Church History</option></select>
     <div className="admin-form-grid"><div><label htmlFor="article-date">Date</label><input id="article-date" name="date" defaultValue={typeof draft?.body.date === "string" ? draft.body.date : ""} placeholder="August 18, 2026" /></div><div><label htmlFor="article-reading-time">Reading time</label><input id="article-reading-time" name="readingTime" defaultValue={typeof draft?.body.readingTime === "string" ? draft.body.readingTime : ""} placeholder="6 min read" /></div></div>
-    <label htmlFor="article-introduction">Introduction</label><textarea id="article-introduction" name="introduction" rows={5} defaultValue={draft?.introduction ?? ""} />
+    <label htmlFor="article-introduction">Introduction</label>
+    <textarea id="article-introduction" name="introduction" rows={5} defaultValue={draft?.introduction ?? ""} />
+    <label htmlFor="article-scripture">Scripture reference</label>
+    <input id="article-scripture" name="scripture" defaultValue={bodyString(draft, "scripture")} placeholder="Romans 8:28" />
     <label htmlFor="article-tags">Tags</label><input id="article-tags" name="tags" defaultValue={draft?.tags.join(", ") ?? ""} placeholder="Faith, Philosophy, Apologetics" />
+
+    <fieldset className="admin-form-section">
+      <legend>Related material</legend>
+      <p className="form-note">Use content slugs, separated by commas. These connections appear at the end of the article.</p>
+      <label htmlFor="article-related-reflections">Related reflection slugs</label>
+      <input id="article-related-reflections" name="relatedReflectionSlugs" defaultValue={bodyList(draft, "relatedReflectionSlugs")} placeholder="reading-scripture-in-context-why-it-matters" />
+      <label htmlFor="article-related-journals">Related journal slugs</label>
+      <input id="article-related-journals" name="relatedJournalSlugs" defaultValue={bodyList(draft, "relatedJournalSlugs")} placeholder="on-slowing-down-to-read" />
+      <label htmlFor="article-related-books">Related book slugs</label>
+      <input id="article-related-books" name="relatedBookSlugs" defaultValue={bodyList(draft, "relatedBookSlugs")} placeholder="book-slug" />
+      <label htmlFor="article-related-studies">Related Study Center dates</label>
+      <input id="article-related-studies" name="relatedStudyPlanDates" defaultValue={bodyList(draft, "relatedStudyPlanDates")} placeholder="2026-11-21, 2026-11-22" />
+    </fieldset>
+
     <div className="admin-stack"><p className="admin-form-label" id="article-body-label">Article body</p><AdminRichTextEditor initialValue={document} onChange={setDocument} labelledBy="article-body-label" /><input name="sections" type="hidden" value={JSON.stringify(sections)} /><input name="richText" type="hidden" value={JSON.stringify(document)} /></div>
     <label className="admin-checkbox"><input name="featured" type="checkbox" value="yes" defaultChecked={draft?.body.featured === true} /> Feature this article</label>
     {!draft ? <input type="hidden" name="saveMode" value="draft" /> : null}
