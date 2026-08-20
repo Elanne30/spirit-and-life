@@ -2,11 +2,23 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ReadingProgress } from "@/app/components/reading-progress";
 import { ReadingNavigation } from "@/app/components/reading-navigation";
+import { RelatedContent } from "@/app/components/related-content";
 import { ArticleRichTextRenderer } from "@/app/components/article-rich-text-renderer";
 import { getPublishedArticle, listPublishedArticles } from "@/app/lib/content-drafts";
+import type { ContentRelations } from "@/app/content/types";
 
 function hasRichText(value: Record<string, unknown>): value is Record<string, unknown> & { richText: unknown } {
   return "richText" in value && typeof value.richText === "object" && value.richText !== null;
+}
+
+function getRelations(body: Record<string, unknown>): ContentRelations {
+  const strings = (value: unknown) => Array.isArray(value) ? value.filter((item): item is string => typeof item === "string") : [];
+  return {
+    relatedReflectionSlugs: strings(body.relatedReflectionSlugs),
+    relatedJournalSlugs: strings(body.relatedJournalSlugs),
+    relatedBookSlugs: strings(body.relatedBookSlugs),
+    relatedStudyPlanDates: strings(body.relatedStudyPlanDates),
+  };
 }
 
 export default async function ArticlePage({ params }: { params: Promise<{ slug: string }> }) {
@@ -21,6 +33,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
   const body = article.body;
   const sections = Array.isArray(body.sections) ? body.sections : [];
   const richText = hasRichText(body) ? body.richText : null;
+  const relations = getRelations(body);
 
   return (
     <main className="reflection-detail-page article-detail-page">
@@ -45,6 +58,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
           ))}
           <ReadingNavigation previous={previous ? { href: `/articles/${previous.slug}`, title: previous.title } : undefined} next={next ? { href: `/articles/${next.slug}`, title: next.title } : undefined} />
           <Link className="button button-text" href="/articles">Back to Articles</Link>
+          <RelatedContent relations={relations} scriptureReference={typeof body.scripture === "string" ? body.scripture : undefined} />
         </div>
       </article>
     </main>
