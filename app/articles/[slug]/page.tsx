@@ -6,6 +6,7 @@ import { ReadingNavigation } from "@/app/components/reading-navigation";
 import { RelatedContent } from "@/app/components/related-content";
 import { ArticleRichTextRenderer } from "@/app/components/article-rich-text-renderer";
 import { getPublishedArticle, listPublishedArticles } from "@/app/lib/content-drafts";
+import { studies } from "@/app/data/study-plan";
 import type { ContentRelations } from "@/app/content/types";
 import { articleMetadata, articleStructuredData } from "@/app/content/seo";
 
@@ -44,6 +45,9 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
   const sections = Array.isArray(body.sections) ? body.sections : [];
   const richText = hasRichText(body) ? body.richText : null;
   const relations = getRelations(body);
+  const assignedLectures = (relations.relatedStudyPlanDates ?? [])
+    .map((date) => studies.find((study) => study.date === date))
+    .filter((study): study is (typeof studies)[number] => Boolean(study));
   const image = article.image_reference ?? (typeof body.image === "string" ? body.image : "");
   const structuredData = articleStructuredData({
     title: article.title,
@@ -73,6 +77,11 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
           </div> : null}
           <div className="article-reading-column reflection-reading-column">
             {article.introduction ? <p className="reflection-introduction">{article.introduction}</p> : null}
+            {assignedLectures.length ? <section className="reading-section article-assigned-lecture" aria-labelledby="assigned-lecture-title">
+              <p className="eyebrow">Assigned lecture</p>
+              <h2 id="assigned-lecture-title">Study assignment</h2>
+              {assignedLectures.map((study) => <div key={study.date}><p><strong>{study.weekday}, {study.date}</strong></p><p>{study.passage}</p><p>{study.focus}</p><Link className="button button-text" href={`/study-center/${study.date}`}>Open lecture →</Link></div>)}
+            </section> : null}
             {richText ? <ArticleRichTextRenderer document={richText} /> : sections.map((section, sectionIndex) => (
               <section className="reading-section" key={sectionIndex}>
                 {typeof section === "object" && section !== null && typeof (section as { heading?: unknown }).heading === "string" && (section as { heading: string }).heading ? <h2>{(section as { heading: string }).heading}</h2> : null}
