@@ -32,19 +32,26 @@ function staticItemsFor(contentType: DraftContentType): Array<{ contentSlug: str
   return books.map((book) => ({ contentSlug: book.contentSlug, title: book.title, category: book.category, date: book.expectedPublication, image: book.cover }));
 }
 
+function bodyString(body: Record<string, unknown>, key: string) {
+  const value = body[key];
+  return typeof value === "string" && value ? value : undefined;
+}
+
 function mapDraftToAdminItem(draft: ContentDraft | ArticleDraft): AdminContentItem {
   return {
     contentType: draft.content_type,
     slug: draft.slug,
     title: draft.title,
     category: draft.category ?? undefined,
+    date: bodyString(draft.body, "date"),
+    readingTime: bodyString(draft.body, "readingTime"),
     updatedAt: draft.updated_at,
     status: draft.status === "published" ? "published" : "draft",
     hasDraft: true,
     hasUnpublishedChanges: draft.has_unpublished_changes,
     draftId: draft.id,
     isStaticSource: false,
-    image: draft.image_reference ?? undefined,
+    image: draft.image_reference ?? (bodyString(draft.body, "image")),
   };
 }
 
@@ -66,15 +73,15 @@ export async function listAdminContentItems(contentType: AdminContentType): Prom
       slug: item.contentSlug,
       title: draft?.title ?? item.title,
       category: draft?.category ?? item.category,
-      date: item.date,
+      date: draft ? (bodyString(draft.body, "date") ?? item.date) : item.date,
       updatedAt: draft?.updated_at,
       status: draft ? (draft.status === "published" ? "published" : "draft") : "static",
       hasDraft: Boolean(draft),
       hasUnpublishedChanges: draft?.has_unpublished_changes ?? false,
       draftId: draft?.id,
       isStaticSource: true,
-      image: draft ? (draft.image_reference ?? undefined) : item.image,
-      readingTime: item.readingTime,
+      image: draft ? (draft.image_reference ?? bodyString(draft.body, "image") ?? undefined) : item.image,
+      readingTime: draft ? (bodyString(draft.body, "readingTime") ?? item.readingTime) : item.readingTime,
     };
   });
 
