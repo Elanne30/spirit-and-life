@@ -29,6 +29,7 @@ function bodyOf(input: ReturnType<typeof read>) {
     date: input.date,
     readingTime: input.readingTime,
     featured: input.featured,
+    image: input.imageReference,
     scripture: input.scripture,
     relatedReflectionSlugs: input.relatedReflectionSlugs,
     relatedJournalSlugs: input.relatedJournalSlugs,
