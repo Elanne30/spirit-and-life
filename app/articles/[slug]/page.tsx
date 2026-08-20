@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ReadingProgress } from "@/app/components/reading-progress";
@@ -34,6 +35,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
   const sections = Array.isArray(body.sections) ? body.sections : [];
   const richText = hasRichText(body) ? body.richText : null;
   const relations = getRelations(body);
+  const image = article.image_reference ?? (typeof body.image === "string" ? body.image : "");
 
   return (
     <main className="reflection-detail-page article-detail-page">
@@ -48,6 +50,9 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
             <span>{article.category ?? "Article"}</span>
           </div>
         </header>
+        {image ? <div className="article-detail-hero page-container">
+          <Image src={image} alt="" width={1600} height={900} priority sizes="(max-width: 900px) 100vw, 78rem" />
+        </div> : null}
         <div className="article-reading-column reflection-reading-column">
           {article.introduction ? <p className="reflection-introduction">{article.introduction}</p> : null}
           {richText ? <ArticleRichTextRenderer document={richText} /> : sections.map((section, index) => (
@@ -61,6 +66,11 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
           <RelatedContent relations={relations} scriptureReference={typeof body.scripture === "string" ? body.scripture : undefined} />
         </div>
       </article>
+      <style>{`
+        .article-detail-hero { width: min(100% - 3rem, 78rem); margin: 0 auto clamp(2.5rem, 5vw, 4.5rem); overflow: hidden; border: 1px solid var(--line); background: var(--surface-muted); }
+        .article-detail-hero img { display: block; width: 100%; height: clamp(18rem, 42vw, 40rem); object-fit: cover; }
+        @media (max-width: 720px) { .article-detail-hero { width: min(100% - 2rem, 40rem); } .article-detail-hero img { height: 15rem; } }
+      `}</style>
     </main>
   );
 }
