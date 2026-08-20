@@ -3,14 +3,14 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireAdminActionAccess } from "@/app/lib/admin-session";
-import { deleteContent, normalizeDraftSlug } from "@/app/lib/content-drafts";
+import { deleteContent, normalizeDraftSlug, type DraftContentType } from "@/app/lib/content-drafts";
 
 export async function deleteArticleAction(formData: FormData) {
   if (!(await requireAdminActionAccess())) return;
   const slug = normalizeDraftSlug(String(formData.get("slug") ?? "").trim());
   if (!slug) return;
 
-  await deleteContent("article", slug);
+  await deleteContent("article" as DraftContentType, slug);
   revalidatePath("/admin");
   revalidatePath("/admin/content");
   revalidatePath("/admin/content/article");
