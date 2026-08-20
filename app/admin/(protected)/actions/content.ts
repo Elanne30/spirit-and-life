@@ -115,9 +115,10 @@ export async function uploadContentImageAction(_previousState: ContentDraftActio
     const blob = await put(`content/${draft.content_type}/${draft.slug}-${Date.now()}.${extension}`, file, { access: "public", addRandomSuffix: true, contentType: file.type });
     const updated = await updateDraftImage(draftId, blob.url);
     if (!updated) return { status: "error", message: "Draft not found." };
-    revalidatePath(`/admin/content/${draft.content_type}/${draft.slug}`);
-    revalidatePath(`/admin/content/${draft.content_type}/${draft.slug}/edit`);
-    const publicRoute = draft.content_type === "article" ? "articles" : draft.content_type === "reflection" ? "reflections" : draft.content_type === "journal" ? "journals" : "books";
+    const draftType = String(draft.content_type);
+    const publicRoute = draftType === "article" ? "articles" : draftType === "reflection" ? "reflections" : draftType === "journal" ? "journals" : "books";
+    revalidatePath(`/admin/content/${draftType}/${draft.slug}`);
+    revalidatePath(`/admin/content/${draftType}/${draft.slug}/edit`);
     revalidatePath(`/${publicRoute}/${draft.slug}`);
     revalidatePath(`/${publicRoute}`);
     revalidatePath("/");
