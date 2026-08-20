@@ -2,6 +2,7 @@
 
 import { scriptureReferences } from "@/app/content/scripture";
 import { listPublishedBooks, listPublishedJournals, listPublishedReflections } from "@/app/content/repository";
+import { listPublishedArticles } from "@/app/lib/content-drafts";
 import { studies } from "@/app/data/study-plan";
 import type { SearchResult, SearchType } from "@/app/content/search-types";
 
@@ -20,11 +21,34 @@ function normalizeSearchText(value: string) {
 }
 
 async function buildSearchIndex(): Promise<IndexedSearchResult[]> {
+  const articles = await listPublishedArticles();
   const reflections = await listPublishedReflections();
   const journals = await listPublishedJournals();
   const books = await listPublishedBooks();
 
   return [
+  ...articles.map((article): IndexedSearchResult => ({
+    type: "Article" as const,
+    title: article.title,
+    description: article.introduction ?? `${article.category ?? "Article"} - Spirit & Life`,
+    href: `/articles/${article.slug}`,
+    meta: [typeof article.body.date === "string" ? article.body.date : "", typeof article.body.readingTime === "string" ? article.body.readingTime : "", article.category ?? ""].filter(Boolean).join(" · "),
+    searchText: [
+      "Article",
+      article.title,
+      article.category ?? "",
+      ...(article.tags ?? []),
+      article.introduction ?? "",
+      typeof article.body.scripture === "string" ? article.body.scripture : "",
+      typeof article.body.date === "string" ? article.body.date : "",
+      typeof article.body.readingTime === "string" ? article.body.readingTime : "",
+      ...((Array.isArray(article.body.sections) ? article.body.sections : []).flatMap((section) => {
+        if (!section || typeof section !== "object") return [];
+        const value = section as { heading?: unknown; paragraphs?: unknown };
+        return [typeof value.heading === "string" ? value.heading : "", ...(Array.isArray(value.paragraphs) ? value.paragraphs.filter((paragraph): paragraph is string => typeof paragraph === "string") : [])];
+      })),
+    ].join(" "),
+  })),
   ...reflections.map((reflection): IndexedSearchResult => ({
     type: "Reflection" as const,
     title: reflection.title,
