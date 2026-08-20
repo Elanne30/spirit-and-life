@@ -77,7 +77,8 @@ async function getAvailableArticleSlug(requestedSlug: string) {
 function resolvePublishedArticle(draft: ArticleDraft): ArticleDraft {
   if (!draft.published_snapshot) return draft;
   const snapshot = draft.published_snapshot;
-  return { ...draft, title: snapshot.title, slug: snapshot.slug, introduction: snapshot.introduction, body: snapshot.body, category: snapshot.category, tags: snapshot.tags, image_reference: snapshot.image_reference };
+  const body = snapshot.image_reference ? { ...snapshot.body, image: snapshot.image_reference } : snapshot.body;
+  return { ...draft, title: snapshot.title, slug: snapshot.slug, introduction: snapshot.introduction, body, category: snapshot.category, tags: snapshot.tags, image_reference: snapshot.image_reference };
 }
 export async function getArticleDraft(id: string) { await ensureSchema(); const result = await sql<ArticleDraft>`SELECT * FROM content_drafts WHERE id = ${id} AND content_type = 'article' LIMIT 1`; return result.rows[0] ?? null; }
 export async function getArticleDraftBySlug(slug: string) { await ensureSchema(); const normalizedSlug = normalizeDraftSlug(slug); const result = await sql<ArticleDraft>`SELECT * FROM content_drafts WHERE content_type = 'article' AND slug = ${normalizedSlug} LIMIT 1`; return result.rows[0] ?? null; }
