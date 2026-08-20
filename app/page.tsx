@@ -2,6 +2,7 @@ import { Button } from "@/app/components/button";
 import { SectionHeading } from "@/app/components/section-heading";
 import { getFeaturedBook } from "@/app/content/featured";
 import { listPublishedJournals, listPublishedReflections } from "@/app/content/repository";
+import { listPublishedArticles } from "@/app/lib/content-drafts";
 import { getStudyByDate } from "@/app/data/study-plan";
 import { siteConfig } from "@/app/content/site-config";
 import Link from "next/link";
@@ -9,7 +10,8 @@ import Image from "next/image";
 import { HomeNewsletterSection } from "@/app/home-newsletter-section";
 
 export default async function Home() {
-  const [reflections, journals, featuredBook] = await Promise.all([
+  const [articles, reflections, journals, featuredBook] = await Promise.all([
+    listPublishedArticles(),
     listPublishedReflections(),
     listPublishedJournals(),
     getFeaturedBook(),
@@ -18,14 +20,15 @@ export default async function Home() {
     ...reflections.filter((reflection) => reflection.featured),
     ...reflections.filter((reflection) => !reflection.featured),
   ].slice(0, 2);
+  const featuredArticle = articles.find((article) => article.body.featured === true) ?? articles[0];
   const featuredJournal = journals[0];
   const todayStudy = getStudyByDate(new Date().toISOString().slice(0, 10));
 
   const libraryEntries = [
-    { number: "01", title: "Reflections", description: "Thoughtful writing on Scripture, theology, philosophy, and Christian living.", href: "/reflections", action: "Read reflections" },
-    { number: "02", title: "Journals", description: "Personal observations and lessons gathered through study, work, faith, and life.", href: "/journals", action: "Read the journal" },
-    { number: "03", title: "Books", description: "Longer works exploring biblical themes, difficult questions, and the life of faith.", href: "/books", action: "Browse the books" },
-    { number: "04", title: "Study Center", description: "A structured place to read Scripture slowly, ask better questions, and keep studying.", href: "/study-center", action: "Enter the Study Center" },
+    { number: "01", title: "Articles", description: "Long-form writing on faith, philosophy, apologetics, theology, and hard questions.", href: "/articles", action: "Read articles" },
+    { number: "02", title: "Reflections", description: "Thoughtful writing on Scripture, theology, philosophy, and Christian living.", href: "/reflections", action: "Read reflections" },
+    { number: "03", title: "Journals", description: "Personal observations and lessons gathered through study, work, faith, and life.", href: "/journals", action: "Read the journal" },
+    { number: "04", title: "Books", description: "Longer works exploring biblical themes, difficult questions, and the life of faith.", href: "/books", action: "Browse the books" },
   ];
 
   return (
@@ -73,52 +76,58 @@ export default async function Home() {
           </div>
         </section>
 
-        <section className="home-feature page-container" aria-labelledby="home-reflections-title">
+        <section className="home-feature page-container" aria-labelledby="featured-writing-title">
           <div className="home-section-intro home-feature-intro">
             <div>
               <p className="eyebrow">Featured writing</p>
-              <h2 id="home-reflections-title">Start with a question.</h2>
+              <h2 id="featured-writing-title">One of each, to begin.</h2>
             </div>
-            <Link className="section-arrow-link" href="/reflections">View all reflections <span aria-hidden="true">↗</span></Link>
+            <Link className="section-arrow-link" href="/articles">View all articles <span aria-hidden="true">↗</span></Link>
           </div>
-          {homepageReflections.length ? (
-            <div className="reflection-grid home-reflection-grid">
-              {homepageReflections.map((reflection, index) => (
-                <article className={`reflection-card home-reflection-card home-reflection-card-${index + 1}`} key={reflection.contentSlug}>
-                  <Link className="reflection-card-image" href={`/reflections/${reflection.contentSlug}`}>
-                    <Image src={reflection.image} alt={reflection.title} width={1280} height={853} sizes="(max-width: 720px) 100vw, 60vw" />
-                  </Link>
-                  <div className="reflection-card-body">
-                    <div className="home-card-meta"><span>{reflection.category}</span><span>{reflection.readingTime}</span></div>
-                    <h3><Link href={`/reflections/${reflection.contentSlug}`}>{reflection.title}</Link></h3>
-                    <p className="scripture-reference">{reflection.scripture}</p>
-                    <p>{reflection.introduction}</p>
-                    <Link className="content-card-link" href={`/reflections/${reflection.contentSlug}`}>Read reflection <span aria-hidden="true">→</span></Link>
-                  </div>
-                </article>
-              ))}
-            </div>
-          ) : <p className="empty-state">Reflections will appear here when they are published.</p>}
-        </section>
+          <div className="home-writing-grid">
+            {featuredArticle ? <article className="home-writing-card home-article-card">
+              {typeof featuredArticle.body.image === "string" && featuredArticle.body.image ? <Link className="home-writing-card-image" href={`/articles/${featuredArticle.slug}`}>
+                <Image src={featuredArticle.body.image} alt={featuredArticle.title} width={1280} height={853} sizes="(max-width: 720px) 100vw, 33vw" />
+              </Link> : null}
+              <div className="home-writing-card-body">
+                <p className="content-card-label">Article · {featuredArticle.category ?? "Article"}</p>
+                <h3><Link href={`/articles/${featuredArticle.slug}`}>{featuredArticle.title}</Link></h3>
+                {featuredArticle.introduction ? <p>{featuredArticle.introduction}</p> : null}
+                <p className="home-card-meta-single">{typeof featuredArticle.body.date === "string" ? featuredArticle.body.date : ""}{typeof featuredArticle.body.readingTime === "string" && featuredArticle.body.readingTime ? ` · ${featuredArticle.body.readingTime}` : ""}</p>
+                <Link className="content-card-link" href={`/articles/${featuredArticle.slug}`}>Read article <span aria-hidden="true">→</span></Link>
+              </div>
+            </article> : <article className="home-writing-card"><div className="home-writing-card-body"><p className="empty-state">Articles will appear here when one is published.</p></div></article>}
 
-        <section className="home-companion-section page-container" aria-label="Journal and today’s study">
-          <article className="home-companion-panel home-journal-panel">
-            <div className="home-panel-heading"><p className="eyebrow">From the journal</p><span aria-hidden="true">02</span></div>
-            <h2>Notes from the life of faith.</h2>
-            {featuredJournal ? <article className="journal-card">
-              <Link className="journal-card-image" href={`/journals/${featuredJournal.contentSlug}`}>
-                <Image src={featuredJournal.image} alt={featuredJournal.title} width={1280} height={853} sizes="(max-width: 720px) 100vw, 50vw" />
+            {homepageReflections[0] ? <article className="home-writing-card home-reflection-feature-card">
+              <Link className="home-writing-card-image" href={`/reflections/${homepageReflections[0].contentSlug}`}>
+                <Image src={homepageReflections[0].image} alt={homepageReflections[0].title} width={1280} height={853} sizes="(max-width: 720px) 100vw, 33vw" />
               </Link>
-              <div className="journal-card-body">
-                <p className="content-card-label">{featuredJournal.date}</p>
+              <div className="home-writing-card-body">
+                <p className="content-card-label">Reflection · {homepageReflections[0].category}</p>
+                <h3><Link href={`/reflections/${homepageReflections[0].contentSlug}`}>{homepageReflections[0].title}</Link></h3>
+                <p className="scripture-reference">{homepageReflections[0].scripture}</p>
+                <p>{homepageReflections[0].introduction}</p>
+                <Link className="content-card-link" href={`/reflections/${homepageReflections[0].contentSlug}`}>Read reflection <span aria-hidden="true">→</span></Link>
+              </div>
+            </article> : null}
+
+            {featuredJournal ? <article className="home-writing-card home-journal-feature-card">
+              <Link className="home-writing-card-image" href={`/journals/${featuredJournal.contentSlug}`}>
+                <Image src={featuredJournal.image} alt={featuredJournal.title} width={1280} height={853} sizes="(max-width: 720px) 100vw, 33vw" />
+              </Link>
+              <div className="home-writing-card-body">
+                <p className="content-card-label">Journal · {featuredJournal.date}</p>
                 <h3><Link href={`/journals/${featuredJournal.contentSlug}`}>{featuredJournal.title}</Link></h3>
                 <p>{featuredJournal.introduction}</p>
                 <Link className="content-card-link" href={`/journals/${featuredJournal.contentSlug}`}>Read entry <span aria-hidden="true">→</span></Link>
               </div>
-            </article> : <p className="empty-state">Journal entries will appear here when they are published.</p>}
-          </article>
+            </article> : null}
+          </div>
+        </section>
+
+        <section className="home-companion-section page-container" aria-label="Journal and today’s study">
           <article className="home-companion-panel home-study-panel">
-            <div className="home-panel-heading"><p className="eyebrow">Today&apos;s Study</p><span aria-hidden="true">03</span></div>
+            <div className="home-panel-heading"><p className="eyebrow">Today&apos;s Study</p><span aria-hidden="true">01</span></div>
             <h2>Stay with the text.</h2>
             {todayStudy ? <div className="home-study-card">
               <p className="content-card-label">{todayStudy.weekday} · {todayStudy.date}</p>
@@ -128,6 +137,18 @@ export default async function Home() {
               <div className="home-study-prompt"><span>Today&apos;s question</span><p>{todayStudy.reflection}</p></div>
               <Link className="content-card-link" href={`/study-center/${todayStudy.date}`}>Begin today&apos;s study <span aria-hidden="true">→</span></Link>
             </div> : <p className="empty-state">Today&apos;s study will appear here when a Study Center entry is available.</p>}
+          </article>
+          <article className="home-companion-panel home-journal-panel">
+            <div className="home-panel-heading"><p className="eyebrow">Keep reading</p><span aria-hidden="true">02</span></div>
+            <h2>There is more to explore.</h2>
+            <p className="home-companion-copy">Move between Articles, Reflections, Journals and Books, or continue with Scripture in the Study Center.</p>
+            <div className="home-companion-links">
+              <Link href="/articles">Articles <span aria-hidden="true">↗</span></Link>
+              <Link href="/reflections">Reflections <span aria-hidden="true">↗</span></Link>
+              <Link href="/journals">Journals <span aria-hidden="true">↗</span></Link>
+              <Link href="/books">Books <span aria-hidden="true">↗</span></Link>
+              <Link href="/study-center">Study Center <span aria-hidden="true">↗</span></Link>
+            </div>
           </article>
         </section>
 
@@ -183,29 +204,31 @@ export default async function Home() {
         .home-page .home-feature { padding-block: clamp(5rem, 8vw, 7rem); border-top: 1px solid var(--line); }
         .home-page .home-feature-intro { align-items: center; }
         .home-page .section-arrow-link { flex: 0 0 auto; color: var(--accent); font-size: .75rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
-        .home-page .home-reflection-grid { display: grid; grid-template-columns: 1.18fr .82fr; gap: 1.25rem; align-items: stretch; }
-        .home-page .reflection-card, .home-page .journal-card, .home-page .home-study-card { overflow: hidden; border: 1px solid var(--line); border-radius: .18rem; background: var(--surface); box-shadow: 0 1rem 2.4rem var(--shadow); }
-        .home-page .reflection-card-image, .home-page .journal-card-image { display: block; aspect-ratio: 16 / 9; overflow: hidden; background: var(--surface-muted); }
-        .home-page .home-reflection-card-1 .reflection-card-image { aspect-ratio: 1.42 / 1; }
-        .home-page .reflection-card-image img, .home-page .journal-card-image img { width: 100%; height: 100%; display: block; object-fit: cover; transition: transform 500ms ease; }
-        .home-page .reflection-card:hover img, .home-page .journal-card:hover img { transform: scale(1.035); }
-        .home-page .reflection-card-body, .home-page .journal-card-body { padding: 1.5rem; }
-        .home-page .home-reflection-card-1 .reflection-card-body { padding: clamp(1.5rem, 3vw, 2.2rem); }
-        .home-page .home-card-meta { display: flex; justify-content: space-between; gap: 1rem; margin-bottom: 1rem; color: var(--accent); font-size: .68rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
-        .home-page .reflection-card-body h3, .home-page .journal-card-body h3, .home-page .home-study-card h3 { margin: 0 0 .75rem; font-size: clamp(1.7rem, 3vw, 2.8rem); line-height: .98; letter-spacing: -.03em; }
-        .home-page .reflection-card-body > p:not(.home-card-meta):not(.scripture-reference), .home-page .journal-card-body > p:not(.content-card-label), .home-page .home-study-card > p:not(.content-card-label):not(.scripture-reference) { color: var(--muted); line-height: 1.7; }
+        .home-page .home-writing-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.25rem; align-items: stretch; }
+        .home-page .home-writing-card { overflow: hidden; min-width: 0; border: 1px solid var(--line); border-radius: .18rem; background: var(--surface); box-shadow: 0 1rem 2.4rem var(--shadow); }
+        .home-page .home-writing-card-image { display: block; aspect-ratio: 16 / 9; overflow: hidden; background: var(--surface-muted); }
+        .home-page .home-writing-card-image img { width: 100%; height: 100%; display: block; object-fit: cover; transition: transform 500ms ease; }
+        .home-page .home-writing-card:hover img { transform: scale(1.035); }
+        .home-page .home-writing-card-body { min-height: 15rem; padding: 1.5rem; }
+        .home-page .home-writing-card-body h3 { margin: .45rem 0 .8rem; font-size: clamp(1.55rem, 2.6vw, 2.35rem); line-height: .98; letter-spacing: -.03em; }
+        .home-page .home-writing-card-body > p:not(.content-card-label):not(.home-card-meta-single):not(.scripture-reference) { color: var(--muted); line-height: 1.65; }
+        .home-page .home-card-meta-single { margin-top: .85rem; color: var(--muted); font-size: .7rem; }
         .home-page .content-card-link { display: inline-flex; gap: .4rem; align-items: center; margin-top: 1rem; font-size: .72rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; }
-        .home-page .home-companion-section { display: grid; grid-template-columns: 1.08fr .92fr; gap: 1.25rem; padding-block: 0 clamp(5rem, 8vw, 7rem); }
+        .home-page .home-companion-section { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; padding-block: 0 clamp(5rem, 8vw, 7rem); }
         .home-page .home-companion-panel { min-width: 0; padding: clamp(1.35rem, 2.5vw, 2rem); border: 1px solid var(--line); background: color-mix(in srgb, var(--background) 72%, var(--surface)); }
         .home-page .home-panel-heading { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; }
         .home-page .home-panel-heading > span { color: var(--accent); font-size: .7rem; font-weight: 800; }
         .home-page .home-companion-panel > h2 { max-width: 25rem; margin: 0 0 1.5rem; font-size: clamp(2rem, 3.5vw, 3.3rem); line-height: .94; letter-spacing: -.04em; }
-        .home-page .journal-card { box-shadow: none; }
         .home-page .home-study-panel { display: flex; flex-direction: column; }
-        .home-page .home-study-card { flex: 1; padding: clamp(1.35rem, 2.5vw, 2rem); box-shadow: none; }
+        .home-page .home-study-card { flex: 1; padding: clamp(1.35rem, 2.5vw, 2rem); overflow: hidden; border: 1px solid var(--line); border-radius: .18rem; background: var(--surface); box-shadow: none; }
         .home-page .home-study-prompt { margin: 1.5rem 0; padding: 1rem 0 0; border-top: 1px solid var(--line); }
         .home-page .home-study-prompt > span { color: var(--accent); font-size: .68rem; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
         .home-page .home-study-prompt p { margin: .55rem 0 0; font-family: var(--font-serif, Georgia, serif); font-size: 1.08rem; line-height: 1.5; }
+        .home-page .home-companion-copy { max-width: 34rem; color: var(--muted); line-height: 1.7; }
+        .home-page .home-companion-links { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); margin-top: 1.5rem; border-top: 1px solid var(--line); }
+        .home-page .home-companion-links a { display: flex; justify-content: space-between; gap: 1rem; padding: .9rem 0; color: inherit; border-bottom: 1px solid var(--line); font-size: .8rem; font-weight: 700; }
+        .home-page .home-companion-links a:nth-child(odd) { padding-right: 1rem; border-right: 1px solid var(--line); }
+        .home-page .home-companion-links a:nth-child(even) { padding-left: 1rem; }
         .home-page .home-book-feature { padding-top: clamp(5rem, 8vw, 7rem); }
         .home-page .feature-split-book { display: grid; grid-template-columns: minmax(11rem, 18rem) minmax(0, 1fr); align-items: center; gap: clamp(2rem, 6vw, 5rem); padding: clamp(1.5rem, 3vw, 2.75rem); border: 1px solid var(--line); background: var(--surface); box-shadow: 0 1rem 2.5rem var(--shadow); }
         .home-page .book-cover-wrap { display: flex; justify-content: center; }
@@ -218,7 +241,7 @@ export default async function Home() {
           .home-page .hero-copy { padding-right: 22%; }
           .home-page .editorial-entry-grid { grid-template-columns: 1fr; }
           .home-page .editorial-entry:nth-child(odd) { border-right: 0; }
-          .home-page .home-companion-section { grid-template-columns: 1fr; }
+          .home-page .home-writing-grid, .home-page .home-companion-section { grid-template-columns: 1fr; }
         }
         @media (max-width: 720px) {
           .home-page { --home-width: min(100% - 1.5rem, 44rem); }
@@ -232,22 +255,24 @@ export default async function Home() {
           .home-page .home-section-intro { display: block; }
           .home-page .home-section-intro > p { margin-top: 1rem; }
           .home-page .section-arrow-link { display: inline-block; margin-top: 1.25rem; }
-          .home-page .home-reflection-grid, .home-page .feature-split-book { grid-template-columns: 1fr; }
           .home-page .editorial-entry { min-height: 13rem; }
-          .home-page .home-companion-panel { padding: 1.2rem; }
-          .home-page .feature-split-book { gap: 2rem; }
+          .home-page .feature-split-book { grid-template-columns: 1fr; gap: 2rem; }
           .home-page .book-cover-wrap img { width: min(68vw, 17rem); }
           .home-page .feature-copy { text-align: center; }
           .home-page .feature-copy .eyebrow { margin-top: 1rem; }
+          .home-page .home-companion-panel { padding: 1.2rem; }
+          .home-page .home-companion-links { grid-template-columns: 1fr; }
+          .home-page .home-companion-links a:nth-child(odd) { padding-right: 0; border-right: 0; }
+          .home-page .home-companion-links a:nth-child(even) { padding-left: 0; }
         }
         @media (max-width: 480px) {
           .home-page .hero h1 { font-size: clamp(3.4rem, 17vw, 5rem); }
           .home-page .hero-actions .button { width: 100%; }
-          .home-page .reflection-card-body, .home-page .journal-card-body, .home-page .home-study-card { padding: 1.2rem; }
+          .home-page .home-writing-card-body, .home-page .home-study-card { padding: 1.2rem; }
           .home-page .editorial-entry-action { position: static; grid-column: 2; margin-top: .75rem; }
         }
         @media (prefers-reduced-motion: reduce) {
-          .home-page .editorial-entry, .home-page .reflection-card-image img, .home-page .journal-card-image img { transition: none; }
+          .home-page .editorial-entry, .home-page .home-writing-card-image img { transition: none; }
         }
       `}</style>
     </div>
