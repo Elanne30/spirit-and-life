@@ -9,8 +9,8 @@ import type { ArticleDraft } from "@/app/lib/content-drafts";
 const initialState: ArticleActionState = { status: "idle", message: "" };
 type Props = { draft?: ArticleDraft };
 function makeSlug(value: string) { return value.normalize("NFKD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 120); }
-function bodyString(draft: ArticleDraft | undefined, key: string) { return typeof draft?.body[key] === "string" ? String(draft.body[key]) : ""; }
-function bodyList(draft: ArticleDraft | undefined, key: string) { return Array.isArray(draft?.body[key]) ? draft?.body[key].filter((value): value is string => typeof value === "string").join(", ") : ""; }
+function bodyString(draft: ArticleDraft | undefined, key: string) { const value = draft?.body[key]; return typeof value === "string" ? value : ""; }
+function bodyList(draft: ArticleDraft | undefined, key: string) { const value = draft?.body[key]; return Array.isArray(value) ? value.filter((item): item is string => typeof item === "string").join(", ") : ""; }
 
 export function ArticleForm({ draft }: Props) {
   const action = draft ? updateArticleAction : createArticleAction;
