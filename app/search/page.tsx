@@ -27,7 +27,7 @@ export default async function SearchPage({
       <section className="page-container page-intro">
         <p className="eyebrow">The Library</p>
         <h1>Search</h1>
-        <p>Search across Reflections, Journals, Books, Scripture references, and Study Center resources.</p>
+        <p>Search across Articles, Reflections, Journals, Books, Scripture references, and Study Center resources.</p>
       </section>
       <SearchForm key={`${query}-${type}`} initialQuery={query} initialType={type} initialResults={results} error={error} />
     </main>
