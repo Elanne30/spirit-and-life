@@ -83,8 +83,6 @@ function readDraftInput(formData: FormData): ParsedDraftInput {
     } catch {
       richText = undefined;
     }
-    // The plain section projection is the compatibility source of truth. A
-    // formatting extension unknown to the server must never prevent saving.
     if (richText) sections = richTextToLegacySections(richText);
     else richText = legacySectionsToRichText(sections);
   }
@@ -119,7 +117,10 @@ export async function uploadContentImageAction(_previousState: ContentDraftActio
     if (!updated) return { status: "error", message: "Draft not found." };
     revalidatePath(`/admin/content/${draft.content_type}/${draft.slug}`);
     revalidatePath(`/admin/content/${draft.content_type}/${draft.slug}/edit`);
-    revalidatePath(`/${draft.content_type === "reflection" ? "reflections" : draft.content_type === "journal" ? "journals" : "books"}/${draft.slug}`);
+    const publicRoute = draft.content_type === "article" ? "articles" : draft.content_type === "reflection" ? "reflections" : draft.content_type === "journal" ? "journals" : "books";
+    revalidatePath(`/${publicRoute}/${draft.slug}`);
+    revalidatePath(`/${publicRoute}`);
+    revalidatePath("/");
     return { status: "success", message: "Image uploaded and saved." };
   } catch (error) {
     console.error("[content-images] Upload failed.", error instanceof Error ? error.message : "Unknown error");
