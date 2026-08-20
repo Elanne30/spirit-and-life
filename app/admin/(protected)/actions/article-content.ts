@@ -15,14 +15,14 @@ function parseSections(formData: FormData) {
 }
 function csv(value: FormDataEntryValue | null) { return String(value ?? "").split(",").map((item) => normalizeDraftSlug(item.trim())).filter(Boolean); }
 function read(formData: FormData) {
-  const title = String(formData.get("title") ?? "").trim(), slug = normalizeDraftSlug(String(formData.get("slug") ?? "")), category = String(formData.get("category") ?? "").trim(), date = String(formData.get("date") ?? "").trim(), readingTime = String(formData.get("readingTime") ?? "").trim(), introduction = String(formData.get("introduction") ?? "").trim();
+  const title = String(formData.get("title") ?? "").trim(), slug = normalizeDraftSlug(String(formData.get("slug") ?? "")), category = String(formData.get("category") ?? "").trim(), date = String(formData.get("date") ?? "").trim(), readingTime = String(formData.get("readingTime") ?? "").trim(), introduction = String(formData.get("introduction") ?? "").trim(), imageReference = String(formData.get("imageReference") ?? "").trim();
   const tags = String(formData.get("tags") ?? "").split(",").map((value) => value.trim()).filter(Boolean), featured = String(formData.get("featured") ?? "") === "yes", sections = parseSections(formData), richText = parseJson(formData.get("richText"));
   const scripture = String(formData.get("scripture") ?? "").trim();
   const relatedReflectionSlugs = csv(formData.get("relatedReflectionSlugs"));
   const relatedJournalSlugs = csv(formData.get("relatedJournalSlugs"));
   const relatedBookSlugs = csv(formData.get("relatedBookSlugs"));
   const relatedStudyPlanDates = String(formData.get("relatedStudyPlanDates") ?? "").split(",").map((item) => item.trim()).filter(Boolean);
-  return { title, slug, category, date, readingTime, introduction, tags, featured, sections, richText, scripture, relatedReflectionSlugs, relatedJournalSlugs, relatedBookSlugs, relatedStudyPlanDates };
+  return { title, slug, category, date, readingTime, introduction, imageReference, tags, featured, sections, richText, scripture, relatedReflectionSlugs, relatedJournalSlugs, relatedBookSlugs, relatedStudyPlanDates };
 }
 function bodyOf(input: ReturnType<typeof read>) {
   return {
@@ -48,7 +48,7 @@ export async function createArticleAction(_previous: ArticleActionState, formDat
 
   let draft;
   try {
-    draft = await createArticleDraft({ contentType: "article", title: input.title, slug: input.slug, category: input.category || undefined, introduction: input.introduction || undefined, tags: input.tags, body: bodyOf(input) });
+    draft = await createArticleDraft({ contentType: "article", title: input.title, slug: input.slug, category: input.category || undefined, introduction: input.introduction || undefined, tags: input.tags, imageReference: input.imageReference || undefined, body: bodyOf(input) });
   } catch (error) {
     console.error("[articles] create failed", error);
     return { status: "error", message: "The article could not be saved. Your writing was not changed." };
@@ -68,7 +68,7 @@ export async function updateArticleAction(_previous: ArticleActionState, formDat
   const existing = await getArticleDraftBySlug(input.slug);
   if (existing && existing.id !== draftId) return { status: "error", message: "This article slug is already in use." };
   try {
-    const draft = await updateArticleDraft(draftId, { contentType: "article", title: input.title, slug: input.slug, category: input.category || undefined, introduction: input.introduction || undefined, tags: input.tags, body: bodyOf(input) });
+    const draft = await updateArticleDraft(draftId, { contentType: "article", title: input.title, slug: input.slug, category: input.category || undefined, introduction: input.introduction || undefined, tags: input.tags, imageReference: input.imageReference || undefined, body: bodyOf(input) });
     if (!draft) return { status: "error", message: "Article draft not found." };
     revalidatePath("/admin/content"); revalidatePath("/admin/content/article"); revalidatePath(`/admin/content/article/${draft.slug}`); revalidatePath(`/articles/${draft.slug}`); revalidatePath("/"); return { status: "success", message: "Article saved." };
   } catch (error) { console.error("[articles] update failed", error); return { status: "error", message: "The article could not be saved. Your writing was not changed." }; }
