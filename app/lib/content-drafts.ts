@@ -1,5 +1,4 @@
 import "server-only";
-
 import crypto from "node:crypto";
 import { sql } from "@vercel/postgres";
 
@@ -10,7 +9,7 @@ export type PublishedSnapshot = { title: string; slug: string; introduction: str
 export type ContentDraft = { id: string; content_type: DraftContentType; title: string; slug: string; status: DraftStatus; introduction: string | null; body: Record<string, unknown>; category: string | null; tags: string[]; image_reference: string | null; created_at: string; updated_at: string; published_at: string | null; author_id: string | null; published_snapshot: PublishedSnapshot | null; has_unpublished_changes: boolean };
 export type ArticleDraft = Omit<ContentDraft, "content_type"> & { content_type: ArticleDraftContentType; topics: string[]; series: string | null };
 export type DraftInput = { contentType: DraftContentType; title: string; slug: string; introduction?: string; body?: Record<string, unknown>; category?: string; tags?: string[]; imageReference?: string; authorId?: string };
-export type ArticleDraftInput = DraftInput & { contentType: ArticleDraftContentType; topics?: string[]; series?: string | null };
+export type ArticleDraftInput = { contentType: ArticleDraftContentType; title: string; slug: string; introduction?: string; body?: Record<string, unknown>; category?: string; tags?: string[]; imageReference?: string; authorId?: string; topics?: string[]; series?: string | null };
 let schemaPromise: Promise<void> | null = null;
 function nowIso() { return new Date().toISOString(); }
 export function normalizeDraftSlug(value: string) { return value.trim().toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 120).replace(/-+$/g, ""); }
