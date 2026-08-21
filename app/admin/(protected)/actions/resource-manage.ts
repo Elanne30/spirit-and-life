@@ -15,6 +15,8 @@ export async function updateDownloadableResourceAction(formData: FormData) {
   return { ok: true as const };
 }
 
+export async function saveDownloadableResourceAction(formData: FormData): Promise<void> { await updateDownloadableResourceAction(formData); }
+
 export async function setDownloadableResourceStatusAction(formData: FormData): Promise<void> {
   if (!(await requireAdminActionAccess())) return;
   const slug = String(formData.get("slug") ?? "").trim();
