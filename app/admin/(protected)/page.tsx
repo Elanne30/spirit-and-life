@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, BarChart3, BookOpen, CalendarDays, FileText, Mail, PenLine, Send, Users } from "lucide-react";
+import { ArrowRight, BarChart3, BookOpen, CalendarDays, FileText, Headphones, Mail, PenLine, Send, Users } from "lucide-react";
 import { listAdminContentItems, type AdminContentItem } from "@/app/admin/(protected)/content/admin-content";
 import { listPublishedArticles } from "@/app/lib/content-drafts";
 import { getNewsletterSubscriberSummary } from "@/app/lib/newsletter";
@@ -31,7 +31,6 @@ export default async function AdminDashboardPage() {
 
   const allContent = [...reflectionItems, ...journalItems, ...bookItems];
   const recentContent = sortRecent(allContent).slice(0, 8);
-  const attentionItems = sortRecent(allContent).filter((item) => item.status === "draft" || item.hasUnpublishedChanges).slice(0, 8);
   const draftCount = allContent.filter((item) => item.status === "draft").length;
   const publishedCount = allContent.filter((item) => item.status !== "draft").length;
   const today = new Intl.DateTimeFormat("en-US", { month: "long", day: "numeric", year: "numeric" }).format(new Date());
@@ -45,6 +44,8 @@ export default async function AdminDashboardPage() {
   ];
 
   const operations = [
+    { title: "Podcast", description: "Audio episodes, show notes, and downloads", icon: Headphones, href: "/admin/podcast", detail: "Manage episodes" },
+    { title: "Downloads", description: "PDFs, documents, and downloadable resources", icon: FileText, href: "/admin/resources", detail: "Manage resources" },
     { title: "Newsletter", description: "Email subscribers and campaigns", icon: Mail, href: "/admin/newsletter", detail: `${newsletterSummary.subscribed} active` },
     { title: "Push", description: "Website push subscribers and updates", icon: Send, href: "/admin/notifications", detail: `${pushSummary.active} active` },
     { title: "Subscribers", description: "Review email and push subscribers", icon: Users, href: "/admin/subscribers", detail: `${newsletterSummary.subscribed + pushSummary.active} active subscriptions` },
@@ -71,6 +72,8 @@ export default async function AdminDashboardPage() {
         { label: "New Reflection", href: "/admin/content/reflection/new", icon: PenLine },
         { label: "New Journal", href: "/admin/content/journal/new", icon: FileText },
         { label: "New Book", href: "/admin/content/book/new", icon: BookOpen },
+        { label: "New Podcast", href: "/admin/podcast/new", icon: Headphones },
+        { label: "New Download", href: "/admin/resources/new", icon: FileText },
         { label: "Content Library", href: "/admin/content", icon: FileText },
       ].map((action) => { const Icon = action.icon; return <Link className="admin-content-overview-card" href={action.href} key={action.label} style={{ minHeight: "7rem", textDecoration: "none" }}><span className="admin-icon"><Icon size={17} /></span><h3 style={{ marginBottom: 0 }}>{action.label}</h3><span className="admin-card-link" style={{ marginTop: "auto", paddingTop: "0.5rem" }}>Open <ArrowRight size={13} /></span></Link>; })}</div></article>
 
