@@ -1,0 +1,6 @@
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import { getDownloadableResourceBySlug } from "@/app/lib/resource-repository";
+import { ResourceStatusActions } from "@/app/admin/(protected)/resources/status-actions";
+
+export default async function AdminResourcePage({ params }: { params: Promise<{ slug: string }> }) { const { slug } = await params; const resource = await getDownloadableResourceBySlug(slug); if (!resource) notFound(); return <section className="admin-editor-page"><div className="admin-editor-header"><div><Link className="admin-outline-link" href="/admin/resources">← Back to Downloads</Link><p className="eyebrow">Downloadable resource</p><h1>{resource.title}</h1><p>{resource.description}</p></div></div><article className="admin-editor-card"><div className="admin-library-meta"><span>{resource.kind}</span><span>{resource.publishedAt}</span><span className={`admin-status admin-status-${resource.status}`}>{resource.status === "published" ? "Published" : "Draft"}</span></div><p className="mt-6">{resource.fileName || "Attached file"}</p><a className="admin-outline-link" href={resource.fileUrl} target="_blank" rel="noreferrer">Preview file</a><ResourceStatusActions slug={resource.slug} published={resource.status === "published"} /></article></section>; }
