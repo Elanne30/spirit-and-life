@@ -18,37 +18,9 @@ export function Footer() {
     <footer className="site-footer">
       <div className="page-container footer-inner">
         <div>
-          <Link
-            className="brand-logo-link"
-            href="/"
-            style={{
-              width: "auto",
-              height: "4.75rem",
-              border: "0",
-              borderRadius: 0,
-              background: "transparent",
-              boxShadow: "none",
-              overflow: "visible",
-            }}
-          >
-            <Image
-              className="brand-logo"
-              src={siteConfig.brand.logo}
-              alt="Spirit & Life"
-              width={616}
-              height={496}
-              style={{
-                width: "4.75rem",
-                height: "4.75rem",
-                objectFit: "contain",
-                mixBlendMode: "normal",
-                opacity: 1,
-              }}
-            />
-            <span className="footer-brand-copy">
-              <strong>Spirit &amp; Life</strong>
-              <small>A library of reflective truths</small>
-            </span>
+          <Link className="brand-logo-link" href="/" style={{ width: "auto", height: "4.75rem", border: "0", borderRadius: 0, background: "transparent", boxShadow: "none", overflow: "visible" }}>
+            <Image className="brand-logo" src={siteConfig.brand.logo} alt="Spirit & Life" width={616} height={496} style={{ width: "4.75rem", height: "4.75rem", objectFit: "contain", mixBlendMode: "normal", opacity: 1 }} />
+            <span className="footer-brand-copy"><strong>Spirit &amp; Life</strong><small>A library of reflective truths</small></span>
           </Link>
           <p className="footer-note">Exploring God, life, and the world with clarity, depth, and faith.</p>
           <p className="footer-heading sr-only">Social Media</p>
@@ -56,7 +28,6 @@ export function Footer() {
             {socialLinks.map(({ label, href }) => {
               const icon = socialIcons[label];
               const iconMarkup = <svg aria-hidden="true" className="footer-social-icon" viewBox="0 0 24 24" focusable="false"><path d={icon.path} /></svg>;
-
               return <a className="footer-social-link" key={label} href={href} target="_blank" rel="noopener noreferrer" aria-label={label}>{iconMarkup}</a>;
             })}
           </div>
@@ -64,7 +35,10 @@ export function Footer() {
         <div className="footer-column">
           <p className="footer-heading">Navigation</p>
           <div className="footer-links footer-navigation-links" aria-label="Footer navigation">
-            {navigation.map((item) => <Link key={item.href} href={item.href}>{item.label}</Link>)}
+            {navigation.map((item) => {
+              if (item.href) return <Link key={item.href} href={item.href}>{item.label}</Link>;
+              return item.children?.map((child) => <Link key={child.href} href={child.href!}>{child.label}</Link>);
+            })}
           </div>
         </div>
         <div className="footer-column">
