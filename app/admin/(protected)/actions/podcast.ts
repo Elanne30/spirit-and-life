@@ -16,7 +16,7 @@ export async function createPodcastEpisodeAction(formData: FormData) {
   const duration = String(formData.get("duration") ?? "").trim() || null;
   const transcript = String(formData.get("transcript") ?? "").trim() || null;
   const youtubeUrl = String(formData.get("youtubeUrl") ?? "").trim() || null;
-  const topicSlugs = formData.getAll("topicSlugs").map((value) => normalizeDraftSlug(String(value))).filter(Boolean);
+  const topicSlugs = csv(formData.get("topicSlugs"));
   const seriesSlug = normalizeDraftSlug(String(formData.get("seriesSlug") ?? "").trim()) || null;
   const questionSlugs = csv(formData.get("questionSlugs"));
   const articleSlugs = csv(formData.get("articleSlugs"));
@@ -27,7 +27,5 @@ export async function createPodcastEpisodeAction(formData: FormData) {
     await createPodcastEpisode({ slug, title, description, publishedAt, duration, coverImage: null, audioUrl: audioUrl || null, transcript, youtubeUrl, topicSlugs, seriesSlug, questionSlugs, articleSlugs, resourceSlugs });
     revalidatePath("/admin/podcast"); revalidatePath(`/admin/podcast/${slug}`); revalidatePath("/podcast"); revalidatePath(`/podcast/${slug}`); revalidatePath("/search");
     return { ok: true as const, slug };
-  } catch (error) {
-    return { ok: false as const, error: error instanceof Error ? error.message : "Unable to save episode." };
-  }
+  } catch (error) { return { ok: false as const, error: error instanceof Error ? error.message : "Unable to save episode." }; }
 }
