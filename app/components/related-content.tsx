@@ -2,6 +2,9 @@ import Link from "next/link";
 import { studies } from "@/app/data/study-plan";
 import { scriptureReferences } from "@/app/content/scripture";
 import { listPublishedBooks, listPublishedJournals, listPublishedReflections } from "@/app/content/repository";
+import { QUESTIONS } from "@/app/lib/questions";
+import { listPodcastEpisodes } from "@/app/lib/podcast-repository";
+import { listDownloadableResources } from "@/app/lib/resource-repository";
 import type { ContentRelations } from "@/app/content/types";
 
 type RelatedItem = {
@@ -19,10 +22,12 @@ type RelatedContentProps = {
 };
 
 export async function RelatedContent({ relations, scriptureReference, scriptureSlugs = [] }: RelatedContentProps) {
-  const [books, journals, reflections] = await Promise.all([
+  const [books, journals, reflections, podcasts, resources] = await Promise.all([
     listPublishedBooks(),
     listPublishedJournals(),
     listPublishedReflections(),
+    listPodcastEpisodes(true),
+    listDownloadableResources(true),
   ]);
 
   const scriptureItems = [
@@ -69,6 +74,36 @@ export async function RelatedContent({ relations, scriptureReference, scriptureS
         description: book.description?.split("\n\n")[0],
         meta: book.category ?? book.status,
       })),
+    ...(relations.relatedQuestionSlugs ?? [])
+      .map((slug) => QUESTIONS.find((question) => question.slug === slug))
+      .filter((question): question is (typeof QUESTIONS)[number] => Boolean(question))
+      .map((question) => ({
+        href: `/questions/${question.slug}`,
+        label: "Question",
+        title: question.question,
+        description: question.description,
+        meta: "Explore the question",
+      })),
+    ...(relations.relatedPodcastSlugs ?? [])
+      .map((slug) => podcasts.find((podcast) => podcast.slug === slug))
+      .filter((podcast): podcast is (typeof podcasts)[number] => Boolean(podcast))
+      .map((podcast) => ({
+        href: `/podcast/${podcast.slug}`,
+        label: "Podcast",
+        title: podcast.title,
+        description: podcast.description,
+        meta: [podcast.publishedAt, podcast.duration].filter(Boolean).join(" · "),
+      })),
+    ...(relations.relatedResourceSlugs ?? [])
+      .map((slug) => resources.find((resource) => resource.slug === slug))
+      .filter((resource): resource is (typeof resources)[number] => Boolean(resource))
+      .map((resource) => ({
+        href: `/resources/${resource.slug}`,
+        label: "Resource",
+        title: resource.title,
+        description: resource.description,
+        meta: resource.kind,
+      })),
     ...scriptureItems,
     ...(relations.relatedStudyPlanDates ?? [])
       .map((date) => studies.find((study) => study.date === date))
@@ -96,6 +131,20 @@ export async function RelatedContent({ relations, scriptureReference, scriptureS
       title: journal.title,
       description: journal.introduction,
       meta: journal.date,
+    })),
+    ...podcasts.slice(0, 1).map((podcast) => ({
+      href: `/podcast/${podcast.slug}`,
+      label: "Podcast",
+      title: podcast.title,
+      description: podcast.description,
+      meta: [podcast.publishedAt, podcast.duration].filter(Boolean).join(" · "),
+    })),
+    ...resources.slice(0, 1).map((resource) => ({
+      href: `/resources/${resource.slug}`,
+      label: "Resource",
+      title: resource.title,
+      description: resource.description,
+      meta: resource.kind,
     })),
     ...books.slice(0, 1).map((book) => ({
       href: `/books/${book.contentSlug}`,
