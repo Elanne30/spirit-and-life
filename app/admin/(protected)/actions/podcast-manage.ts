@@ -11,7 +11,7 @@ export async function updatePodcastEpisodeAction(formData: FormData) {
   if (!(await requireAdminActionAccess())) return { ok: false as const, error: "Unauthorized." };
   const slug = String(formData.get("slug") ?? "").trim();
   if (!slug) return { ok: false as const, error: "Missing episode." };
-  const topicSlugs = formData.getAll("topicSlugs").map((value) => normalizeDraftSlug(String(value))).filter(Boolean);
+  const topicSlugs = csv(formData.get("topicSlugs"));
   const seriesSlug = normalizeDraftSlug(String(formData.get("seriesSlug") ?? "").trim()) || null;
   await updatePodcastEpisode(slug, {
     title: String(formData.get("title") ?? "").trim(), description: String(formData.get("description") ?? "").trim(),
@@ -25,20 +25,5 @@ export async function updatePodcastEpisodeAction(formData: FormData) {
 }
 
 export async function savePodcastEpisodeAction(formData: FormData): Promise<void> { await updatePodcastEpisodeAction(formData); }
-
-export async function setPodcastEpisodeStatusAction(formData: FormData): Promise<void> {
-  if (!(await requireAdminActionAccess())) return;
-  const slug = String(formData.get("slug") ?? "").trim();
-  if (!slug) return;
-  const status = String(formData.get("status") ?? "draft") === "published" ? "published" : "draft";
-  await updatePodcastEpisodeStatus(slug, status);
-  revalidatePath("/admin/podcast"); revalidatePath(`/admin/podcast/${slug}`); revalidatePath("/podcast"); revalidatePath(`/podcast/${slug}`);
-}
-
-export async function deletePodcastEpisodeAction(formData: FormData): Promise<void> {
-  if (!(await requireAdminActionAccess())) return;
-  const slug = String(formData.get("slug") ?? "").trim();
-  if (!slug) return;
-  await deletePodcastEpisode(slug);
-  revalidatePath("/admin/podcast"); revalidatePath("/podcast");
-}
+export async function setPodcastEpisodeStatusAction(formData: FormData): Promise<void> { if (!(await requireAdminActionAccess())) return; const slug = String(formData.get("slug") ?? "").trim(); if (!slug) return; const status = String(formData.get("status") ?? "draft") === "published" ? "published" : "draft"; await updatePodcastEpisodeStatus(slug, status); revalidatePath("/admin/podcast"); revalidatePath(`/admin/podcast/${slug}`); revalidatePath("/podcast"); revalidatePath(`/podcast/${slug}`); }
+export async function deletePodcastEpisodeAction(formData: FormData): Promise<void> { if (!(await requireAdminActionAccess())) return; const slug = String(formData.get("slug") ?? "").trim(); if (!slug) return; await deletePodcastEpisode(slug); revalidatePath("/admin/podcast"); revalidatePath("/podcast"); }
