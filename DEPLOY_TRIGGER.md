@@ -1,1 +1,1 @@
-Temporary deployment trigger for the latest public theme corrections. This file can be removed after Vercel picks up the commit.
+Temporary deployment trigger for the latest Phase 2 implementation. This file can be removed after Vercel verification.
