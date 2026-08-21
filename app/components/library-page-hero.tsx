@@ -16,8 +16,8 @@ export function LibraryPageHero({ eyebrow, title, subtitle, description, imageUr
       <div className="mx-auto max-w-6xl">
         <div className="max-w-3xl">
           <p className="mb-4 text-xs font-semibold uppercase tracking-[0.2em] text-[color:var(--accent)]">{eyebrow}</p>
-          <h1 className="!mb-0 font-serif text-5xl font-semibold leading-[0.9] tracking-[-0.045em] !text-[color:var(--foreground)] sm:text-6xl lg:text-7xl">{title}</h1>
-          {subtitle ? <p className="mt-4 font-serif text-xl italic text-[color:var(--accent-strong)] sm:text-2xl">{subtitle}</p> : null}
+          <h1 className="!mb-0 max-w-[18ch] break-words font-serif text-5xl font-semibold leading-[0.94] tracking-[-0.045em] !text-[color:var(--foreground)] [text-wrap:balance] sm:text-6xl lg:text-7xl">{title}</h1>
+          {subtitle ? <p className="mt-4 max-w-2xl font-serif text-xl italic leading-tight text-[color:var(--accent-strong)] sm:text-2xl">{subtitle}</p> : null}
           <p className="mt-5 max-w-xl text-sm leading-7 text-[color:var(--foreground)]/85 sm:text-base">{description}</p>
           {actions?.length ? (
             <div className="mt-7 flex flex-wrap gap-3">
