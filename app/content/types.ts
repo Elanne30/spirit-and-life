@@ -12,6 +12,7 @@ export type ContentCategory = (typeof contentCategories)[number];
 export type ReflectionCategory = ContentCategory | "SCRIPTURE";
 
 export type ContentRelations = {
+  relatedArticleSlugs?: string[];
   relatedReflectionSlugs?: string[];
   relatedJournalSlugs?: string[];
   relatedBookSlugs?: string[];
