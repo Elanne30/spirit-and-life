@@ -4,6 +4,7 @@ export const navigation = [
   { label: "Reflections", href: "/reflections" },
   { label: "Journals", href: "/journals" },
   { label: "Books", href: "/books" },
+  { label: "Podcast", href: "/podcast" },
   { label: "Study Center", href: "/study-center" },
   { label: "Topics", href: "/topics" },
   { label: "Series", href: "/series" },
