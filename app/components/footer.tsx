@@ -35,7 +35,12 @@ export function Footer() {
         <div className="footer-column">
           <p className="footer-heading">Navigation</p>
           <div className="footer-links footer-navigation-links" aria-label="Footer navigation">
-            {navigation.flatMap((item) => item.href ? [<Link key={item.href} href={item.href}>{item.label}</Link>] : (item.children ?? []).map((child) => <Link key={child.href} href={child.href}>{child.label}</Link>))}
+            {navigation.map((item) => {
+              if ("href" in item) {
+                return <Link key={item.href} href={item.href}>{item.label}</Link>;
+              }
+              return item.children.map((child) => <Link key={child.href} href={child.href}>{child.label}</Link>);
+            })}
           </div>
         </div>
         <div className="footer-column">
