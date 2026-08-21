@@ -10,19 +10,19 @@ type LibraryPageHeroProps = {
 export function LibraryPageHero({ eyebrow, title, subtitle, description, imageUrl, actions }: LibraryPageHeroProps) {
   return (
     <header
-      className="relative isolate overflow-hidden border-b border-white/10 px-6 py-20 text-[#fffaf2] sm:px-10 sm:py-24 lg:px-16 lg:py-28"
-      style={{ backgroundImage: `linear-gradient(90deg, rgba(8, 13, 18, 0.88), rgba(8, 13, 18, 0.58) 58%, rgba(8, 13, 18, 0.38)), url(${imageUrl})`, backgroundPosition: "center", backgroundSize: "cover" }}
+      className="relative isolate overflow-hidden border-b border-[color:var(--line)] px-6 py-20 text-[color:var(--foreground)] sm:px-10 sm:py-24 lg:px-16 lg:py-28"
+      style={{ backgroundImage: `linear-gradient(90deg, color-mix(in srgb, var(--background) 90%, transparent), color-mix(in srgb, var(--background) 62%, transparent) 58%, color-mix(in srgb, var(--background) 30%, transparent)), url(${imageUrl})`, backgroundPosition: "center", backgroundSize: "cover" }}
     >
       <div className="mx-auto max-w-6xl">
         <div className="max-w-3xl">
-          <p className="mb-4 text-xs font-semibold uppercase tracking-[0.2em] text-[#d9a467]">{eyebrow}</p>
-          <h1 className="!mb-0 font-serif text-5xl font-semibold leading-[0.9] tracking-[-0.045em] !text-[#fffaf2] sm:text-6xl lg:text-7xl">{title}</h1>
-          {subtitle ? <p className="mt-4 font-serif text-xl italic text-[#e3c39c] sm:text-2xl">{subtitle}</p> : null}
-          <p className="mt-5 max-w-xl text-sm leading-7 text-[#f2eee5]/85 sm:text-base">{description}</p>
+          <p className="mb-4 text-xs font-semibold uppercase tracking-[0.2em] text-[color:var(--accent)]">{eyebrow}</p>
+          <h1 className="!mb-0 font-serif text-5xl font-semibold leading-[0.9] tracking-[-0.045em] !text-[color:var(--foreground)] sm:text-6xl lg:text-7xl">{title}</h1>
+          {subtitle ? <p className="mt-4 font-serif text-xl italic text-[color:var(--accent-strong)] sm:text-2xl">{subtitle}</p> : null}
+          <p className="mt-5 max-w-xl text-sm leading-7 text-[color:var(--foreground)]/85 sm:text-base">{description}</p>
           {actions?.length ? (
             <div className="mt-7 flex flex-wrap gap-3">
               {actions.map((action) => (
-                <a key={action.href} href={action.href} className={action.primary ? "inline-flex min-h-11 items-center justify-center rounded-md bg-[#d9a467] px-5 text-sm font-semibold text-[#1d211e] transition hover:bg-[#efb37d]" : "inline-flex min-h-11 items-center justify-center rounded-md border border-white/35 px-5 text-sm font-semibold text-white transition hover:border-white/70"}>{action.label}</a>
+                <a key={action.href} href={action.href} className={action.primary ? "inline-flex min-h-11 items-center justify-center rounded-md bg-[color:var(--accent)] px-5 text-sm font-semibold text-[color:var(--on-accent)] transition hover:bg-[color:var(--accent-strong)]" : "inline-flex min-h-11 items-center justify-center rounded-md border border-[color:var(--line)] px-5 text-sm font-semibold text-[color:var(--foreground)] transition hover:border-[color:var(--accent)]"}>{action.label}</a>
               ))}
             </div>
           ) : null}
