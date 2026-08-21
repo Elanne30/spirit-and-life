@@ -16,6 +16,9 @@ export type ContentRelations = {
   relatedJournalSlugs?: string[];
   relatedBookSlugs?: string[];
   relatedStudyPlanDates?: string[];
+  relatedQuestionSlugs?: string[];
+  relatedPodcastSlugs?: string[];
+  relatedResourceSlugs?: string[];
 };
 
 export type StudyPlanRelationships = Record<string, ContentRelations>;
