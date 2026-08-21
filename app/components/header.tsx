@@ -18,7 +18,7 @@ const adminNavigation = [
   { label: "Push", href: "/admin/notifications" },
 ];
 
-function isItemActive(item: NavigationItem, pathname: string) {
+function isItemActive(item: NavigationItem, pathname: string): boolean {
   if (item.href) return pathname === item.href || (item.href !== "/" && pathname.startsWith(`${item.href}/`));
   return item.children?.some((child) => isItemActive(child, pathname)) ?? false;
 }
