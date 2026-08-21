@@ -17,9 +17,11 @@ export async function createPodcastEpisodeAction(formData: FormData) {
   const slug = normalizeDraftSlug(String(formData.get("slug") ?? title)) || "episode";
   try {
     await createPodcastEpisode({ slug, title, description, publishedAt, duration, coverImage: null, audioUrl: audioUrl || null, transcript, topicSlugs: [], seriesSlug: null, questionSlugs: [] });
+    revalidatePath("/admin/podcast");
+    revalidatePath(`/admin/podcast/${slug}`);
     revalidatePath("/podcast");
     revalidatePath("/search");
-    return { ok: true as const };
+    return { ok: true as const, slug };
   } catch (error) {
     return { ok: false as const, error: error instanceof Error ? error.message : "Unable to save episode." };
   }
