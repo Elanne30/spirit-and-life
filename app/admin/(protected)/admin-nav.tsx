@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { FilePenLine, FileText, LayoutDashboard, Mail, Menu, MessageSquare, Send, Users, Headphones, Download } from "lucide-react";
+import { FilePenLine, FileText, LayoutDashboard, Mail, Menu, MessageSquare, Send, Users, Headphones, Download, Video } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 
@@ -14,6 +14,7 @@ const adminNavigation = [
     { label: "Books", href: "/admin/content/book", icon: FileText },
     { label: "Podcast", href: "/admin/podcast", icon: Headphones },
     { label: "Downloads", href: "/admin/resources", icon: Download },
+    { label: "Videos", href: "/admin/videos", icon: Video },
     { label: "Content", href: "/admin/content", icon: FileText },
   ]},
   { label: "Audience & messaging", items: [
