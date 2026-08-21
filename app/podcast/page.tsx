@@ -7,7 +7,7 @@ export default async function PodcastPage() {
   const episodes = await listPodcastEpisodes(true);
 
   return (
-    <main className="bg-[color:var(--background)] text-[color:var(--foreground)] transition-colors duration-200">
+    <main className="bg-[color:var(--background)] text-[color:var(--foreground)] transition-colors duration-200" style={{ backgroundColor: "var(--background)", color: "var(--foreground)" }}>
       <LibraryPageHero
         eyebrow="Podcast"
         title="Spirit & Life Podcast"
@@ -17,7 +17,7 @@ export default async function PodcastPage() {
         actions={[{ label: "Listen Now", href: "#latest-episodes", primary: true }, { label: "Browse Episodes", href: "#latest-episodes" }]}
       />
 
-      <section id="latest-episodes" className="mx-auto max-w-6xl px-6 py-14 sm:px-8 sm:py-16" aria-labelledby="latest-episodes-heading">
+      <section id="latest-episodes" className="mx-auto max-w-6xl px-6 py-14 sm:px-8 sm:py-16" aria-labelledby="latest-episodes-heading" style={{ backgroundColor: "var(--background)", color: "var(--foreground)" }}>
         <div className="mb-7 flex items-end justify-between gap-4 border-b border-[color:var(--line)] pb-4">
           <h2 id="latest-episodes-heading" className="font-serif text-3xl font-semibold text-[color:var(--foreground)] sm:text-4xl">Latest Episodes</h2>
           <span className="text-xs font-semibold uppercase tracking-[0.14em] text-[color:var(--muted)]">{episodes.length} episodes</span>
@@ -26,8 +26,8 @@ export default async function PodcastPage() {
         {episodes.length > 0 ? (
           <div className="grid gap-6 sm:grid-cols-2">
             {episodes.map((episode, index) => (
-              <Link key={episode.slug} href={`/podcast/${episode.slug}`} className="group overflow-hidden rounded-xl border border-[color:var(--line)] bg-[color:var(--surface)] shadow-sm transition duration-200 hover:-translate-y-1 hover:shadow-md">
-                <div className="relative aspect-[16/9] overflow-hidden bg-[color:var(--surface-muted)]">
+              <Link key={episode.slug} href={`/podcast/${episode.slug}`} className="group overflow-hidden rounded-xl border shadow-sm transition duration-200 hover:-translate-y-1 hover:shadow-md" style={{ backgroundColor: "var(--surface)", borderColor: "var(--line)", color: "var(--foreground)" }}>
+                <div className="relative aspect-[16/9] overflow-hidden" style={{ backgroundColor: "var(--surface-muted)" }}>
                   {episode.coverImage ? (
                     <Image src={episode.coverImage} alt="" fill sizes="(max-width: 640px) 100vw, 50vw" className="object-cover transition duration-500 group-hover:scale-[1.025]" />
                   ) : (
@@ -48,7 +48,7 @@ export default async function PodcastPage() {
             ))}
           </div>
         ) : (
-          <div className="rounded-xl border border-[color:var(--line)] bg-[color:var(--surface)] p-7 shadow-sm sm:p-9">
+          <div className="rounded-xl border p-7 shadow-sm sm:p-9" style={{ backgroundColor: "var(--surface)", borderColor: "var(--line)", color: "var(--foreground)" }}>
             <p className="text-xs font-semibold uppercase tracking-[0.15em] text-[color:var(--muted)]">Podcast library</p>
             <h2 className="mt-3 font-serif text-3xl font-semibold text-[color:var(--foreground)]">Episodes coming soon</h2>
             <p className="mt-3 max-w-xl text-[color:var(--muted)]">The podcast library is ready for episodes, audio, transcripts, and related resources to be added.</p>
