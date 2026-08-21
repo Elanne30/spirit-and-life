@@ -5,6 +5,7 @@ export const navigation = [
   { label: "Journals", href: "/journals" },
   { label: "Books", href: "/books" },
   { label: "Podcast", href: "/podcast" },
+  { label: "Downloads", href: "/resources" },
   { label: "Study Center", href: "/study-center" },
   { label: "Topics", href: "/topics" },
   { label: "Series", href: "/series" },
