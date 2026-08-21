@@ -19,16 +19,18 @@ export default async function ResourcesPage() {
           <p className="mt-3 max-w-xl text-muted-foreground">The resource library is ready for studies, essays, audio, and other material to be published.</p>
         </section>
       ) : (
-        <section className="mt-10 grid gap-px border bg-border sm:grid-cols-2 lg:grid-cols-3" aria-label="Resources">
+        <section className="mt-10 grid gap-5 sm:grid-cols-2" aria-label="Resources">
           {resources.map((resource, index) => (
-            <Link key={resource.slug} href={`/resources/${resource.slug}`} className="group bg-background p-6 transition hover:bg-muted/30 sm:p-7">
+            <Link key={resource.slug} href={`/resources/${resource.slug}`} className="group border bg-background p-6 transition hover:-translate-y-0.5 hover:bg-muted/20 sm:p-7">
               <div className="flex items-center justify-between gap-4">
                 <span className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">{resource.kind}</span>
                 <span className="font-serif text-sm text-muted-foreground">{String(index + 1).padStart(2, "0")}</span>
               </div>
-              <h2 className="mt-8 font-serif text-2xl font-semibold leading-tight group-hover:text-foreground">{resource.title}</h2>
-              {resource.description ? <p className="mt-3 text-sm leading-6 text-muted-foreground">{resource.description}</p> : null}
-              <span className="mt-7 inline-block border-b border-foreground/30 pb-1 text-xs font-semibold uppercase tracking-[0.12em]">View resource ↗</span>
+              <div className="mt-10 min-h-28">
+                <h2 className="font-serif text-2xl font-semibold leading-tight group-hover:text-foreground">{resource.title}</h2>
+                {resource.description ? <p className="mt-3 line-clamp-2 text-sm leading-6 text-muted-foreground">{resource.description}</p> : null}
+              </div>
+              <span className="mt-6 inline-block border-b border-foreground/30 pb-1 text-xs font-semibold uppercase tracking-[0.12em]">View resource ↗</span>
             </Link>
           ))}
         </section>
