@@ -13,6 +13,8 @@ export async function updatePodcastEpisodeAction(formData: FormData) {
   return { ok: true as const };
 }
 
+export async function savePodcastEpisodeAction(formData: FormData): Promise<void> { await updatePodcastEpisodeAction(formData); }
+
 export async function setPodcastEpisodeStatusAction(formData: FormData): Promise<void> {
   if (!(await requireAdminActionAccess())) return;
   const slug = String(formData.get("slug") ?? "").trim();
