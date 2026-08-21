@@ -1,48 +1,58 @@
 import Link from "next/link";
 import Image from "next/image";
 import { listPodcastEpisodes } from "@/app/lib/podcast-repository";
+import { LibraryPageHero } from "@/app/components/library-page-hero";
 
 export default async function PodcastPage() {
   const episodes = await listPodcastEpisodes(true);
 
   return (
-    <main className="mx-auto max-w-6xl px-6 py-16 sm:py-20">
-      <header className="max-w-3xl border-b pb-10">
-        <p className="text-sm font-medium uppercase tracking-[0.18em] text-muted-foreground">Listen</p>
-        <h1 className="mt-3 font-serif text-5xl font-semibold tracking-tight sm:text-6xl">Podcast</h1>
-        <p className="mt-5 max-w-2xl text-base leading-7 text-muted-foreground">Thoughtful conversations and Christian reflections, with episodes available to listen to, read, and revisit.</p>
-      </header>
+    <main>
+      <LibraryPageHero
+        eyebrow="Podcast"
+        title="Spirit & Life Podcast"
+        subtitle="Sound teaching for a deeper walk with God."
+        description="Thoughtful conversations and Christian reflections to strengthen faith, encourage careful thinking, and help you keep growing in Christ."
+        imageUrl="https://images.unsplash.com/photo-1478737270239-2f02b77fc618?auto=format&fit=crop&w=1800&q=85"
+      />
 
-      {episodes.length > 0 ? (
-        <section className="mt-10 grid gap-5 sm:grid-cols-2" aria-label="Podcast episodes">
-          {episodes.map((episode, index) => (
-            <Link key={episode.slug} href={`/podcast/${episode.slug}`} className="group overflow-hidden border bg-background transition hover:-translate-y-0.5 hover:bg-muted/20">
-              <div className="relative aspect-[16/9] overflow-hidden bg-muted/30">
-                {episode.coverImage ? (
-                  <Image src={episode.coverImage} alt="" fill sizes="(max-width: 640px) 100vw, 50vw" className="object-cover transition duration-500 group-hover:scale-[1.025]" />
-                ) : (
-                  <div className="flex h-full items-center justify-center font-serif text-4xl text-muted-foreground">S&amp;L</div>
-                )}
-                <span className="absolute left-4 top-4 border bg-background/90 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.14em]">Episode {String(index + 1).padStart(2, "0")}</span>
-              </div>
-              <div className="p-6 sm:p-7">
-                <div className="flex items-center justify-between gap-4 text-xs uppercase tracking-[0.12em] text-muted-foreground">
-                  <span>{episode.duration || "Podcast"}</span>
-                  <span>Listen ↗</span>
+      <section className="mx-auto max-w-6xl px-6 py-14 sm:px-8 sm:py-16" aria-labelledby="latest-episodes-heading">
+        <div className="mb-7 flex items-end justify-between gap-4 border-b pb-4">
+          <h2 id="latest-episodes-heading" className="font-serif text-3xl font-semibold sm:text-4xl">Latest Episodes</h2>
+          <span className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">{episodes.length} episodes</span>
+        </div>
+
+        {episodes.length > 0 ? (
+          <div className="grid gap-6 sm:grid-cols-2">
+            {episodes.map((episode, index) => (
+              <Link key={episode.slug} href={`/podcast/${episode.slug}`} className="group overflow-hidden rounded-xl border bg-background shadow-sm transition duration-200 hover:-translate-y-1 hover:shadow-md">
+                <div className="relative aspect-[16/9] overflow-hidden bg-muted/30">
+                  {episode.coverImage ? (
+                    <Image src={episode.coverImage} alt="" fill sizes="(max-width: 640px) 100vw, 50vw" className="object-cover transition duration-500 group-hover:scale-[1.025]" />
+                  ) : (
+                    <div className="flex h-full items-center justify-center bg-muted/30 font-serif text-4xl text-muted-foreground">S&amp;L</div>
+                  )}
+                  <span className="absolute left-4 top-4 rounded-full border border-white/20 bg-black/55 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-white">{episode.duration || `Episode ${String(index + 1).padStart(2, "0")}`}</span>
                 </div>
-                <h2 className="mt-4 font-serif text-2xl font-semibold leading-tight">{episode.title}</h2>
-                {episode.description ? <p className="mt-3 line-clamp-3 text-sm leading-6 text-muted-foreground">{episode.description}</p> : null}
-              </div>
-            </Link>
-          ))}
-        </section>
-      ) : (
-        <section className="mt-10 border p-7 sm:p-9">
-          <p className="text-xs font-semibold uppercase tracking-[0.15em] text-muted-foreground">Podcast library</p>
-          <h2 className="mt-3 font-serif text-3xl font-semibold">Episodes coming soon</h2>
-          <p className="mt-3 max-w-xl text-muted-foreground">The podcast library is ready for episodes, audio, transcripts, and related resources to be added.</p>
-        </section>
-      )}
+                <div className="p-5 sm:p-6">
+                  <div className="flex items-center justify-between gap-4 text-xs uppercase tracking-[0.12em] text-muted-foreground">
+                    <span>Episode {String(index + 1).padStart(2, "0")}</span>
+                    <span className="text-[color:var(--accent)]">Listen Now ↗</span>
+                  </div>
+                  <h3 className="mt-3 font-serif text-2xl font-semibold leading-tight">{episode.title}</h3>
+                  {episode.description ? <p className="mt-3 line-clamp-3 text-sm leading-6 text-muted-foreground">{episode.description}</p> : null}
+                </div>
+              </Link>
+            ))}
+          </div>
+        ) : (
+          <div className="border p-7 sm:p-9">
+            <p className="text-xs font-semibold uppercase tracking-[0.15em] text-muted-foreground">Podcast library</p>
+            <h2 className="mt-3 font-serif text-3xl font-semibold">Episodes coming soon</h2>
+            <p className="mt-3 max-w-xl text-muted-foreground">The podcast library is ready for episodes, audio, transcripts, and related resources to be added.</p>
+          </div>
+        )}
+      </section>
     </main>
   );
 }
