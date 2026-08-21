@@ -1,4 +1,4 @@
-export const searchTypes = ["All", "Article", "Reflection", "Journal", "Book", "Scripture", "Study Center", "Topic", "Series", "Question"] as const;
+export const searchTypes = ["All", "Article", "Reflection", "Journal", "Book", "Podcast", "Scripture", "Study Center", "Topic", "Series", "Question"] as const;
 
 export type SearchType = (typeof searchTypes)[number];
 
