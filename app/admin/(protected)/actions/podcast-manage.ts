@@ -12,5 +12,20 @@ export async function updatePodcastEpisodeAction(formData: FormData) {
   revalidatePath("/admin/podcast"); revalidatePath(`/admin/podcast/${slug}`); revalidatePath("/podcast");
   return { ok: true as const };
 }
-export async function setPodcastEpisodeStatusAction(formData: FormData) { if (!(await requireAdminActionAccess())) return { ok: false as const, error: "Unauthorized." }; const slug = String(formData.get("slug") ?? "").trim(); const status = String(formData.get("status") ?? "draft") === "published" ? "published" : "draft"; await updatePodcastEpisodeStatus(slug, status); revalidatePath("/admin/podcast"); revalidatePath(`/admin/podcast/${slug}`); revalidatePath("/podcast"); revalidatePath(`/podcast/${slug}`); return { ok: true as const }; }
-export async function deletePodcastEpisodeAction(formData: FormData) { if (!(await requireAdminActionAccess())) return { ok: false as const, error: "Unauthorized." }; const slug = String(formData.get("slug") ?? "").trim(); await deletePodcastEpisode(slug); revalidatePath("/admin/podcast"); revalidatePath("/podcast"); return { ok: true as const }; }
+
+export async function setPodcastEpisodeStatusAction(formData: FormData): Promise<void> {
+  if (!(await requireAdminActionAccess())) return;
+  const slug = String(formData.get("slug") ?? "").trim();
+  if (!slug) return;
+  const status = String(formData.get("status") ?? "draft") === "published" ? "published" : "draft";
+  await updatePodcastEpisodeStatus(slug, status);
+  revalidatePath("/admin/podcast"); revalidatePath(`/admin/podcast/${slug}`); revalidatePath("/podcast"); revalidatePath(`/podcast/${slug}`);
+}
+
+export async function deletePodcastEpisodeAction(formData: FormData): Promise<void> {
+  if (!(await requireAdminActionAccess())) return;
+  const slug = String(formData.get("slug") ?? "").trim();
+  if (!slug) return;
+  await deletePodcastEpisode(slug);
+  revalidatePath("/admin/podcast"); revalidatePath("/podcast");
+}
