@@ -14,6 +14,9 @@ function getRelations(body: Record<string, unknown>): ContentRelations {
     relatedJournalSlugs: strings(body.relatedJournalSlugs),
     relatedBookSlugs: strings(body.relatedBookSlugs),
     relatedStudyPlanDates: strings(body.relatedStudyPlanDates),
+    relatedQuestionSlugs: strings(body.relatedQuestionSlugs),
+    relatedPodcastSlugs: strings(body.relatedPodcastSlugs),
+    relatedResourceSlugs: strings(body.relatedResourceSlugs),
   };
 }
 
@@ -21,7 +24,6 @@ function hasRichText(value: Record<string, unknown>): value is Record<string, un
   return "richText" in value && typeof value.richText === "object" && value.richText !== null;
 }
 
-// Article uses the same reading environment as Journal. The content model and actions remain Article-specific.
 export async function ArticleArticle({ article, showBackLink = true }: { article: ArticleDraft; showBackLink?: boolean }) {
   const articles = await listPublishedArticles();
   const index = articles.findIndex((item) => item.slug === article.slug);
@@ -50,9 +52,7 @@ export async function ArticleArticle({ article, showBackLink = true }: { article
             {scripture ? <span>{scripture}</span> : null}
           </div>
         </header>
-        {image ? <div className="journal-feature-image page-container">
-          <Image src={image} alt={article.title} width={1280} height={853} priority sizes="(max-width: 1220px) 100vw, 76rem" />
-        </div> : null}
+        {image ? <div className="journal-feature-image page-container"><Image src={image} alt={article.title} width={1280} height={853} priority sizes="(max-width: 1220px) 100vw, 76rem" /></div> : null}
         <div className="journal-reading-column">
           {article.introduction ? <p className="journal-introduction">{article.introduction}</p> : null}
           {richText ? <ArticleRichTextRenderer document={richText} /> : sections.map((section, sectionIndex) => (
@@ -61,10 +61,7 @@ export async function ArticleArticle({ article, showBackLink = true }: { article
               {typeof section === "object" && section !== null && Array.isArray((section as { paragraphs?: unknown }).paragraphs) ? (section as { paragraphs: unknown[] }).paragraphs.filter((paragraph): paragraph is string => typeof paragraph === "string").map((paragraph, paragraphIndex) => <p key={paragraphIndex}>{paragraph}</p>) : null}
             </section>
           ))}
-          <ReadingNavigation
-            previous={previous ? { href: `/articles/${previous.slug}`, title: previous.title } : undefined}
-            next={next ? { href: `/articles/${next.slug}`, title: next.title } : undefined}
-          />
+          <ReadingNavigation previous={previous ? { href: `/articles/${previous.slug}`, title: previous.title } : undefined} next={next ? { href: `/articles/${next.slug}`, title: next.title } : undefined} />
           {showBackLink ? <Link className="button button-text" href="/articles">Back to Articles</Link> : null}
           <RelatedContent relations={relations} scriptureReference={scripture || undefined} />
         </div>

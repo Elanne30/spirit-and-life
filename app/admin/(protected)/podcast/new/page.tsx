@@ -16,10 +16,7 @@ export default function NewPodcastEpisodePage() {
     if (!file) return;
     setStatus("Uploading audio…");
     try {
-      const blob = await upload(`podcast/${Date.now()}-${file.name}`, file, {
-        access: "public",
-        handleUploadUrl: "/api/admin/blob-upload",
-      });
+      const blob = await upload(`podcast/${Date.now()}-${file.name}`, file, { access: "public", handleUploadUrl: "/api/admin/blob-upload" });
       setAudioUrl(blob.url);
       setStatus("Audio uploaded");
     } catch (error) {
@@ -34,20 +31,9 @@ export default function NewPodcastEpisodePage() {
     const data = new FormData(event.currentTarget);
     data.set("audioUrl", audioUrl);
     const result = await createPodcastEpisodeAction(data);
-    if (result.ok) {
-      setStatus("Episode saved");
-      router.push("/admin/podcast");
-      router.refresh();
-    } else {
-      setStatus(result.error);
-      setSaving(false);
-    }
+    if (result.ok) { setStatus("Episode saved"); router.push("/admin/podcast"); router.refresh(); }
+    else { setStatus(result.error); setSaving(false); }
   }
 
-  return (
-    <section className="admin-editor-page">
-      <div className="admin-editor-header"><div><button type="button" className="admin-outline-link" onClick={() => router.push("/admin/content")}>← Back to Content</button><p className="eyebrow">Create</p><h1>New Podcast Episode</h1><p>Add an audio episode to the Spirit &amp; Life library.</p></div></div>
-      <article className="admin-editor-card"><form onSubmit={save} className="space-y-5"><input name="title" required className="w-full rounded-md border p-3" placeholder="Episode title" /><input name="slug" className="w-full rounded-md border p-3" placeholder="Slug (optional)" /><textarea name="description" className="min-h-32 w-full rounded-md border p-3" placeholder="Description / show notes" /><div className="grid gap-4 sm:grid-cols-2"><input name="publishedAt" required type="date" className="rounded-md border p-3" /><input name="duration" className="rounded-md border p-3" placeholder="Duration, e.g. 42:18" /></div><textarea name="transcript" className="min-h-32 w-full rounded-md border p-3" placeholder="Transcript (optional)" /><input type="file" accept="audio/mpeg,audio/mp4,audio/wav,audio/x-m4a,audio/aac,audio/ogg" onChange={uploadAudio} />{status ? <p className="text-sm text-muted-foreground">{status}</p> : null}{audioUrl ? <audio className="w-full" controls src={audioUrl} /> : null}<button type="submit" disabled={saving || !audioUrl} className="rounded-md border px-4 py-2 disabled:opacity-50">{saving ? "Saving…" : "Save episode"}</button></form></article>
-    </section>
-  );
+  return <section className="admin-editor-page"><div className="admin-editor-header"><div><button type="button" className="admin-outline-link" onClick={() => router.push("/admin/podcast")}>← Back to Podcast</button><p className="eyebrow">Create</p><h1>New Podcast Episode</h1><p>Add an audio episode and connect it to the wider Spirit &amp; Life library.</p></div></div><article className="admin-editor-card"><form onSubmit={save} className="space-y-5"><input name="title" required className="w-full rounded-md border p-3" placeholder="Episode title" /><input name="slug" className="w-full rounded-md border p-3" placeholder="Slug (optional)" /><textarea name="description" className="min-h-32 w-full rounded-md border p-3" placeholder="Description / show notes" /><div className="grid gap-4 sm:grid-cols-2"><input name="publishedAt" required type="date" className="rounded-md border p-3" /><input name="duration" className="rounded-md border p-3" placeholder="Duration, e.g. 42:18" /></div><input name="youtubeUrl" type="url" className="w-full rounded-md border p-3" placeholder="YouTube URL (optional)" /><div className="grid gap-4 sm:grid-cols-2"><input name="topicSlugs" className="w-full rounded-md border p-3" placeholder="Topic slugs, comma-separated" /><input name="seriesSlug" className="w-full rounded-md border p-3" placeholder="Series slug (optional)" /></div><div className="grid gap-4 sm:grid-cols-2"><input name="questionSlugs" className="w-full rounded-md border p-3" placeholder="Question slugs, comma-separated" /><input name="articleSlugs" className="w-full rounded-md border p-3" placeholder="Article slugs, comma-separated" /></div><input name="resourceSlugs" className="w-full rounded-md border p-3" placeholder="Resource slugs, comma-separated" /><textarea name="transcript" className="min-h-32 w-full rounded-md border p-3" placeholder="Transcript (optional)" /><input type="file" accept="audio/mpeg,audio/mp4,audio/wav,audio/x-m4a,audio/aac,audio/ogg" onChange={uploadAudio} />{status ? <p className="text-sm text-muted-foreground">{status}</p> : null}{audioUrl ? <audio className="w-full" controls src={audioUrl} /> : null}<button type="submit" disabled={saving || !audioUrl} className="rounded-md border px-4 py-2 disabled:opacity-50">{saving ? "Saving…" : "Save episode"}</button></form></article></section>;
 }
