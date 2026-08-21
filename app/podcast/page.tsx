@@ -7,49 +7,50 @@ export default async function PodcastPage() {
   const episodes = await listPodcastEpisodes(true);
 
   return (
-    <main>
+    <main className="bg-[#f7f3eb] text-[#282b28]">
       <LibraryPageHero
         eyebrow="Podcast"
         title="Spirit & Life Podcast"
         subtitle="Sound teaching for a deeper walk with God."
         description="Thoughtful conversations and Christian reflections to strengthen faith, encourage careful thinking, and help you keep growing in Christ."
         imageUrl="https://images.unsplash.com/photo-1478737270239-2f02b77fc618?auto=format&fit=crop&w=1800&q=85"
+        actions={[{ label: "Listen Now", href: "#latest-episodes", primary: true }, { label: "Browse Episodes", href: "#latest-episodes" }]}
       />
 
-      <section className="mx-auto max-w-6xl px-6 py-14 sm:px-8 sm:py-16" aria-labelledby="latest-episodes-heading">
-        <div className="mb-7 flex items-end justify-between gap-4 border-b pb-4">
+      <section id="latest-episodes" className="mx-auto max-w-6xl px-6 py-14 sm:px-8 sm:py-16" aria-labelledby="latest-episodes-heading">
+        <div className="mb-7 flex items-end justify-between gap-4 border-b border-[#cfc8ba] pb-4">
           <h2 id="latest-episodes-heading" className="font-serif text-3xl font-semibold sm:text-4xl">Latest Episodes</h2>
-          <span className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">{episodes.length} episodes</span>
+          <span className="text-xs font-semibold uppercase tracking-[0.14em] text-[#6b716b]">{episodes.length} episodes</span>
         </div>
 
         {episodes.length > 0 ? (
           <div className="grid gap-6 sm:grid-cols-2">
             {episodes.map((episode, index) => (
-              <Link key={episode.slug} href={`/podcast/${episode.slug}`} className="group overflow-hidden rounded-xl border bg-background shadow-sm transition duration-200 hover:-translate-y-1 hover:shadow-md">
-                <div className="relative aspect-[16/9] overflow-hidden bg-muted/30">
+              <Link key={episode.slug} href={`/podcast/${episode.slug}`} className="group overflow-hidden rounded-xl border border-[#d8d0c2] bg-[#fcfaf5] shadow-sm transition duration-200 hover:-translate-y-1 hover:shadow-md">
+                <div className="relative aspect-[16/9] overflow-hidden bg-[#e8e1d5]">
                   {episode.coverImage ? (
                     <Image src={episode.coverImage} alt="" fill sizes="(max-width: 640px) 100vw, 50vw" className="object-cover transition duration-500 group-hover:scale-[1.025]" />
                   ) : (
-                    <div className="flex h-full items-center justify-center bg-muted/30 font-serif text-4xl text-muted-foreground">S&amp;L</div>
+                    <div className="flex h-full items-center justify-center bg-[#e8e1d5] font-serif text-4xl text-[#6b716b]">S&amp;L</div>
                   )}
-                  <span className="absolute left-4 top-4 rounded-full border border-white/20 bg-black/55 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-white">{episode.duration || `Episode ${String(index + 1).padStart(2, "0")}`}</span>
+                  <span className="absolute bottom-3 right-3 rounded-full bg-black/55 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-white">{episode.duration || `Episode ${String(index + 1).padStart(2, "0")}`}</span>
                 </div>
                 <div className="p-5 sm:p-6">
-                  <div className="flex items-center justify-between gap-4 text-xs uppercase tracking-[0.12em] text-muted-foreground">
+                  <div className="flex items-center justify-between gap-4 text-xs uppercase tracking-[0.12em] text-[#6b716b]">
                     <span>Episode {String(index + 1).padStart(2, "0")}</span>
-                    <span className="text-[color:var(--accent)]">Listen Now ↗</span>
+                    <span className="text-[#9a5e3a]">Listen Now →</span>
                   </div>
                   <h3 className="mt-3 font-serif text-2xl font-semibold leading-tight">{episode.title}</h3>
-                  {episode.description ? <p className="mt-3 line-clamp-3 text-sm leading-6 text-muted-foreground">{episode.description}</p> : null}
+                  {episode.description ? <p className="mt-3 line-clamp-3 text-sm leading-6 text-[#6b716b]">{episode.description}</p> : null}
                 </div>
               </Link>
             ))}
           </div>
         ) : (
-          <div className="border p-7 sm:p-9">
-            <p className="text-xs font-semibold uppercase tracking-[0.15em] text-muted-foreground">Podcast library</p>
+          <div className="rounded-xl border border-[#d8d0c2] bg-[#fcfaf5] p-7 shadow-sm sm:p-9">
+            <p className="text-xs font-semibold uppercase tracking-[0.15em] text-[#6b716b]">Podcast library</p>
             <h2 className="mt-3 font-serif text-3xl font-semibold">Episodes coming soon</h2>
-            <p className="mt-3 max-w-xl text-muted-foreground">The podcast library is ready for episodes, audio, transcripts, and related resources to be added.</p>
+            <p className="mt-3 max-w-xl text-[#6b716b]">The podcast library is ready for episodes, audio, transcripts, and related resources to be added.</p>
           </div>
         )}
       </section>
