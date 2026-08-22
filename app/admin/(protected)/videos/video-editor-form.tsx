@@ -46,7 +46,6 @@ export function VideoEditorForm({ video }: { video?: VideoRecord }) {
   return (
     <form className="admin-form video-editor-form" onSubmit={save}>
       {video ? <><input type="hidden" name="id" value={video.id} /><input type="hidden" name="oldSlug" value={video.slug} /></> : null}
-      <input type="hidden" name="status" value={currentStatus} />
       <label htmlFor="video-title">Video title</label>
       <input id="video-title" name="title" value={title} onChange={(event) => setTitle(event.target.value)} required />
       <label htmlFor="video-slug">Slug</label>
@@ -85,7 +84,7 @@ export function VideoEditorForm({ video }: { video?: VideoRecord }) {
       {uploadStatus ? <p className="form-note" role="status">{uploadStatus}</p> : null}
       {error ? <p className="form-error" role="alert">{error}</p> : null}
       <div className="video-editor-actions">
-        <button className="button button-primary" type="submit" name="status" value={currentStatus === "archived" ? "archived" : isPublished ? "published" : "draft"} disabled={saving}>{saving ? "Saving…" : video ? "Save changes" : "Save draft"}</button>
+        <button className="button button-primary" type="submit" name="status" value={isPublished ? "published" : "draft"} disabled={saving}>{saving ? "Saving…" : video ? "Save changes" : "Save draft"}</button>
         {!isPublished && <button className="button button-primary" type="submit" name="status" value="published" disabled={saving}>{saving ? "Saving…" : "Publish"}</button>}
         {isPublished && <button className="button button-secondary" type="submit" name="status" value="draft" disabled={saving}>{saving ? "Saving…" : "Unpublish"}</button>}
         <button className="button button-secondary" type="button" onClick={() => router.push("/admin/videos")} disabled={saving}>Cancel</button>
