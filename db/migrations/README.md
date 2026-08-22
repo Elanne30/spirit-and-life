@@ -1,0 +1,1 @@
+Database migrations in this directory are applied by the project's existing deployment/database migration process. The Phase 3 video schema is additive and uses CREATE TABLE IF NOT EXISTS / CREATE INDEX IF NOT EXISTS so it can be safely applied where the original video migration has not yet been executed.
