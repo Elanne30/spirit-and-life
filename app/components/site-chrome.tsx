@@ -3,6 +3,7 @@
 import { usePathname } from "next/navigation";
 import { Header } from "@/app/components/header";
 import { Footer } from "@/app/components/footer";
+import { PublicVideoMount } from "@/app/components/public-video-mount";
 
 export function SiteChrome({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -15,6 +16,7 @@ export function SiteChrome({ children }: { children: React.ReactNode }) {
     <>
       <Header />
       {children}
+      <PublicVideoMount pathname={pathname} />
       <Footer />
     </>
   );
