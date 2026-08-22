@@ -14,14 +14,13 @@ export function VideoEditorForm({ video }: { video?: VideoRecord }) {
   const router = useRouter();
   const [title, setTitle] = useState(video?.title ?? "");
   const [slug, setSlug] = useState(video?.slug ?? "");
-  const [slugEdited, setSlugEdited] = useState(Boolean(video));
   const [videoUrl, setVideoUrl] = useState(video?.videoUrl ?? "");
   const [thumbnailUrl, setThumbnailUrl] = useState(video?.thumbnailUrl ?? "");
   const [uploadStatus, setUploadStatus] = useState("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
-  useEffect(() => { if (!slugEdited) setSlug(slugify(title)); }, [title, slugEdited]);
+  useEffect(() => { setSlug(slugify(title)); }, [title]);
 
   async function uploadFile(file: File, kind: "video" | "thumbnail") {
     setUploadStatus(`Uploading ${kind === "video" ? "video" : "thumbnail"}…`);
@@ -41,14 +40,18 @@ export function VideoEditorForm({ video }: { video?: VideoRecord }) {
     else { setError(result.error ?? "Video could not be saved."); setSaving(false); }
   }
 
+  const currentStatus = video?.status ?? "draft";
+  const isPublished = currentStatus === "published";
+
   return (
     <form className="admin-form video-editor-form" onSubmit={save}>
       {video ? <><input type="hidden" name="id" value={video.id} /><input type="hidden" name="oldSlug" value={video.slug} /></> : null}
+      <input type="hidden" name="status" value={currentStatus} />
       <label htmlFor="video-title">Video title</label>
       <input id="video-title" name="title" value={title} onChange={(event) => setTitle(event.target.value)} required />
       <label htmlFor="video-slug">Slug</label>
-      <input id="video-slug" name="slug" value={slug} onChange={(event) => { setSlugEdited(true); setSlug(slugify(event.target.value)); }} required pattern="[a-z0-9]+(?:-[a-z0-9]+)*" maxLength={120} />
-      <p className="form-note">The slug follows the title automatically until you edit it.</p>
+      <input id="video-slug" name="slug" value={slug} readOnly required pattern="[a-z0-9]+(?:-[a-z0-9]+)*" maxLength={120} />
+      <p className="form-note">The slug is generated automatically from the title.</p>
       <label htmlFor="video-description">Short description</label>
       <textarea id="video-description" name="description" rows={5} defaultValue={video?.description ?? ""} />
       <div className="video-editor-grid">
@@ -72,17 +75,21 @@ export function VideoEditorForm({ video }: { video?: VideoRecord }) {
       <label htmlFor="video-transcript">Transcript</label>
       <textarea id="video-transcript" name="transcript" rows={9} defaultValue={video?.transcript ?? ""} />
       <div className="video-editor-grid">
-        <div><label htmlFor="video-status">Status</label><select id="video-status" name="status" defaultValue={video?.status ?? "draft"}><option value="draft">Draft</option><option value="published">Published</option><option value="archived">Archived</option></select></div>
         <div><label htmlFor="video-published-at">Publication date</label><input id="video-published-at" name="publishedAt" type="datetime-local" defaultValue={video?.publishedAt ? new Date(video.publishedAt).toISOString().slice(0, 16) : ""} /></div>
       </div>
       <fieldset className="video-destinations">
         <legend>Publish to</legend>
-        <p className="form-note">Choose every public section where this video should appear. Additional destinations can be added later without changing the video record.</p>
+        <p className="form-note">Choose every public section where this video should appear. You can save it as a draft before publishing.</p>
         <div className="video-destination-grid">{VIDEO_DESTINATIONS.map((destination) => <label className="admin-checkbox" key={destination}><input type="checkbox" name="destination" value={destination} defaultChecked={video?.destinations.includes(destination)} />{destinationLabels[destination]}</label>)}</div>
       </fieldset>
       {uploadStatus ? <p className="form-note" role="status">{uploadStatus}</p> : null}
       {error ? <p className="form-error" role="alert">{error}</p> : null}
-      <div className="video-editor-actions"><button className="button button-primary" type="submit" disabled={saving}>{saving ? "Saving…" : video ? "Save changes" : "Save video"}</button><button className="button button-secondary" type="button" onClick={() => router.push("/admin/videos")} disabled={saving}>Cancel</button></div>
+      <div className="video-editor-actions">
+        <button className="button button-primary" type="submit" name="status" value={currentStatus === "archived" ? "archived" : isPublished ? "published" : "draft"} disabled={saving}>{saving ? "Saving…" : video ? "Save changes" : "Save draft"}</button>
+        {!isPublished && <button className="button button-primary" type="submit" name="status" value="published" disabled={saving}>{saving ? "Saving…" : "Publish"}</button>}
+        {isPublished && <button className="button button-secondary" type="submit" name="status" value="draft" disabled={saving}>{saving ? "Saving…" : "Unpublish"}</button>}
+        <button className="button button-secondary" type="button" onClick={() => router.push("/admin/videos")} disabled={saving}>Cancel</button>
+      </div>
     </form>
   );
 }
