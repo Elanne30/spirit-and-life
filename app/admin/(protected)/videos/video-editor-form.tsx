@@ -38,7 +38,7 @@ export function VideoEditorForm({ video }: { video?: VideoRecord }) {
     form.set("videoUrl", videoUrl); form.set("thumbnailUrl", thumbnailUrl);
     const result = video ? await updateVideoAction(form) : await createVideoAction(form);
     if (result.ok) { router.push("/admin/videos"); router.refresh(); }
-    else { setError("error" in result ? result.error : "Video could not be saved."); setSaving(false); }
+    else { setError(result.error ?? "Video could not be saved."); setSaving(false); }
   }
 
   return (
