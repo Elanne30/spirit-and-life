@@ -9,9 +9,8 @@ export async function createVideoAction(formData: FormData) {
   const slug = String(formData.get("slug") ?? "").trim();
   if (!title || !slug) return { ok: false as const, error: "Title and slug are required." };
 
-  const destinations = String(formData.get("destinations") ?? "")
-    .split(",")
-    .map((value) => value.trim())
+  const destinations = formData.getAll("destination")
+    .map((value) => String(value).trim())
     .filter(Boolean);
 
   try {
