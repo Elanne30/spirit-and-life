@@ -1,64 +1,103 @@
 import Link from "next/link";
-import { ArrowLeft, ArrowRight, Edit3, Eye, Plus, Video } from "lucide-react";
+import { CalendarDays, Clock3, Eye, Plus, Search, Video } from "lucide-react";
 import { listVideos } from "@/app/lib/video-repository";
-import { deleteVideoAction } from "@/app/admin/(protected)/actions/video";
+import { VideoMoreActions } from "@/app/admin/(protected)/videos/video-more-actions";
+import styles from "../content/admin-library-reference.module.css";
 
 export const dynamic = "force-dynamic";
 
-const destinationLabels: Record<string, string> = { home: "Home", articles: "Articles", reflections: "Reflections", journals: "Journals", resources: "Resources" };
+function statusLabel(status: "draft" | "published" | "archived") {
+  if (status === "published") return "Published";
+  if (status === "archived") return "Archived";
+  return "Draft";
+}
+
+function statusClass(status: "draft" | "published" | "archived") {
+  return status === "published" ? styles.statusPublished : styles.statusDraft;
+}
+
+function displayDate(value: string) {
+  if (!value) return null;
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+}
 
 export default async function AdminVideosPage() {
   const videos = await listVideos();
+  const publishedCount = videos.filter((video) => video.status === "published").length;
+  const draftCount = videos.filter((video) => video.status === "draft").length;
+
   return (
-    <section className="admin-library-page">
-      <div className="admin-library-heading video-library-heading">
-        <div>
-          <p className="eyebrow">Media library</p>
-          <h2>Videos</h2>
-          <p>Manage hosted videos and YouTube-linked videos for Spirit &amp; Life.</p>
-        </div>
-        <div className="admin-library-actions">
-          <Link className="admin-outline-link" href="/admin"><ArrowLeft size={14} /> Dashboard</Link>
-          <Link className="admin-primary-link" href="/admin/videos/new"><Plus size={14} /> Add Video</Link>
-        </div>
+    <section className={`${styles.library} admin-library-page`}>
+      <div className={styles.heading}>
+        <h1>Videos</h1>
+        <p>Manage hosted videos and YouTube-linked videos for Spirit &amp; Life.</p>
       </div>
 
-      {videos.length ? <div className="admin-library-grid video-library-grid">
-        {videos.map((video) => (
-          <article className="admin-library-card video-library-card" key={video.id}>
-            <div className="admin-library-image video-card-media">
-              {video.thumbnailUrl ? <img src={video.thumbnailUrl} alt="" /> : <span className="admin-icon"><Video size={24} /></span>}
-              <span className={`admin-status admin-status-${video.status}`}>{video.status}</span>
-            </div>
-            <div className="admin-library-card-body">
-              <div className="admin-library-card-title"><h3>{video.title}</h3></div>
-              {video.description ? <p>{video.description}</p> : <p className="quiet-note">No description</p>}
-              <div className="admin-library-meta"><span>{video.duration || "Video"}</span><span>{video.destinations.length ? video.destinations.map((item) => destinationLabels[item] ?? item).join(" · ") : "No destinations"}</span></div>
-              <div className="video-card-actions">
-                <Link className="button button-secondary" href={`/admin/videos/${video.slug}/edit`}><Edit3 size={14} /> Edit</Link>
-                <Link className="button button-secondary" href={`/resources/video/${video.slug}`} target="_blank"><Eye size={14} /> Preview</Link>
-                <form action={deleteVideoAction}><input type="hidden" name="id" value={video.id} /><input type="hidden" name="slug" value={video.slug} /><button className="button button-secondary video-delete-button" type="submit">Delete</button></form>
-              </div>
-            </div>
-          </article>
-        ))}
-      </div> : <div className="admin-empty-state"><Video size={22} /><h2>No videos yet</h2><p>Create your first video when you are ready.</p><Link className="admin-primary-link" href="/admin/videos/new">Add Video <ArrowRight size={14} /></Link></div>}
+      <div className={styles.toolbar}>
+        <nav className={styles.tabs} aria-label="Video filters">
+          <span className={`${styles.tab} ${styles.tabActive}`}>All ({videos.length})</span>
+          <span className={styles.tab}>Published ({publishedCount})</span>
+          <span className={styles.tab}>Drafts ({draftCount})</span>
+          <span className={styles.tab}>Archived ({videos.filter((video) => video.status === "archived").length})</span>
+        </nav>
+        <label className={styles.search}>
+          <Search size={15} aria-hidden="true" />
+          <input aria-label="Search videos" placeholder="Search videos..." readOnly />
+        </label>
+        <Link className={`button button-primary ${styles.addButton}`} href="/admin/videos/new" aria-label="Add Video">
+          <Plus size={15} />
+          Add Video
+        </Link>
+      </div>
 
-      <style>{`
-        .video-library-heading { align-items: flex-end; }
-        .video-library-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-        .video-library-card { overflow: hidden; }
-        .video-card-media { position: relative; aspect-ratio: 16 / 9; overflow: hidden; background: var(--surface-muted); }
-        .video-card-media img { display: block; width: 100%; height: 100%; object-fit: cover; }
-        .video-card-media .admin-status { position: absolute; top: .75rem; left: .75rem; }
-        .video-library-card-body > p { min-height: 3.2rem; }
-        .video-card-actions { display: flex; flex-wrap: wrap; gap: .45rem; margin-top: 1rem; padding-top: .85rem; border-top: 1px solid var(--line); }
-        .video-card-actions form { margin: 0; }
-        .video-card-actions .button { display: inline-flex; align-items: center; gap: .35rem; }
-        .video-delete-button { color: #9f3f36; }
-        @media (max-width: 1000px) { .video-library-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-        @media (max-width: 680px) { .video-library-grid { grid-template-columns: 1fr; } }
-      `}</style>
+      {videos.length ? (
+        <div className={styles.grid}>
+          {videos.map((video) => (
+            <article className={styles.card} key={video.id}>
+              <Link className={styles.imageWrap} href={`/admin/videos/${video.slug}/edit`} aria-label={`Open ${video.title}`}>
+                {video.thumbnailUrl ? (
+                  <img className={styles.image} src={video.thumbnailUrl} alt="" loading="lazy" />
+                ) : (
+                  <span className={styles.imagePlaceholder}>
+                    <Video size={24} />
+                    Video
+                  </span>
+                )}
+                <span className={`${styles.status} ${statusClass(video.status)}`}>
+                  {statusLabel(video.status)}
+                </span>
+              </Link>
+
+              <div className={styles.body}>
+                <p className={styles.category}>
+                  {video.destinations.length
+                    ? video.destinations.map((destination) => destination.charAt(0).toUpperCase() + destination.slice(1)).join(" · ")
+                    : "Video"}
+                </p>
+                <h2 className={styles.title}>{video.title}</h2>
+                <div className={styles.meta}>
+                  {displayDate(video.publishedAt ?? video.createdAt) ? (
+                    <span><CalendarDays size={12} />{displayDate(video.publishedAt ?? video.createdAt)}</span>
+                  ) : null}
+                  {video.duration ? <span><Clock3 size={12} />{video.duration}</span> : null}
+                </div>
+              </div>
+
+              <div className={styles.actions}>
+                <Link className={styles.action} href={`/admin/videos/${video.slug}/edit`}>Edit</Link>
+                <Link className={styles.action} href={`/resources/video/${video.slug}`} target="_blank" aria-label={`Preview ${video.title}`} title="Preview">
+                  <Eye size={15} />
+                </Link>
+                <VideoMoreActions slug={video.slug} title={video.title} status={video.status} id={video.id} />
+              </div>
+            </article>
+          ))}
+        </div>
+      ) : (
+        <div className={styles.empty}>No videos yet. Add your first video to begin.</div>
+      )}
     </section>
   );
 }
