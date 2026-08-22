@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowRight, BookOpen, FilePenLine, FileText, Headphones, PenLine, Download } from "lucide-react";
+import { ArrowRight, BookOpen, FilePenLine, FileText, Headphones, PenLine, Download, Video } from "lucide-react";
 import { listAdminContentItems, type AdminContentItem, type AdminContentType } from "@/app/admin/(protected)/content/admin-content";
 
 const sections: Array<{ contentType: AdminContentType; label: string }> = [
@@ -102,6 +102,7 @@ export default async function AdminContentPage({ searchParams }: { searchParams:
           {overview.map((item) => { const Icon = item.icon; return <article className="admin-content-overview-card" key={item.title}><span className="admin-icon"><Icon size={19} /></span><h3>{item.title}</h3><p>{item.description}</p><strong>{item.count}</strong><small>{item.type === "draft" ? "Drafts" : "Published"}</small><Link href={item.href}>View all <ArrowRight size={14} /></Link></article>; })}
           <article className="admin-content-overview-card"><span className="admin-icon"><Headphones size={19} /></span><h3>Podcast</h3><p>Manage audio episodes, show notes, transcripts, and downloads.</p><strong>Audio</strong><small>Library</small><Link href="/admin/podcast">View all <ArrowRight size={14} /></Link></article>
           <article className="admin-content-overview-card"><span className="admin-icon"><Download size={19} /></span><h3>Downloads</h3><p>Manage PDFs and other downloadable resources for readers.</p><strong>Files</strong><small>Library</small><Link href="/admin/resources">View all <ArrowRight size={14} /></Link></article>
+          <article className="admin-content-overview-card"><span className="admin-icon"><Video size={19} /></span><h3>Videos</h3><p>Manage hosted videos and YouTube-linked videos for Spirit &amp; Life.</p><strong>Video</strong><small>Library</small><Link href="/admin/videos">View all <ArrowRight size={14} /></Link></article>
         </div>
       </article>
       <article className="admin-card admin-recent-content">
