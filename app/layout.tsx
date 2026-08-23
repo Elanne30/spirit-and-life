@@ -33,7 +33,9 @@ export const metadata: Metadata = {
   },
   alternates: { canonical: "/" },
   icons: {
-    icon: "/icon.svg",
+    icon: [
+      { url: "/icon.svg", type: "image/svg+xml" },
+    ],
     shortcut: "/icon.svg",
     apple: "/icon.svg",
   },
