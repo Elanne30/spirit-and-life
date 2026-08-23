@@ -1,7 +1,7 @@
 import { sql } from "@vercel/postgres";
 
 export type VideoStatus = "draft" | "published" | "archived";
-export const VIDEO_DESTINATIONS = ["home", "articles", "reflections", "journals", "resources"] as const;
+export const VIDEO_DESTINATIONS = ["home", "articles", "reflections", "journals", "books", "podcast", "resources", "topics", "series", "questions", "study-center", "scripture", "about"] as const;
 export type VideoDestination = (typeof VIDEO_DESTINATIONS)[number];
 
 export type VideoRecord = {
