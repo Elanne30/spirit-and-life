@@ -38,11 +38,21 @@ function revalidateVideoPaths(slug?: string) {
   revalidatePath("/admin/content");
   revalidatePath("/admin/videos");
   if (slug) revalidatePath(`/resources/video/${slug}`);
-  revalidatePath("/resources");
-  revalidatePath("/articles");
-  revalidatePath("/reflections");
-  revalidatePath("/journals");
-  revalidatePath("/");
+  for (const path of [
+    "/resources",
+    "/articles",
+    "/reflections",
+    "/journals",
+    "/books",
+    "/podcast",
+    "/topics",
+    "/series",
+    "/questions",
+    "/study-center",
+    "/scripture",
+    "/about",
+    "/",
+  ]) revalidatePath(path);
 }
 
 export async function createVideoAction(formData: FormData) {
