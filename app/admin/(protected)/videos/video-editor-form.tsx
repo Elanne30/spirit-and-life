@@ -6,7 +6,21 @@ import { useRouter } from "next/navigation";
 import { createVideoAction, updateVideoAction } from "@/app/admin/(protected)/actions/video";
 import { VIDEO_DESTINATIONS, type VideoRecord } from "@/app/lib/video-repository";
 
-const destinationLabels: Record<string, string> = { home: "Home", articles: "Articles", reflections: "Reflections", journals: "Journals", resources: "Resources" };
+const destinationLabels: Record<string, string> = {
+  home: "Homepage",
+  articles: "Articles",
+  reflections: "Reflections",
+  journals: "Journals",
+  books: "Books",
+  podcast: "Podcast",
+  resources: "Resources",
+  topics: "Topics",
+  series: "Series",
+  questions: "Questions",
+  "study-center": "Study Center",
+  scripture: "Scripture",
+  about: "About",
+};
 
 function slugify(value: string) { return value.normalize("NFKD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").replace(/-+/g, "-").slice(0, 120); }
 
@@ -78,7 +92,7 @@ export function VideoEditorForm({ video }: { video?: VideoRecord }) {
       </div>
       <fieldset className="video-destinations">
         <legend>Publish to</legend>
-        <p className="form-note">Choose every public section where this video should appear. You can save it as a draft before publishing.</p>
+        <p className="form-note">Choose every public section where this video should appear. You can select multiple sections and save it as a draft before publishing.</p>
         <div className="video-destination-grid">{VIDEO_DESTINATIONS.map((destination) => <label className="admin-checkbox" key={destination}><input type="checkbox" name="destination" value={destination} defaultChecked={video?.destinations.includes(destination)} />{destinationLabels[destination]}</label>)}</div>
       </fieldset>
       {uploadStatus ? <p className="form-note" role="status">{uploadStatus}</p> : null}

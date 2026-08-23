@@ -8,7 +8,15 @@ const destinationMap = {
   "/articles": "articles",
   "/reflections": "reflections",
   "/journals": "journals",
+  "/books": "books",
+  "/podcast": "podcast",
   "/resources": "resources",
+  "/topics": "topics",
+  "/series": "series",
+  "/questions": "questions",
+  "/study-center": "study-center",
+  "/scripture": "scripture",
+  "/about": "about",
 } as const;
 
 type VideoSummary = { id: string; title: string; slug: string; description: string | null; thumbnailUrl: string | null; duration: string | null };
