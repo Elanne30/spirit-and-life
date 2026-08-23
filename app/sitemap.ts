@@ -8,7 +8,7 @@ import { scriptureReferences } from "@/app/content/scripture";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   await ensurePublishingIntegrity();
-  const routes = ["", "articles", "reflections", "journals", "books", "study-center", "about", "contact", "scripture", "search", "privacy-policy", "terms-of-use"];
+  const routes = ["", "articles", "reflections", "journals", "books", "podcast", "resources", "topics", "series", "questions", "study-center", "about", "contact", "scripture", "search", "privacy-policy", "terms-of-use"];
   const [reflections, journals, books, articles] = await Promise.all([listPublishedReflections(), listPublishedJournals(), listPublishedBooks(), listPublishedArticles()]);
   const contentRoutes = [
     ...articles.map((item) => `articles/${item.slug}`),
