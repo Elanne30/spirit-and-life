@@ -46,7 +46,7 @@ function orderSeriesArticles(articles: ArticleDraft[]) {
     const partA = articlePartNumber(a);
     const partB = articlePartNumber(b);
     if (partA !== partB) return partA - partB;
-    return a.published_at.localeCompare(b.published_at);
+    return (a.published_at ?? a.updated_at).localeCompare(b.published_at ?? b.updated_at);
   });
 }
 
