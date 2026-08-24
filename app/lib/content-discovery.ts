@@ -29,6 +29,27 @@ function articleMatchesQuestion(article: ArticleDraft, slug: string) {
   return bodyStringList(article, "relatedQuestionSlugs").includes(slug);
 }
 
+function articlePartNumber(article: ArticleDraft) {
+  const explicit = article.body.seriesOrder;
+  if (typeof explicit === "number" && Number.isFinite(explicit)) return explicit;
+  if (typeof explicit === "string" && /^\d+$/.test(explicit.trim())) return Number(explicit.trim());
+
+  const match = article.title.match(/\bpart\s+(one|two|three|four|five|six|seven|eight|nine|ten|\d+)\b/i);
+  if (!match) return Number.MAX_SAFE_INTEGER;
+  const value = match[1].toLowerCase();
+  const words: Record<string, number> = { one: 1, two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8, nine: 9, ten: 10 };
+  return words[value] ?? Number(value);
+}
+
+function orderSeriesArticles(articles: ArticleDraft[]) {
+  return [...articles].sort((a, b) => {
+    const partA = articlePartNumber(a);
+    const partB = articlePartNumber(b);
+    if (partA !== partB) return partA - partB;
+    return a.published_at.localeCompare(b.published_at);
+  });
+}
+
 export async function getTopicDiscovery(slug: string) {
   const topic = getTopic(slug);
   if (!topic) return null;
@@ -49,7 +70,7 @@ export async function getSeriesDiscovery(slug: string) {
     series,
     topics: (series.topicSlugs ?? []).map(getTopic).filter((topic): topic is Topic => Boolean(topic)),
     questions: QUESTIONS.filter((question) => question.seriesSlug === slug),
-    articles: articles.filter((article) => articleMatchesSeries(article, slug)),
+    articles: orderSeriesArticles(articles.filter((article) => articleMatchesSeries(article, slug))),
   };
 }
 
