@@ -5,7 +5,7 @@ import { LibraryPageHero } from "@/app/components/library-page-hero";
 
 export default async function TopicPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const discovery = getTopicDiscovery(slug);
+  const discovery = await getTopicDiscovery(slug);
   if (!discovery) notFound();
 
   return (
@@ -23,6 +23,10 @@ export default async function TopicPage({ params }: { params: Promise<{ slug: st
             <div className="mt-5 space-y-3">{discovery.questions.length ? discovery.questions.map((question) => <Link key={question.slug} href={`/questions/${question.slug}`} className="block rounded-xl border p-5 transition hover:-translate-y-0.5 hover:border-[color:var(--accent)]"><span className="text-xs uppercase tracking-[0.12em] text-muted-foreground">Question</span><h3 className="mt-2 font-serif text-xl">{question.question}</h3><span className="mt-3 inline-block text-xs font-semibold uppercase tracking-[0.12em] text-[color:var(--accent)]">Explore ↗</span></Link>) : <p className="text-sm text-muted-foreground">No questions yet.</p>}</div>
           </section>
         </div>
+        <section className="mt-6 rounded-2xl border bg-[color:var(--surface)] p-6 sm:p-8">
+          <div className="flex items-center justify-between gap-4 border-b pb-4"><h2 className="font-serif text-3xl">Articles</h2><span className="text-xs text-muted-foreground">{discovery.articles.length}</span></div>
+          <div className="mt-5 grid gap-4 md:grid-cols-2">{discovery.articles.length ? discovery.articles.map((article) => <Link key={article.id} href={`/articles/${article.slug}`} className="block rounded-xl border p-5 transition hover:-translate-y-0.5 hover:border-[color:var(--accent)]"><span className="text-xs uppercase tracking-[0.12em] text-muted-foreground">Article</span><h3 className="mt-2 font-serif text-xl">{article.title}</h3>{article.introduction ? <p className="mt-2 text-sm text-muted-foreground line-clamp-3">{article.introduction}</p> : null}<span className="mt-3 inline-block text-xs font-semibold uppercase tracking-[0.12em] text-[color:var(--accent)]">Read article ↗</span></Link>) : <p className="text-sm text-muted-foreground">Published articles tagged with this topic will appear here automatically.</p>}</div>
+        </section>
       </section>
     </main>
   );
