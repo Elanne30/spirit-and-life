@@ -5,7 +5,7 @@ import { createArticleAction, updateArticleAction, type ArticleActionState } fro
 import { uploadContentImageAction, type ContentDraftActionState } from "@/app/admin/(protected)/actions/content";
 import { AdminRichTextEditor } from "@/app/admin/(protected)/content/admin-rich-text-editor";
 import { legacySectionsToRichText, normalizeRichTextDocument, richTextToLegacySections, type RichTextDocument } from "@/app/content/article-rich-text";
-import { TOPICS } from "@/app/lib/content-taxonomy";
+import { TOPICS, SERIES } from "@/app/lib/content-taxonomy";
 import type { ArticleDraft } from "@/app/lib/content-drafts";
 
 const initialState: ArticleActionState = { status: "idle", message: "" };
@@ -36,7 +36,7 @@ export function ArticleForm({ draft }: Props) {
       <label htmlFor="article-category">Category</label><select id="article-category" name="category" defaultValue={draft?.category ?? "Philosophy"}><option>Philosophy</option><option>Apologetics</option><option>Biblical Studies</option><option>Theology</option><option>Christian Living</option><option>Faith &amp; Life</option><option>Church History</option></select>
       <div className="admin-form-grid"><div><label htmlFor="article-date">Date</label><input id="article-date" name="date" defaultValue={typeof draft?.body.date === "string" ? draft.body.date : ""} placeholder="August 18, 2026" /></div><div><label htmlFor="article-reading-time">Reading time</label><input id="article-reading-time" name="readingTime" defaultValue={typeof draft?.body.readingTime === "string" ? draft.body.readingTime : ""} placeholder="6 min read" /></div></div>
       <label htmlFor="article-topics">Topics</label><select id="article-topics" name="topics" multiple defaultValue={Array.isArray(draft?.body.topics) ? draft.body.topics.filter((value): value is string => typeof value === "string") : []}>{TOPICS.map((topic) => <option key={topic.slug} value={topic.slug}>{topic.name}</option>)}</select><p className="form-note">Hold Ctrl/Cmd to select more than one topic.</p>
-      <label htmlFor="article-series">Series</label><input id="article-series" name="series" defaultValue={bodyString(draft, "series")} placeholder="the-problem-of-evil" /><p className="form-note">Optional series slug.</p>
+      <label htmlFor="article-series">Series</label><select id="article-series" name="series" defaultValue={bodyString(draft, "series")}><option value="">No series</option>{SERIES.map((series) => <option key={series.slug} value={series.slug}>{series.name}</option>)}</select><p className="form-note">Assign this article to a series here. You do not paste the article into the series page.</p>
       <label htmlFor="article-introduction">Introduction</label><textarea id="article-introduction" name="introduction" rows={5} defaultValue={draft?.introduction ?? ""} />
       <label htmlFor="article-image">Article image reference</label><input id="article-image" name="imageReference" defaultValue={draft?.image_reference ?? bodyString(draft, "image")} placeholder="/images/articles/my-article.jpg or https://..." />
       <label htmlFor="article-scripture">Scripture reference</label><input id="article-scripture" name="scripture" defaultValue={bodyString(draft, "scripture")} placeholder="Romans 8:28" />
