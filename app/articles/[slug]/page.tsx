@@ -6,6 +6,8 @@ import { ReadingNavigation } from "@/app/components/reading-navigation";
 import { RelatedContent } from "@/app/components/related-content";
 import { ArticleRichTextRenderer } from "@/app/components/article-rich-text-renderer";
 import { getPublishedArticle, listPublishedArticles } from "@/app/lib/content-drafts";
+import { getSeries, getTopic } from "@/app/lib/content-taxonomy";
+import { getSeriesDiscovery } from "@/app/lib/content-discovery";
 import { studies } from "@/app/data/study-plan";
 import type { ContentRelations } from "@/app/content/types";
 import { articleMetadata, articleStructuredData } from "@/app/content/seo";
@@ -24,6 +26,13 @@ function getRelations(body: Record<string, unknown>): ContentRelations {
   };
 }
 
+function articleTopics(article: { topics?: string[]; body: Record<string, unknown> }) {
+  const direct = article.topics ?? [];
+  if (direct.length) return direct;
+  const bodyTopics = article.body.topics;
+  return Array.isArray(bodyTopics) ? bodyTopics.filter((value): value is string => typeof value === "string") : [];
+}
+
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const article = await getPublishedArticle(slug);
@@ -38,9 +47,13 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
   if (!article) notFound();
 
   const articles = await listPublishedArticles();
-  const index = articles.findIndex((item) => item.slug === article.slug);
-  const previous = index > 0 ? articles[index - 1] : undefined;
-  const next = index >= 0 && index < articles.length - 1 ? articles[index + 1] : undefined;
+  const seriesSlug = article.series ?? (typeof article.body.series === "string" ? article.body.series : null);
+  const seriesDiscovery = seriesSlug ? await getSeriesDiscovery(seriesSlug) : null;
+  const navigationArticles = seriesDiscovery?.articles?.length ? seriesDiscovery.articles : articles;
+  const index = navigationArticles.findIndex((item) => item.slug === article.slug);
+  const previous = index > 0 ? navigationArticles[index - 1] : undefined;
+  const next = index >= 0 && index < navigationArticles.length - 1 ? navigationArticles[index + 1] : undefined;
+
   const body = article.body;
   const sections = Array.isArray(body.sections) ? body.sections : [];
   const richText = hasRichText(body) ? body.richText : null;
@@ -56,6 +69,8 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
     image: image || "/images/social-image/social-image-logo.jpg",
     date: typeof body.date === "string" ? body.date : "",
   });
+  const series = seriesSlug ? getSeries(seriesSlug) : null;
+  const topics = articleTopics(article).map(getTopic).filter((topic): topic is NonNullable<ReturnType<typeof getTopic>> => Boolean(topic));
 
   return (
     <>
@@ -71,6 +86,10 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
               <span>{typeof body.readingTime === "string" ? body.readingTime : ""}</span>
               <span>{article.category ?? "Article"}</span>
             </div>
+            {(series || topics.length) ? <div className="mt-5 flex flex-wrap items-center gap-2" aria-label="Article relationships">
+              {series ? <Link href={`/series/${series.slug}`} className="rounded-full border px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.1em] hover:border-[color:var(--accent)]">Series: {series.name}</Link> : null}
+              {topics.map((topic) => <Link key={topic.slug} href={`/topics/${topic.slug}`} className="rounded-full border px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.1em] hover:border-[color:var(--accent)]">{topic.name}</Link>)}
+            </div> : null}
           </header>
           {image ? <div className="article-detail-hero page-container">
             <Image src={image} alt={article.title} width={1600} height={900} priority sizes="(max-width: 900px) 100vw, 78rem" />
@@ -89,7 +108,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
               </section>
             ))}
             <ReadingNavigation previous={previous ? { href: `/articles/${previous.slug}`, title: previous.title } : undefined} next={next ? { href: `/articles/${next.slug}`, title: next.title } : undefined} />
-            <Link className="button button-text" href="/articles">Back to Articles</Link>
+            {series ? <Link className="button button-text" href={`/series/${series.slug}`}>Back to {series.name} →</Link> : <Link className="button button-text" href="/articles">Back to Articles</Link>}
             <RelatedContent relations={relations} scriptureReference={typeof body.scripture === "string" ? body.scripture : undefined} />
           </div>
         </article>
