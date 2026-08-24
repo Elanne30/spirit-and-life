@@ -25,8 +25,8 @@ function articleMatchesSeries(article: ArticleDraft, slug: string) {
   return article.series === slug || (typeof article.body.series === "string" && article.body.series === slug);
 }
 
-function articleMatchesQuestion(article: ArticleDraft, slug: string) {
-  return bodyStringList(article, "relatedQuestionSlugs").includes(slug);
+function articleMatchesQuestion(article: ArticleDraft, question: Question) {
+  return bodyStringList(article, "relatedQuestionSlugs").includes(question.slug) || Boolean(question.seriesSlug && articleMatchesSeries(article, question.seriesSlug));
 }
 
 function articlePartNumber(article: ArticleDraft) {
@@ -58,7 +58,7 @@ export async function getTopicDiscovery(slug: string) {
     topic,
     series: SERIES.filter((series) => series.topicSlugs?.includes(slug)),
     questions: QUESTIONS.filter((question) => question.topicSlugs.includes(slug)),
-    articles: articles.filter((article) => articleMatchesTopic(article, slug)),
+    articles: orderSeriesArticles(articles.filter((article) => articleMatchesTopic(article, slug))),
   };
 }
 
@@ -82,6 +82,6 @@ export async function getQuestionDiscovery(slug: string) {
     question,
     topics: question.topicSlugs.map(getTopic).filter((topic): topic is Topic => Boolean(topic)),
     series: question.seriesSlug ? getSeries(question.seriesSlug) : null,
-    articles: articles.filter((article) => articleMatchesQuestion(article, slug)),
+    articles: orderSeriesArticles(articles.filter((article) => articleMatchesQuestion(article, question))),
   };
 }
