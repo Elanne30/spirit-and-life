@@ -35,7 +35,7 @@ function articlePartNumber(article: ArticleDraft) {
   if (typeof explicit === "string" && /^\d+$/.test(explicit.trim())) return Number(explicit.trim());
 
   const match = article.title.match(/\bpart\s+(one|two|three|four|five|six|seven|eight|nine|ten|\d+)\b/i);
-  if (!match) return Number.MAX_SAFE_INTEGER;
+  if (!match) return 1;
   const value = match[1].toLowerCase();
   const words: Record<string, number> = { one: 1, two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8, nine: 9, ten: 10 };
   return words[value] ?? Number(value);
