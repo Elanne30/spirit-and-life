@@ -12,10 +12,17 @@ import {
 import { WeekProgress } from "@/app/study-center/week-progress";
 import { pageMetadata } from "@/app/content/seo";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = pageMetadata("Study Center", "Explore Bible study plans, reading practices, and learning resources from Spirit & Life.", "/study-center");
 
 export default function StudyCenterPage() {
-  const today = new Date().toISOString().split("T")[0];
+  const today = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Africa/Lagos",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(new Date());
   const currentStudy = getStudyByDate(today) ?? studies[0];
   const currentWeek = currentStudy.week ?? 1;
   const weekStudies = getStudiesByWeek(currentWeek);
