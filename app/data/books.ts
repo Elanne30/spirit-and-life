@@ -3,7 +3,7 @@ import type { ContentCategory, ContentRelations } from "@/app/content/types";
 
 export type Book = ImageManifestEntry & ContentRelations & {
   cover?: string;
-  status: "Coming Soon";
+  status: "Available" | "Coming Soon";
   category?: ContentCategory;
   featured?: boolean;
   subtitle?: string;
@@ -17,7 +17,7 @@ export type Book = ImageManifestEntry & ContentRelations & {
 
 const verifiedBookDetails: Record<string, Omit<Book, keyof ImageManifestEntry | "cover">> = {
   "from-perfection-to-corruption": {
-    status: "Coming Soon",
+    status: "Available",
     category: "Biblical Studies",
     featured: true,
     relatedStudyPlanDates: ["2026-07-27", "2026-08-03", "2026-08-10"],
