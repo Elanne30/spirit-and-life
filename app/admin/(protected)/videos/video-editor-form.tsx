@@ -49,6 +49,9 @@ export function VideoEditorForm({ video }: { video?: VideoRecord }) {
     event.preventDefault(); setSaving(true); setError("");
     const form = new FormData(event.currentTarget);
     form.set("videoUrl", videoUrl); form.set("thumbnailUrl", thumbnailUrl);
+    const submitter = event.nativeEvent instanceof SubmitEvent ? event.nativeEvent.submitter : null;
+    const requestedStatus = submitter instanceof HTMLButtonElement ? submitter.value : "draft";
+    form.set("status", requestedStatus || "draft");
     const result = video ? await updateVideoAction(form) : await createVideoAction(form);
     if (result.ok) { router.push("/admin/videos"); router.refresh(); }
     else { setError(result.error ?? "Video could not be saved."); setSaving(false); }
