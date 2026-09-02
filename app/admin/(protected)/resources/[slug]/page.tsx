@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { updateDownloadableResourceAction } from "@/app/admin/(protected)/actions/resource-manage";
+import { saveDownloadableResourceAction } from "@/app/admin/(protected)/actions/resource-manage";
 import { getDownloadableResourceBySlug } from "@/app/lib/resource-repository";
 
 export default async function AdminResourcePage({ params }: { params: Promise<{ slug: string }> }) {
@@ -19,7 +19,7 @@ export default async function AdminResourcePage({ params }: { params: Promise<{ 
         </div>
       </div>
       <article className="admin-editor-card">
-        <form action={updateDownloadableResourceAction} className="space-y-5">
+        <form action={saveDownloadableResourceAction} className="space-y-5">
           <input type="hidden" name="slug" value={resource.slug} />
           <input name="title" required defaultValue={resource.title} className="w-full rounded-md border p-3" placeholder="Resource title" />
           <textarea name="description" className="min-h-32 w-full rounded-md border p-3" defaultValue={resource.description} placeholder="Description" />
