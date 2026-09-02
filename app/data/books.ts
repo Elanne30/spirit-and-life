@@ -1,6 +1,13 @@
 import { imageManifest, type ImageManifestEntry } from "@/app/data/image-manifest";
 import type { ContentCategory, ContentRelations } from "@/app/content/types";
 
+export type BookPurchaseOption = {
+  id: string;
+  store: string;
+  url: string;
+  enabled: boolean;
+};
+
 export type Book = ImageManifestEntry & ContentRelations & {
   cover?: string;
   status: "Available" | "Coming Soon";
@@ -13,6 +20,9 @@ export type Book = ImageManifestEntry & ContentRelations & {
   publisher?: string;
   length?: string;
   tableOfContents?: string[];
+  purchaseOptions?: BookPurchaseOption[];
+  paperbackStatus?: "Available Soon" | "Available";
+  paperbackUrl?: string;
 };
 
 const verifiedBookDetails: Record<string, Omit<Book, keyof ImageManifestEntry | "cover">> = {
