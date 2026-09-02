@@ -11,33 +11,9 @@ const initialState: ContentDraftActionState = { status: "idle", message: "" };
 const reflectionCategories = ["Biblical Studies", "Theology", "Christian Living", "Faith & Life", "Philosophy", "Apologetics", "Church History", "SCRIPTURE"];
 const contentCategoryOptions = ["Biblical Studies", "Theology", "Christian Living", "Faith & Life", "Philosophy", "Apologetics", "Church History"];
 function getBodyValue<T>(body: Record<string, unknown>, key: string): T | undefined { return body[key] as T | undefined; }
-function slugifyTitle(value: string) {
-  return value
-    .normalize("NFKD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-    .replace(/-+/g, "-")
-    .slice(0, 120)
-    .replace(/-+$/g, "");
-}
-function normalizeSlugInput(value: string) {
-  return value
-    .normalize("NFKD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase()
-    .replace(/[^a-z0-9-]+/g, "-")
-    .replace(/-+/g, "-")
-    .replace(/^-+|-+$/g, "")
-    .slice(0, 120)
-    .replace(/-+$/g, "");
-}
-function getInitialSections(draft: ContentDraft): ReflectionSection[] {
-  const value = getBodyValue<unknown[]>(draft.body, "sections");
-  if (!Array.isArray(value) || !value.length) return [{ heading: "", paragraphs: [""] }];
-  return value.filter((section): section is { heading?: unknown; paragraphs?: unknown } => typeof section === "object" && section !== null).map((section) => ({ heading: typeof section.heading === "string" ? section.heading : "", paragraphs: Array.isArray(section.paragraphs) ? section.paragraphs.filter((paragraph): paragraph is string => typeof paragraph === "string") : [] })).map((section) => ({ ...section, paragraphs: section.paragraphs.length ? section.paragraphs : [""] }));
-}
+function slugifyTitle(value: string) { return value.normalize("NFKD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").replace(/-+/g, "-").slice(0, 120).replace(/-+$/g, ""); }
+function normalizeSlugInput(value: string) { return value.normalize("NFKD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9-]+/g, "-").replace(/-+/g, "-").replace(/^-+|-+$/g, "").slice(0, 120).replace(/-+$/g, ""); }
+function getInitialSections(draft: ContentDraft): ReflectionSection[] { const value = getBodyValue<unknown[]>(draft.body, "sections"); if (!Array.isArray(value) || !value.length) return [{ heading: "", paragraphs: [""] }]; return value.filter((section): section is { heading?: unknown; paragraphs?: unknown } => typeof section === "object" && section !== null).map((section) => ({ heading: typeof section.heading === "string" ? section.heading : "", paragraphs: Array.isArray(section.paragraphs) ? section.paragraphs.filter((paragraph): paragraph is string => typeof paragraph === "string") : [] })).map((section) => ({ ...section, paragraphs: section.paragraphs.length ? section.paragraphs : [""] })); }
 export function ContentEditForm({ draft }: { draft: ContentDraft }) {
   const [state, formAction, isPending] = useActionState(updateDraftActionSafe, initialState);
   const [uploadState, uploadAction, isUploading] = useActionState(uploadContentImageAction, initialState);
@@ -56,125 +32,13 @@ export function ContentEditForm({ draft }: { draft: ContentDraft }) {
   const length = getBodyValue<string>(draft.body, "length") ?? "";
   const tableOfContents = getBodyValue<string[]>(draft.body, "tableOfContents") ?? [];
   const featured = getBodyValue<boolean>(draft.body, "featured") ?? false;
+  const bookStatus = getBodyValue<string>(draft.body, "status") === "Available" ? "Available" : "Coming Soon";
   const categoryOptions = draft.content_type === "reflection" ? reflectionCategories : contentCategoryOptions;
 
-  useEffect(() => {
-    if (!slugEdited && title !== draft.title) {
-      setSlug(slugifyTitle(title));
-    }
-  }, [title, slugEdited, draft.title]);
+  useEffect(() => { if (!slugEdited && title !== draft.title) setSlug(slugifyTitle(title)); }, [title, slugEdited, draft.title]);
 
   return (<>
-    <style>{`
-      .admin-editor-page .editorShell,
-      .admin-form .editorShell {
-        background: var(--surface-muted);
-        color: var(--foreground);
-        border-color: var(--line);
-      }
-      .admin-editor-page .workspace,
-      .admin-form .workspace {
-        height: auto !important;
-        min-height: 0 !important;
-        background: var(--surface-muted) !important;
-      }
-      .admin-editor-page .pageViewport,
-      .admin-form .pageViewport {
-        height: auto !important;
-        min-height: 0 !important;
-        overflow-x: hidden !important;
-        overflow-y: visible !important;
-        overscroll-behavior: auto !important;
-        -webkit-overflow-scrolling: auto;
-        touch-action: pan-y;
-      }
-      .admin-editor-page .page,
-      .admin-form .page {
-        background: var(--surface) !important;
-        color: var(--foreground) !important;
-        box-shadow: 0 2px 9px var(--shadow) !important;
-      }
-      .admin-editor-page .prose,
-      .admin-form .prose {
-        color: var(--foreground) !important;
-        caret-color: var(--foreground) !important;
-        touch-action: pan-y;
-      }
-      .admin-editor-page .prose h1,
-      .admin-editor-page .prose h2,
-      .admin-editor-page .prose h3,
-      .admin-editor-page .prose h4,
-      .admin-editor-page .prose h5,
-      .admin-editor-page .prose h6,
-      .admin-form .prose h1,
-      .admin-form .prose h2,
-      .admin-form .prose h3,
-      .admin-form .prose h4,
-      .admin-form .prose h5,
-      .admin-form .prose h6 {
-        color: var(--foreground) !important;
-      }
-      .admin-editor-page .toolbar,
-      .admin-form .toolbar {
-        background: var(--surface) !important;
-        border-bottom-color: var(--line) !important;
-        color: var(--foreground);
-      }
-      .admin-editor-page .toolbarGroup,
-      .admin-form .toolbarGroup {
-        border-right-color: var(--line) !important;
-      }
-      .admin-editor-page .toolbarButton,
-      .admin-form .toolbarButton {
-        color: var(--foreground) !important;
-      }
-      .admin-editor-page .toolbarButton:hover,
-      .admin-form .toolbarButton:hover,
-      .admin-editor-page .toolbarButton.active,
-      .admin-form .toolbarButton.active {
-        background: var(--surface-muted) !important;
-        border-color: var(--line) !important;
-      }
-      .admin-editor-page .select,
-      .admin-editor-page .dropdownTrigger,
-      .admin-form .select,
-      .admin-form .dropdownTrigger {
-        background: var(--surface) !important;
-        color: var(--foreground) !important;
-        border-color: var(--line) !important;
-      }
-      .admin-editor-page .dropdownMenu,
-      .admin-form .dropdownMenu {
-        background: var(--surface) !important;
-        color: var(--foreground) !important;
-        border-color: var(--line) !important;
-        box-shadow: 0 8px 24px var(--shadow) !important;
-      }
-      .admin-editor-page .dropdownItem,
-      .admin-form .dropdownItem { color: var(--foreground) !important; }
-      .admin-editor-page .dropdownItem:hover,
-      .admin-editor-page .dropdownItemActive,
-      .admin-form .dropdownItem:hover,
-      .admin-form .dropdownItemActive { background: var(--surface-muted) !important; }
-      .admin-editor-page .rulerHeader,
-      .admin-editor-page .horizontalRuler,
-      .admin-editor-page .verticalRulerViewport,
-      .admin-editor-page .verticalRuler,
-      .admin-form .rulerHeader,
-      .admin-form .horizontalRuler,
-      .admin-form .verticalRulerViewport,
-      .admin-form .verticalRuler {
-        background-color: var(--surface-muted) !important;
-        color: var(--muted) !important;
-        border-color: var(--line) !important;
-      }
-      .admin-editor-page .statusBar,
-      .admin-form .statusBar {
-        background: var(--surface) !important;
-        color: var(--muted) !important;
-        border-top-color: var(--line) !important;
-      }
-    `}</style>
+    <style>{`.admin-editor-page .editorShell,.admin-form .editorShell{background:var(--surface-muted);color:var(--foreground);border-color:var(--line)}.admin-editor-page .workspace,.admin-form .workspace{height:auto!important;min-height:0!important;background:var(--surface-muted)!important}.admin-editor-page .pageViewport,.admin-form .pageViewport{height:auto!important;min-height:0!important;overflow-x:hidden!important;overflow-y:visible!important;overscroll-behavior:auto!important;-webkit-overflow-scrolling:auto;touch-action:pan-y}.admin-editor-page .page,.admin-form .page{background:var(--surface)!important;color:var(--foreground)!important;box-shadow:0 2px 9px var(--shadow)!important}.admin-editor-page .prose,.admin-form .prose{color:var(--foreground)!important;caret-color:var(--foreground)!important;touch-action:pan-y}.admin-editor-page .prose h1,.admin-editor-page .prose h2,.admin-editor-page .prose h3,.admin-editor-page .prose h4,.admin-editor-page .prose h5,.admin-editor-page .prose h6,.admin-form .prose h1,.admin-form .prose h2,.admin-form .prose h3,.admin-form .prose h4,.admin-form .prose h5,.admin-form .prose h6{color:var(--foreground)!important}.admin-editor-page .toolbar,.admin-form .toolbar{background:var(--surface)!important;border-bottom-color:var(--line)!important;color:var(--foreground)}.admin-editor-page .toolbarGroup,.admin-form .toolbarGroup{border-right-color:var(--line)!important}.admin-editor-page .toolbarButton,.admin-form .toolbarButton{color:var(--foreground)!important}.admin-editor-page .toolbarButton:hover,.admin-editor-page .toolbarButton.active,.admin-form .toolbarButton:hover,.admin-form .toolbarButton.active{background:var(--surface-muted)!important;border-color:var(--line)!important}.admin-editor-page .select,.admin-editor-page .dropdownTrigger,.admin-form .select,.admin-form .dropdownTrigger{background:var(--surface)!important;color:var(--foreground)!important;border-color:var(--line)!important}.admin-editor-page .dropdownMenu,.admin-form .dropdownMenu{background:var(--surface)!important;color:var(--foreground)!important;border-color:var(--line)!important;box-shadow:0 8px 24px var(--shadow)!important}.admin-editor-page .dropdownItem,.admin-form .dropdownItem{color:var(--foreground)!important}.admin-editor-page .dropdownItem:hover,.admin-editor-page .dropdownItemActive,.admin-form .dropdownItem:hover,.admin-form .dropdownItemActive{background:var(--surface-muted)!important}.admin-editor-page .rulerHeader,.admin-editor-page .horizontalRuler,.admin-editor-page .verticalRulerViewport,.admin-editor-page .verticalRuler,.admin-form .rulerHeader,.admin-form .horizontalRuler,.admin-form .verticalRulerViewport,.admin-form .verticalRuler{background-color:var(--surface-muted)!important;color:var(--muted)!important;border-color:var(--line)!important}.admin-editor-page .statusBar,.admin-form .statusBar{background:var(--surface)!important;color:var(--muted)!important;border-top-color:var(--line)!important}`}</style>
     <div className="admin-image-control"><p className="admin-form-label">Current image</p>{preview ? <img className="admin-image-preview" src={preview} alt="Current content image" /> : <p className="quiet-note">No image selected.</p>}<form action={uploadAction} className="admin-image-upload-form"><input type="hidden" name="draftId" value={draft.id} /><label className="button button-secondary" htmlFor="edit-image-upload">{preview ? "Change image" : "Upload image"}</label><input id="edit-image-upload" name="image" type="file" accept="image/jpeg,image/png,image/webp,image/gif" onChange={(event) => { const file = event.target.files?.[0]; if (file) setPreview(URL.createObjectURL(file)); }} /><button className="button button-primary" type="submit" disabled={isUploading}>{isUploading ? "Uploading..." : "Upload and save image"}</button>{uploadState.message ? <p className={uploadState.status === "error" ? "form-error" : "form-note"} role="status">{uploadState.message}</p> : null}</form></div>
     <form className="admin-form" action={formAction}>
       <input type="hidden" name="draftId" value={draft.id} /><input type="hidden" name="contentType" value={draft.content_type} />
@@ -187,10 +51,9 @@ export function ContentEditForm({ draft }: { draft: ContentDraft }) {
       <label htmlFor="edit-introduction">{draft.content_type === "book" ? "Description" : "Introduction"}</label><textarea id="edit-introduction" name="introduction" rows={6} defaultValue={draft.introduction ?? ""} />
       {draft.content_type === "reflection" ? <><label htmlFor="edit-date">Date</label><input id="edit-date" name="date" type="text" defaultValue={date} placeholder="August 13, 2026" /><label htmlFor="edit-reading-time">Reading time</label><input id="edit-reading-time" name="readingTime" type="text" defaultValue={readingTime} placeholder="6 min read" /><label htmlFor="edit-scripture">Scripture</label><input id="edit-scripture" name="scripture" type="text" defaultValue={scripture} placeholder="Romans 8:28" /><ReflectionBodyEditor initialSections={getInitialSections(draft)} initialRichText={getBodyValue(draft.body, "richText")} /></> : null}
       {draft.content_type === "journal" ? <><label htmlFor="edit-date">Date</label><input id="edit-date" name="date" type="text" defaultValue={date} placeholder="August 13, 2026" /><label htmlFor="edit-label">Label</label><input id="edit-label" name="label" type="text" defaultValue={label || "JOURNAL ENTRY"} /><ReflectionBodyEditor initialSections={getInitialSections(draft)} initialRichText={getBodyValue(draft.body, "richText")} /></> : null}
-      {draft.content_type === "book" ? <><label htmlFor="edit-subtitle">Subtitle</label><input id="edit-subtitle" name="subtitle" type="text" defaultValue={subtitle} /><label htmlFor="edit-expected-publication">Expected publication</label><input id="edit-expected-publication" name="expectedPublication" type="text" defaultValue={expectedPublication} /><label htmlFor="edit-author">Author</label><input id="edit-author" name="author" type="text" defaultValue={author} /><label htmlFor="edit-publisher">Publisher/site label</label><input id="edit-publisher" name="publisher" type="text" defaultValue={publisher} /><label htmlFor="edit-length">Length</label><input id="edit-length" name="length" type="text" defaultValue={length} placeholder="180 pages" /><label htmlFor="edit-toc">Table of contents (one entry per line)</label><textarea id="edit-toc" name="tableOfContents" rows={6} defaultValue={tableOfContents.join("\n")} /></> : null}
+      {draft.content_type === "book" ? <><label htmlFor="edit-book-status">Book availability</label><select id="edit-book-status" name="bookStatus" defaultValue={bookStatus}><option value="Coming Soon">Coming Soon</option><option value="Available">Available</option></select><label htmlFor="edit-subtitle">Subtitle</label><input id="edit-subtitle" name="subtitle" type="text" defaultValue={subtitle} /><label htmlFor="edit-expected-publication">Expected publication</label><input id="edit-expected-publication" name="expectedPublication" type="text" defaultValue={expectedPublication} /><label htmlFor="edit-author">Author</label><input id="edit-author" name="author" type="text" defaultValue={author} /><label htmlFor="edit-publisher">Publisher/site label</label><input id="edit-publisher" name="publisher" type="text" defaultValue={publisher} /><label htmlFor="edit-length">Length</label><input id="edit-length" name="length" type="text" defaultValue={length} placeholder="180 pages" /><label htmlFor="edit-toc">Table of contents (one entry per line)</label><textarea id="edit-toc" name="tableOfContents" rows={6} defaultValue={tableOfContents.join("\n")} /></> : null}
       <label className="admin-checkbox" htmlFor="edit-featured"><input id="edit-featured" name="featured" type="checkbox" value="yes" defaultChecked={featured} />Feature this content</label>
-      <button className="button button-primary" type="submit" disabled={isPending}>{isPending ? "Saving..." : "Save changes"}</button>
-      {state.message ? <p className={state.status === "error" ? "form-error" : "form-note"} role="status">{state.message}</p> : null}
+      <button className="button button-primary" type="submit" disabled={isPending}>{isPending ? "Saving..." : "Save changes"}</button>{state.message ? <p className={state.status === "error" ? "form-error" : "form-note"} role="status">{state.message}</p> : null}
     </form>
   </>);
 }
