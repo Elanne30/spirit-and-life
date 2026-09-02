@@ -10,6 +10,7 @@ function parseOptions(raw: string): PurchaseOption[] { try { const parsed = JSON
 export async function saveBookPurchaseSettings(_previousState: { ok: boolean; message: string }, formData: FormData) {
   if (!(await requireAdminActionAccess())) return { ok: false, message: "Unauthorized." };
   const draftId = String(formData.get("draftId") ?? "").trim();
+  const status = String(formData.get("status") ?? "Coming Soon") === "Available" ? "Available" : "Coming Soon";
   const purchaseOptions = parseOptions(String(formData.get("purchaseOptions") ?? "[]"));
   const paperbackStatus = String(formData.get("paperbackStatus") ?? "Available Soon") === "Available" ? "Available" : "Available Soon";
   const paperbackUrl = String(formData.get("paperbackUrl") ?? "").trim();
@@ -17,7 +18,7 @@ export async function saveBookPurchaseSettings(_previousState: { ok: boolean; me
   if (paperbackUrl && !/^https?:\/\//i.test(paperbackUrl)) return { ok: false, message: "Paperback URL must begin with http:// or https://." };
   const draft = await getDraft(draftId);
   if (!draft || draft.content_type !== "book") return { ok: false, message: "Book record not found." };
-  const updated = await updateDraft(draftId, { contentType: "book", title: draft.title, slug: draft.slug, introduction: draft.introduction ?? undefined, category: draft.category ?? undefined, tags: draft.tags, imageReference: draft.image_reference ?? undefined, body: { ...draft.body, purchaseOptions, paperbackStatus, paperbackUrl: paperbackUrl || undefined } });
+  const updated = await updateDraft(draftId, { contentType: "book", title: draft.title, slug: draft.slug, introduction: draft.introduction ?? undefined, category: draft.category ?? undefined, tags: draft.tags, imageReference: draft.image_reference ?? undefined, body: { ...draft.body, status, purchaseOptions, paperbackStatus, paperbackUrl: paperbackUrl || undefined } });
   if (!updated) return { ok: false, message: "Book record not found." };
   revalidatePath(`/admin/content/book/${draft.slug}`); revalidatePath(`/admin/content/book/${draft.slug}/edit`); revalidatePath(`/books/${draft.slug}`); revalidatePath(`/books/${draft.slug}/get`); revalidatePath("/books");
   return { ok: true, message: "Purchase settings saved." };
