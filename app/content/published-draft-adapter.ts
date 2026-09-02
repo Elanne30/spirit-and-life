@@ -33,6 +33,7 @@ type JournalBody = {
 };
 
 type BookBody = {
+  status?: unknown;
   subtitle?: unknown;
   expectedPublication?: unknown;
   author?: unknown;
@@ -54,6 +55,10 @@ function asStringArray(value: unknown) {
   return Array.isArray(value)
     ? value.filter((item): item is string => typeof item === "string")
     : [];
+}
+
+function asBookStatus(value: unknown): Book["status"] {
+  return value === "Available" ? "Available" : "Coming Soon";
 }
 
 function asReflectionCategory(value: string | null) {
@@ -112,7 +117,6 @@ function draftToReflection(draft: ContentDraft): Reflection | null {
   }
 
   const body = draft.body as ReflectionBody;
-
   const date = asString(body.date);
   const readingTime = asString(body.readingTime);
   const scripture = asString(body.scripture);
@@ -157,7 +161,6 @@ function draftToJournal(draft: ContentDraft): Journal | null {
   }
 
   const body = draft.body as JournalBody;
-
   const relations: ContentRelations = {
     relatedReflectionSlugs: asStringArray(body.relatedReflectionSlugs),
     relatedJournalSlugs: asStringArray(body.relatedJournalSlugs),
@@ -195,7 +198,6 @@ function draftToBook(draft: ContentDraft): Book | null {
   }
 
   const body = draft.body as BookBody;
-
   const relations: ContentRelations = {
     relatedReflectionSlugs: asStringArray(body.relatedReflectionSlugs),
     relatedJournalSlugs: asStringArray(body.relatedJournalSlugs),
@@ -208,7 +210,7 @@ function draftToBook(draft: ContentDraft): Book | null {
     contentSlug: draft.slug,
     title: draft.title,
     cover: draft.image_reference || undefined,
-    status: "Coming Soon",
+    status: asBookStatus(body.status),
     category: asContentCategory(draft.category),
     featured: body.featured === true,
     subtitle: asString(body.subtitle) || undefined,
