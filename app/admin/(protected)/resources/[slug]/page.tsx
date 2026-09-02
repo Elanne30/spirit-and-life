@@ -3,4 +3,46 @@ import { notFound } from "next/navigation";
 import { updateDownloadableResourceAction } from "@/app/admin/(protected)/actions/resource-manage";
 import { getDownloadableResourceBySlug } from "@/app/lib/resource-repository";
 
-export default async function AdminResourcePage({ params }: { params: Promise<{ slug: string }> }) { const { slug } = await params; const resource = await getDownloadableResourceBySlug(slug); if (!resource) notFound(); return <section className="admin-editor-page"><div className="admin-editor-header"><div><Link className="admin-outline-link" href="/admin/resources">← Back to Resources</Link><p className="eyebrow">Edit</p><h1>{resource.title}</h1><p>Update the resource details.</p></div></div><article className="admin-editor-card"><form action={async (formData) => { await updateDownloadableResourceAction(formData); }} className="space-y-5"><input type="hidden" name="slug" value={resource.slug} /><input name="title" required defaultValue={resource.title} className="w-full rounded-md border p-3" placeholder="Resource title" /><textarea name="description" className="min-h-32 w-full rounded-md border p-3" defaultValue={resource.description} placeholder="Description" /><div className="grid gap-4 sm:grid-cols-2"><select name="kind" defaultValue={resource.kind} className="rounded-md border p-3"><option>PDF</option><option>Document</option><option>Audio</option><option>Essay</option></select><input name="publishedAt" required type="date" defaultValue={resource.publishedAt} className="rounded-md border p-3" /></div><div className="rounded-xl border p-4"><p className="text-sm font-medium">File</p><p className="mt-2 text-sm text-muted-foreground">{resource.fileName || "Attached file"}</p><a className="mt-3 inline-flex rounded-md border px-3 py-2 text-sm" href={resource.fileUrl} target="_blank" rel="noreferrer">Preview file</a></div><div className="flex gap-3"><button type="submit" className="rounded-md border px-4 py-2">Save changes</button><Link href={`/resources/${resource.slug}`} target="_blank" className="rounded-md border px-4 py-2">Preview</Link></div></form></article></section>; }
+export default async function AdminResourcePage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  const resource = await getDownloadableResourceBySlug(slug);
+  if (!resource) notFound();
+
+  return (
+    <section className="admin-editor-page">
+      <div className="admin-editor-header">
+        <div>
+          <Link className="admin-outline-link" href="/admin/resources">← Back to Resources</Link>
+          <p className="eyebrow">Edit</p>
+          <h1>{resource.title}</h1>
+          <p>Update the resource details.</p>
+        </div>
+      </div>
+      <article className="admin-editor-card">
+        <form action={updateDownloadableResourceAction} className="space-y-5">
+          <input type="hidden" name="slug" value={resource.slug} />
+          <input name="title" required defaultValue={resource.title} className="w-full rounded-md border p-3" placeholder="Resource title" />
+          <textarea name="description" className="min-h-32 w-full rounded-md border p-3" defaultValue={resource.description} placeholder="Description" />
+          <div className="grid gap-4 sm:grid-cols-2">
+            <select name="kind" defaultValue={resource.kind} className="rounded-md border p-3">
+              <option>PDF</option>
+              <option>Document</option>
+              <option>Audio</option>
+              <option>Essay</option>
+            </select>
+            <input name="publishedAt" required type="date" defaultValue={resource.publishedAt} className="rounded-md border p-3" />
+          </div>
+          <div className="rounded-xl border p-4">
+            <p className="text-sm font-medium">File</p>
+            <p className="mt-2 text-sm text-muted-foreground">{resource.fileName || "Attached file"}</p>
+            <a className="mt-3 inline-flex rounded-md border px-3 py-2 text-sm" href={resource.fileUrl} target="_blank" rel="noreferrer">Preview file</a>
+          </div>
+          <div className="flex gap-3">
+            <button type="submit" className="rounded-md border px-4 py-2">Save changes</button>
+            <Link href={`/resources/${resource.slug}`} target="_blank" className="rounded-md border px-4 py-2">Preview</Link>
+          </div>
+        </form>
+      </article>
+    </section>
+  );
+}
