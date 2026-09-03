@@ -3,6 +3,10 @@ import { NextResponse } from "next/server";
 import { requireAdminActionAccess } from "@/app/lib/admin-session";
 
 const ALLOWED_TYPES = [
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "image/avif",
   "audio/mpeg",
   "audio/mp4",
   "audio/wav",
