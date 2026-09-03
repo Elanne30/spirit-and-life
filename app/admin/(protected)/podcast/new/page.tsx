@@ -1,39 +1,9 @@
 "use client";
-
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { upload } from "@vercel/blob/client";
 import { createPodcastEpisodeAction } from "@/app/admin/(protected)/actions/podcast";
-
-export default function NewPodcastEpisodePage() {
-  const router = useRouter();
-  const [audioUrl, setAudioUrl] = useState("");
-  const [status, setStatus] = useState("");
-  const [saving, setSaving] = useState(false);
-
-  async function uploadAudio(event: React.ChangeEvent<HTMLInputElement>) {
-    const file = event.target.files?.[0];
-    if (!file) return;
-    setStatus("Uploading audio…");
-    try {
-      const blob = await upload(`podcast/${Date.now()}-${file.name}`, file, { access: "public", handleUploadUrl: "/api/admin/blob-upload" });
-      setAudioUrl(blob.url);
-      setStatus("Audio uploaded");
-    } catch (error) {
-      setStatus(error instanceof Error ? error.message : "Audio upload failed.");
-    }
-  }
-
-  async function save(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setSaving(true);
-    setStatus("Saving episode…");
-    const data = new FormData(event.currentTarget);
-    data.set("audioUrl", audioUrl);
-    const result = await createPodcastEpisodeAction(data);
-    if (result.ok) { setStatus("Episode saved"); router.push("/admin/podcast"); router.refresh(); }
-    else { setStatus(result.error); setSaving(false); }
-  }
-
-  return <section className="admin-editor-page"><div className="admin-editor-header"><div><button type="button" className="admin-outline-link" onClick={() => router.push("/admin/podcast")}>← Back to Podcast</button><p className="eyebrow">Create</p><h1>New Podcast Episode</h1><p>Add an audio episode and connect it to the wider Spirit &amp; Life library.</p></div></div><article className="admin-editor-card"><form onSubmit={save} className="space-y-5"><input name="title" required className="w-full rounded-md border p-3" placeholder="Episode title" /><input name="slug" className="w-full rounded-md border p-3" placeholder="Slug (optional)" /><textarea name="description" className="min-h-32 w-full rounded-md border p-3" placeholder="Description / show notes" /><div className="grid gap-4 sm:grid-cols-2"><input name="publishedAt" required type="date" className="rounded-md border p-3" /><input name="duration" className="rounded-md border p-3" placeholder="Duration, e.g. 42:18" /></div><input name="youtubeUrl" type="url" className="w-full rounded-md border p-3" placeholder="YouTube URL (optional)" /><div className="grid gap-4 sm:grid-cols-2"><input name="topicSlugs" className="w-full rounded-md border p-3" placeholder="Topic slugs, comma-separated" /><input name="seriesSlug" className="w-full rounded-md border p-3" placeholder="Series slug (optional)" /></div><div className="grid gap-4 sm:grid-cols-2"><input name="questionSlugs" className="w-full rounded-md border p-3" placeholder="Question slugs, comma-separated" /><input name="articleSlugs" className="w-full rounded-md border p-3" placeholder="Article slugs, comma-separated" /></div><input name="resourceSlugs" className="w-full rounded-md border p-3" placeholder="Resource slugs, comma-separated" /><textarea name="transcript" className="min-h-32 w-full rounded-md border p-3" placeholder="Transcript (optional)" /><input type="file" accept="audio/mpeg,audio/mp4,audio/wav,audio/x-m4a,audio/aac,audio/ogg" onChange={uploadAudio} />{status ? <p className="text-sm text-muted-foreground">{status}</p> : null}{audioUrl ? <audio className="w-full" controls src={audioUrl} /> : null}<button type="submit" disabled={saving || !audioUrl} className="rounded-md border px-4 py-2 disabled:opacity-50">{saving ? "Saving…" : "Save episode"}</button></form></article></section>;
-}
+export default function NewPodcastEpisodePage(){const router=useRouter();const[audioUrl,setAudioUrl]=useState("");const[coverImage,setCoverImage]=useState("");const[status,setStatus]=useState("");const[saving,setSaving]=useState(false);
+async function uploadFile(file:File,kind:"audio"|"cover"){setStatus(`Uploading ${kind==="audio"?"audio":"cover image"}…`);try{const blob=await upload(`podcast/${kind}/${Date.now()}-${file.name}`,file,{access:"public",handleUploadUrl:"/api/admin/blob-upload"});kind==="audio"?setAudioUrl(blob.url):setCoverImage(blob.url);setStatus(`${kind==="audio"?"Audio":"Cover image"} uploaded.`)}catch(e){setStatus(e instanceof Error?e.message:"Upload failed.")}}
+async function save(event:React.FormEvent<HTMLFormElement>){event.preventDefault();setSaving(true);setStatus("Saving episode…");const data=new FormData(event.currentTarget);data.set("audioUrl",audioUrl);data.set("coverImage",coverImage);const result=await createPodcastEpisodeAction(data);if(result.ok){setStatus("Episode saved");router.push("/admin/podcast");router.refresh()}else{setStatus(result.error);setSaving(false)}}
+return <section className="admin-editor-page"><div className="admin-editor-header"><div><button type="button" className="admin-outline-link" onClick={()=>router.push("/admin/podcast")}>← Back to Podcast</button><p className="eyebrow">Create</p><h1>New Podcast Episode</h1><p>Add an audio episode and connect it to the wider Spirit &amp; Life library.</p></div></div><article className="admin-editor-card"><form onSubmit={save} className="space-y-5"><input name="title" required className="w-full rounded-md border p-3" placeholder="Episode title"/><input name="slug" className="w-full rounded-md border p-3" placeholder="Slug (optional)"/><textarea name="description" className="min-h-32 w-full rounded-md border p-3" placeholder="Description / show notes"/><div className="grid gap-4 sm:grid-cols-2"><input name="publishedAt" required type="date" className="rounded-md border p-3"/><input name="duration" className="rounded-md border p-3" placeholder="Duration, e.g. 42:18"/></div><label className="block text-sm font-medium">Cover image / artwork<input type="file" accept="image/jpeg,image/png,image/webp,image/avif" className="mt-2 w-full rounded-md border p-3" onChange={e=>{const f=e.target.files?.[0];if(f)void uploadFile(f,"cover")}}/>{coverImage?<img className="mt-3 w-full max-w-md rounded-xl" src={coverImage} alt="Podcast cover preview"/>:<span className="mt-2 block text-sm text-muted-foreground">No cover image selected.</span>}</label><input type="hidden" name="coverImage" value={coverImage}/><input name="youtubeUrl" type="url" className="w-full rounded-md border p-3" placeholder="YouTube URL (optional)"/><div className="grid gap-4 sm:grid-cols-2"><input name="topicSlugs" className="w-full rounded-md border p-3" placeholder="Topic slugs, comma-separated"/><input name="seriesSlug" className="w-full rounded-md border p-3" placeholder="Series slug (optional)"/></div><div className="grid gap-4 sm:grid-cols-2"><input name="questionSlugs" className="w-full rounded-md border p-3" placeholder="Question slugs, comma-separated"/><input name="articleSlugs" className="w-full rounded-md border p-3" placeholder="Article slugs, comma-separated"/></div><input name="resourceSlugs" className="w-full rounded-md border p-3" placeholder="Resource slugs, comma-separated"/><textarea name="transcript" className="min-h-32 w-full rounded-md border p-3" placeholder="Transcript (optional)"/><label className="block text-sm font-medium">Audio file<input type="file" accept="audio/mpeg,audio/mp4,audio/wav,audio/x-m4a,audio/aac,audio/ogg" className="mt-2 w-full rounded-md border p-3" onChange={e=>{const f=e.target.files?.[0];if(f)void uploadFile(f,"audio")}}/></label>{audioUrl?<audio className="w-full" controls src={audioUrl}/>:null}<input type="hidden" name="audioUrl" value={audioUrl}/>{status?<p className="text-sm text-muted-foreground">{status}</p>:null}<button type="submit" disabled={saving||!audioUrl} className="rounded-md border px-4 py-2 disabled:opacity-50">{saving?"Saving…":"Save episode"}</button></form></article></section>}
