@@ -1,5 +1,6 @@
 import { Button } from "@/app/components/button";
 import { SectionHeading } from "@/app/components/section-heading";
+import { PublicVideoMount } from "@/app/components/public-video-mount";
 import { getFeaturedBook } from "@/app/content/featured";
 import { listPublishedJournals, listPublishedReflections } from "@/app/content/repository";
 import { listPublishedArticles } from "@/app/lib/content-drafts";
@@ -75,6 +76,8 @@ export default async function Home() {
             ))}
           </div>
         </section>
+
+        <PublicVideoMount pathname="/" />
 
         <section className="home-feature page-container" aria-labelledby="featured-writing-title">
           <div className="home-section-intro home-feature-intro">
