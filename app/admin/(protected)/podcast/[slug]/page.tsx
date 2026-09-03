@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { notFound, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { upload } from "@vercel/blob/client";
 import { savePodcastEpisodeAction } from "@/app/admin/(protected)/actions/podcast-manage";
 
@@ -17,7 +17,9 @@ export default function AdminPodcastEpisodePage({ params }: { params: Promise<{ 
       try {
         const r = await fetch(`/api/admin/podcast/${encodeURIComponent(slug)}`, { cache: "no-store" });
         if (!r.ok) {
-          if (!cancelled) notFound();
+          if (!cancelled) {
+            setStatus(r.status === 404 ? "Podcast episode not found." : "Unable to load podcast episode.");
+          }
           return;
         }
         const e = await r.json();
