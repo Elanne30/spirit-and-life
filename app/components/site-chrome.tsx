@@ -16,7 +16,7 @@ export function SiteChrome({ children }: { children: React.ReactNode }) {
     <>
       <Header />
       {children}
-      <PublicVideoMount pathname={pathname} />
+      {pathname !== "/" ? <PublicVideoMount pathname={pathname} /> : null}
       <Footer />
     </>
   );
